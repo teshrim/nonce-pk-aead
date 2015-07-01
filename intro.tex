@@ -35,7 +35,7 @@ Note that we do not necessarilly demand that~$S$ be uniformly random, or that it
 \hfpagesss{.25}{.25}{.25}
 {
 \underline{$\Encprim{\pk}{}{\header, M}$}:\\[2pt]
-$(K,X,\pubiv) \getsr \encap_\pk$\\
+$(K,X,\pubiv) \getsr \encap_\pk()$\\
 $C \gets \encprim{K}{}{\header,\pubiv,M}$\\
 Return $(X,N,C)$
 
@@ -47,7 +47,7 @@ Return $M$
 }
 {
 \underline{$\Encprim{\pk}{}{\header,\pubiv,M}$}:\\[2pt]
-$(K,X) \getsr \encap_\pk$\\
+$(K,X) \getsr \encap_\pk()$\\
 $C \gets \encprim{K}{}{\header,\pubiv,M}$\\
 Return $(X,C)$
 
