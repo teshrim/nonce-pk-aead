@@ -1,0 +1,101 @@
+\message{ !name(hopper-attack.tex)}
+\message{ !name(hopper-attack.tex) !offset(-2) }
+\section{[HvAL] \texttt{One-bit} Scheme is not Secure}
+
+Here we consider the \texttt{One-bit} scheme of Hopper et al.\
+\cite{HvAL}, and show that it does not meet our XXX-security notion.
+
+\begin{figure}[tph]
+\begin{center}
+\hfpages{.4}
+{
+\underline{$\enc^H_K(m;(h,N))$}\\[2pt]
+for $i=1$ to~$\ell$\\
+\nudge $s \getsr \mathcal{C}_h$\\
+\nudge $s' \getsr \mathcal{C}_h$\\
+\nudge if $H(K \concat \langle N+i \rangle \concat s)=m$ then $c_i \gets s$\\
+\nudge else $c_i \getsr s'$\\
+\nudge $h \gets h \concat c_i$\\
+$N \gets N + \ell$\\
+return $((h,N), c_1 c_2 \cdots c_\ell)$
+
+\medskip
+\underline{$\dec^H_K(c_1 c_2 \cdots c_\ell;(h,N))$}\\[2pt]
+if $\sum_{i=1}^{\ell} H(K \concat \langle N+i \rangle \concat
+c_i) > \ell/2$ then $m \gets 1$\\
+else $m \gets 0$\\
+$N \gets N+\ell$\\
+return $(N,m)$
+}
+{
+\underline{Adversary~$\advA_1^H(c_1 c_2 \cdots c_\ell, K, m)$}\\[2pt]
+$t \gets \sum_{i=0}^{\ell} H(K \concat \langle i \rangle \concat c_i)$\\
+if $\left| t - \frac{\ell}{2} \right| \geq \delta\frac{\ell}{2}$ 
+ then return 1\\
+return 0
+
+\medskip
+\underline{Adversary~$\advA_2^H(c_1 c_2 \cdots c_\ell, m)$}\\[2pt]
+$T\gets 0$\\
+for $K \in \mathcal{K}$\\
+\nudge $t \gets \sum_{i=1}^{\ell} H(K \concat \langle i \rangle \concat c_i)$\\
+\nudge if $\left| t - \frac{\ell}{2} \right| \geq \delta\frac{\ell}{2}$ 
+ then $T \gets T+1$\\
+if $T > \lceil |\mathcal{K}|/2 \rceil$ then return 1\\
+return 0
+}
+\caption{Hopper et al.\ \texttt{One-bit} Scheme with the PRF
+  $F_K(x)=H(K \concat x)$, and the attacks.  [Note: can probably
+  extend this to arbitrary PRFs by changing the threshold for~$T$
+  appropriately... since if any non-negligible fraction~$\alpha$ of keys result
+  in ``non-random'' behavior, you won't have a good PRF to start
+  with.]  Adversary~$\advA_1$ is for known-key settings,
+  while~$\advA_2$ is for (low-entropy) unknown-key settings.  For
+  simplicity, we assume that $N=0$ initially, and that $\ell$ is
+  even.  The parameter~$\delta$ is determined in the proof of the
+  attack.}
+\label{fig:one-bit}
+\end{center}
+\end{figure}
+
+\begin{theorem}(Informal.) When~$H\colon\bits^* \to \bits$ is a random
+  oracle, the \texttt{One-bit} scheme $(\enc^H,\dec^H)$ in
+  Figure~\ref{fig:one-bit} is not XXX-secure.  In particular,
+  adversary~$\advA_1$ achieves advantage [...] 
+\end{theorem}
+\begin{proof}(sketch.)
+Consider the case that $c_1 c_2 \cdots c_\ell$ resulted from
+independent samples from the distribution determined by
+$\mathcal{C}_h$, where~$h$ takes on whatever is its initial value (and
+can be ignored for the attack).  Let $X_i = H(K \concat \langle i
+\rangle \concat c_i)$, so that $\Prob{X_i = 1}=\Prob{X_i=0}=1/2$ for
+all $i \in [\ell]$, and $t = \sum_{i=1}^{\ell} X_i$ is a Bernoulli
+random varible with $\mathbb{E}[t]=\ell/2$.  In this case, a standard Chernoff
+bound gives, for $0 < \delta < 1$
+\[
+\Prob{\advA_1 \Rightarrow 1 \given b=0} = \Prob{\left| t - \frac{\ell}{2} \right| \geq \delta \frac{\ell}{2}} \leq 2e^{-\frac{\ell\delta^2}{6}}
+\]
+[Note: should work out a concrete value of $\delta$.  If we want to
+allow~$\delta$ outside of the given range, need a different two-sided
+Chernoff bound.]
+
+Now consider the case that~$b=1$, with message~$m=0$, so that $c_1 c_2 \cdots c_\ell$ are
+the result of~$\enc^H_K(0)$.  Recall that, at the time that $c_i$ was
+assigned, it was to one of two independent samples $s,s'$ from the
+channel distribution.  In particular, it was assigned the value of~$s$
+iff $H(K \concat \langle i \rangle \concat s)=0$.  Thus, if $X_i = H(K
+\concat \langle i \rangle \concat c_i)$, we have 
+\begin{align*}
+\Prob{X_i=0} =& 
+\Prob{X_i=0 \cap c_i=s} + \Prob{X_i=0 \cap c_i=s'}\\
+=& \Prob{c_i=s} + \Prob{X_i=0 \cap c_i=s'}\\
+=& \Prob{H(K \concat \langle i \rangle \concat s)=0} \\
+ &+ \Prob{H(K \concat \langle i \rangle \concat s')=0 \cap (s'\neq
+   s)}
+ + \Prob{H(K \concat \langle i \rangle \concat s')=0 \cap (s' =
+   s)} \\
+=&
+\end{align*}
+
+\end{proof}
+\message{ !name(hopper-attack.tex) !offset(-101) }

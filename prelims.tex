@@ -1,0 +1,22 @@
+\section{Preliminaries}
+\label{sec:prelims}
+We begin with basic notation.  When $X,Y$ are bitstrings, we write $X \concat Y$ for their concatenation, $|X|$ for the bitlength, and $X\xor Y$ for their bitwise exclusive-or.  When $\calX$ is a set, we write $x \getsr \calX$ to mean that a value is sampled from $\calX$ and assigned to the variable~$x$.  Unless otherwise specified, sampling from sets is via the uniform distribution.
+
+When~$F$ is an randomized algorithm, we write $x \getsr F(y_1,y_2,\cdots)$ to mean that~$F$ is run with the specified inputs and the result assigned to~$x$.  When~$F$ is determinsitic, we drop the $\$$-embellishment from the assignment arrow.  Algorithms may be provided access to one or more \emph{oracles}, and we write these as superscripts, e.g. $F^{\mathcal{O}}$; oracle access is black box and via an specified interface.  
+
+An \emph{adversary} is a randomized algorithm.
+
+\paragraph{Asymmetric (Public-key) Encryption Schemes. }
+Fix sets $\pubkeys, \seckeys, \adata, \pubivs, \secivs, \ptxts, \ctxts$, the first two of which are nonempty.  An encryption scheme $\Pi=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen$ for the operation of key generation.
+
+The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata \times \pubivs \times \secivs \times \ptxts \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$ and a plaintext~$M \in \ptxts$, and returns a ciphertext~$C \in \ctxts$. 
+When $\secivs$ is empty, then encryption is randomized.  Otherwise, it is \emph{IV-based} and deteministic.
+To stress the differing semantics of the inputs, key and non-private/private data, we write $\Encprim{\pk}{\header,\pubiv}{S,M}$ instead of $\Enc(\pk,\header,\pubiv,\seciv,M)$ for the operation of encryption.  When encryption takes an oracle, we $\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\mathcal{O}}$ to clearly separate oracles from inputs.
+
+The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
+
+For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=M$.
+
+\paragraph{Symmetric Encryption Schemes. } [Fill in similarly, may ultimately consolidate.]
+
+\paragraph{Encapsulation schemes. } [Need to spend time sorting out the syntax.  Both IV-based and and probabilistic.]

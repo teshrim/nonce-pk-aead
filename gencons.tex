@@ -1,0 +1,98 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{DTE-Encrypt-DTE Constructions}
+\label{sec:gencons}
+
+
+We investigate a natural methodology for building DME schemes, which can be seen
+as generalization of the Rank-Encipher-Unrank approach introduced for
+FPE~\cite{BRRS09}. We start by providing a more general treatment of 
+distribution-transforming encoders (DTE), originally introduced by Juels and
+Ristenpart~\cite{JR14} for use in building HE schemes. 
+
+\paragraph{DTE schemes.} 
+A DTE scheme $\DTE = (\encode,\decode,\xdist,\ydist)$ is a pair of algorithms
+and pair of distributions.  The possibly
+randomized encode algorithm $\encode$ takes as input a value $X \in \calX \equiv
+\supp(\xdist)$ and outputs a value $Y \in \calY \equiv \supp(\ydist)$. 
+The possibly randomized decode algorithm $\decode$ takes as input a value $Y\in\calY$ and
+outputs a value $X\in\calX$. We require that for all $X \in \calX$  
+\bnm
+  \Prob{\decode(\encode(X)) = X} = 1 
+\enm
+where the probability is over the random coins used by the two algorithms.
+\tnote{We may want to generalize this notion of correctness to match the DME
+ones later.} 
+
+In their use by~\cite{JR14} for HE, a DTE was used with  
+some distribution $\xdist$ over plaintext messages and $\ydist$ was the uniform distribution over
+bit strings of an appropriate length. Here we will also be interested in
+DTEs that convert from uniform distributions over bit strings to values that should
+appear to be non-uniformly distributed. 
+%The goal was to transform values drawn according to $\mdist$ to uniform
+%bit strings. 
+
+\paragraph{The construction.} Let $\mdist$ be a message distribution, $\cdist$
+be a ciphertext distribution, and $\xdist$ and $\ydist$ be the uniform distribution
+over bit strings of lengths that will be defined appropriately below.  Let $\DTE_m =
+(\encode_m,\decode_m,\mdist,\xdist)$  and $\DTE_c =
+(\encode_c,\decode_c,\ydist,\cdist)$ be DTE schemes.
+Let $\SEscheme = (\enc,\dec)$ be a conventional symmetric encryption scheme. 
+Then the DTE-Encrypt-DTE scheme $\DME = (\Enc,\Dec)$ has encryption and
+decryption defined by 
+\bnm
+  \Enc(K,M) = \encode_c(\enc(K,\encode_m(M))) \eqnand
+  \Dec(K,C) = \decode_m(\dec(K,\decode_c(C))) \;.
+\enm
+If we set $\mdist$ and $\cdist$ to be uniform, then building a DTE-Encrypt-DTE
+scheme is equivalent to building a Rank-Encrypt-Unrank style
+scheme~\cite{BRRS09,LDJRS14}. 
+\tsnote{If I take Rank as $\encode_m$ and Unrank as
+  $\encode_c$, so that I follow your DTE-Encrypt-DTE construction,
+  then I don't see what can be asserted about $\mdist$ (although 
+$\supp(\mdist)$ is strings of a particular format).
+  However, $\ydist$ should be uniform for good Encrypt stages, so
+  likewise $\cdist$ uniform over the support of $\cdist$.  Note: even
+  if $\supp(\mdist)=\supp(\cdist)$, i.e.\ FPE, we don't want to demand
+  $\mdist=\cdist$ if we want ``typical'' kinds of security.}
+When $\cdist$ is uniform over bit strings, and
+hence $\DTE_c$ can be the identity,  then the resulting DTE-Encrypt scheme 
+is equivalent to an HE scheme.
+\tsnote{Isn't this under the assumption that $\dec_{K'}(Y)$ is uniform
+  over bitstrings when $K'$ is the wrong key and $Y$
+  is uniform? That's probably true for natural schemes, even when
+  $K'=K$, although not
+  for CBC (or other schemes) with padding/redundancy.} 
+When $\mdist$ is arbitrary  \tnote{need to define
+this} then Encrypt-DTE gives rise to a stegonagraphy scheme with covertext
+distribution~$\cdist$. 
+\tsnote{A couple of observations: (1) $\xdist$ need not be uniform if
+  one uses typical encryption schemes, which are provably secure
+  against adversarially chosen $\xdist$; (2) if we want to target
+  ``typical'' kinds of security notions for this DME construction,
+  we'll need $\mdist$ to be adversarially chosen; this fights against
+  (3) if we want HE-type properties, then
+  $\xdist$ and $\mdist$ are pretty restricted, based on current
+  knowledge; (4) for typical $\enc$, we'll have $\ydist$ uniform-ish.}
+
+In the above we have glossed over the lengths of strings, implicitly assuming
+that the domains and ranges of $\DTE_m$, $\DTE_c$, and $\SEscheme$ align
+appropriately. We will see how this plays out in detail for particular
+constructions below.
+
+The main challenge towards using the DTE-Encrypt-DTE construction is that of
+building DTEs that transform uniform bit strings to other distributions. The DTE
+schemes explored thus far, including all those in \cite{JR14}, work in the other
+direction. One approach for doing so is to leverage the large literature on
+random variable sampling algorithms that use uniform random variables to
+generate, for example, normal or exponentially distributed random variables.
+Unfortunately,  these algorithms do not easily provide DTEs since they are not
+invertible (being typically many-to-one). 
+
+
+
+
+
+
+
+
+

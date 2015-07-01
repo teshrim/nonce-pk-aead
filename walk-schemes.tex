@@ -1,0 +1,684 @@
+
+\section{DME from Walk Schemes}
+\subsection{Walk Schemes and Random Walks}
+Fix a finite, non-empty set~$\calS=\{s_1,s_2,\ldots,s_n\}$ of states.
+Let $\matP$ be a (row) stochastic matrix where the entry in row~$s$
+and column~$t$ (written $[P]_{s,t}$) is defined to be $\Prob{t
+  \given s}$, where $s,t\in\calS$.
+Together $(\calS,\matP)$ define a
+  (discrete, finite, time-homogeneous) Markov process.
+  Note that row~$s$ of~$\matP$,
+written $[P]_{s}$, is a distribution; namely, the distribution over next
+states~$t \in \calS$ given that the current state is~$s$.  We will
+assume that $(\calS,\matP)$ defines an ergodic Markov process, so
+that~$\matP$ has a unique stationary distribution.  As a reminder,
+this means that $\mathbf{Q} = \lim_{i\to\infty}\matP^i$ exists, and
+that every row of~$Q$ is this stationary distribution.  
+
+Now, let $\vecpi=[\pi(s_1) \; \pi(s_2) \; \cdots \; \pi(s_n)]$ be a
+distribution over~$\calS$, written as a row vector, and let $\Sigma \subseteq \bits^*$ be a set.  
+A \textit{walk scheme} is a tuple
+$(\calS,\matP,\vecpi,\propose,\decide)$, and in this context we refer
+to $\pi$ as the \textit{target distribution} of the walk scheme.  
+%
+The \textit{proposal algorithm} $\propose \colon \Sigma\times\calS \to \calS$
+is a (potentially) randomized algorithm that, on input a state-string
+$\sigma\in\Sigma$ and an element $s\in\calS$, samples a $t\in\calS$
+according to the \textit{proposal distribution} $[P]_s$, and outputs $t$.  
+We allow the proposal algorithm to take a state-strimg in order to support instantiations that may,
+for example, make use of a key or a counter.
+When $\Sigma=\emptyset$, we omit the state-string $\sigma$ from
+the notation.  
+%
+The
+(potentially) randomized
+\textit{decision algorithm} $\decide \colon \Sigma \times \calS \times \calS \to
+\calS$ takes as input a triple $(\sigma,s,t)$ and returns a state~$s'$.  As a
+correctness condition, we insist that $\decide(\sigma,s,t) \in \{s,t\}$.  
+%As
+%we will see, the decision between~$s$ and~$t$ will be determined
+%by~$\matP,\vecpi$, too.  
+%The deterministic \textit{termination predicate}
+%$\terminate\colon\Sigma\to\bits$ takes state-string~$\sigma$ and
+%returns a bit~$b$.
+
+\paragraph{Markov Walks induced by Walk Schemes. }
+Intuitively, a walk scheme $(\calS,\matP,\vecpi,\propose,\decide)$
+will be used to specify a particular stochastic ``walk'' process. In
+particular, a walk (starting in
+state~$s_0 \in \calS$, with initial state-string~$\sigma_0\in\Sigma$) is a sequence of random variables $X_0 = s_0,
+X_1, X_2, \ldots $ where, for each $i > 0$, the value of $X_i$ is
+defined by the following steps: 
+\begin{align*}
+t &\getsr \propose(\sigma_i,s_{i-1})\\
+s_{i} &\getsr \decide(\sigma_i,s_{i-1},t)\\
+X_i &\gets s_{i}
+\end{align*}
+where the $\sigma_i$ are determined by some implicit external process.
+As a simple example, let $\Sigma=\emptyset$, let~$\vecpi$ be the
+stationary distribution of~$\matP$, and define $\decide(s,t)=t$ for
+all $s,t \in S$.  Then the resulting sequence $X_0=s_0,X_1,X_2,\ldots$
+gives a classical ``random walk'' on the state space~$S$ and, for
+any~$T$ that is at least the mixing time of the walk, $X_T$ will be a
+sample from the distribution~$\vecpi$.  
+
+Walks will usually specify a termination condition $\terminate$, at which point
+something is done with the final $X_i$ (e.g. this is provided to some
+other algorithm).  For the moment, we leave the termination condition implicit.
+
+\paragraph{Metropolis-Hastings walks.} Set $\Sigma=\emptyset$ and
+define $\decide$ as follows.  On input $(s,t)$, compute $\alpha =
+\min\{1,\frac{\vecpi(t)}{\vecpi(s)}\frac{[\matP]_{t,s}}{[\matP]_{s,t}}\}$.
+If $\alpha=1$ then $\decide(s,t)=t$.  If $\alpha < 1$ then
+$\decide(s,t)=t$ with probability~$\alpha$, and $\decide(s,t)=s$ with
+probability $1-\alpha$.\footnote{For completeness, we must addresss
+  the corner cases of $\vecpi(s)=0$ or $[\matP]_{s,t}=0$.  
+If $[\matP]_{s,t}=0$, then $\propose(\sigma,s)$ never
+ returns~$t$, so this is not an issue. If
+  you want $\vecpi(s)=0$ then you should \textbf{never} accept~$s$ as
+  a proposal.  That's intuitive, but I don't know if it is correct
+  w.r.t.\ the analysis of the algorithm  } 
+The last step is easily implemented by
+picking a uniform real~$u \in [0,1]$, and setting $\decide(s,t)=t$ iff
+$u \leq \alpha$.
+
+\paragraph{Rejection-sampling walks. }  We note that the walk scheme
+formalism also allows one to captures standard rejection sampling.  First, fix
+$\Sigma=\emptyset$.
+Instead of calling $t\getsr\propose(s_{i-1})$, we call
+$t\getsr\propose(\mathtt{s})$ for some fixed~$\mathtt{s}$ and,
+correspondingly, we call $s' \gets \decide(\mathtt{s},t)$.  The sequence
+$X_0,X_1,\ldots$ is terminated as soon as some $X_i \neq \mathtt{s}$.
+Here, the ``matrix'' $\matP$ need consist of a single row
+$[\matP]_\mathtt{s}$ that is the fixed proposal distribution.  Thus,
+one samples repeatedly from $[\matP]_{\mathtt{s}}$ until the
+proposed~$t$ is such that $\decide(\mathtt{s},t)=t$. 
+%\tsnote{Not sure this is totally correct.}
+
+\paragraph{Reversible walk schemes. } Fix a walk scheme~$\walk$.  For
+each $s' \in \calS$ and $\sigma \in \bits^*$, 
+let $\mathcal{A}(s' \given \sigma)=\{s \in
+  \calS \;|\; \Prob{s'\getsr\propose(\sigma,s) \wedge s'\getsr\decide(\sigma,s,s')}>0\}$ be the set
+  of possible~$s'$-ancestors (given state string~$\sigma$), where the probability is over the
+  coins~$c_p, c_d$ of $\propose$ and $\decide$, respectively.  
+If~$T$ is a number such that $|\mathcal{A}(s' \given \sigma)| \leq T$ always, 
+then we say that~$\walk$ is \textit{$T$-ambiguous}. 
+For our applications, we desire walk schemes with small~$T$,
+and for which~$\mathcal{A}(s' \given \sigma)$ is efficiently
+computable when given $(\sigma,c_p,c_d)$.  When $T=1$ we can 
+uniquely reverse a given walk sequence, hopefully efficiently. 
+\tsnote{Seems to require
+  deterministic $\decide$, and invertible $\propose$.}
+\tsnote{From the FPE paper, eprint version, page 12: ``In fact, we
+  rather expect that most computationally interesting Markov processes
+  can be recast so as to make them computationally reversible.'' No
+  further discussion.}
+
+\subsection{The Feistel walk} 
+There is a very natural way to
+view a Feistel enciphering of a bitstring $M \in \bits^{2n}$ as a
+Markov process, since the distribution of the input to round~$i+1$
+depends on previous rounds only through the input to round~$i$.
+Moreover, balanced Feistel enciphering, using a random function~$\rho$ as the round
+function, is easily seen as a random walk on state
+space~$\calS=\bits^{2n}$: from any state~$s_i = M_\ell \concat M_r$ 
+(the input to Feistel round~$i$), select uniformly among the $2^n$
+possible states $M_r \concat X$ where $X\in\bits^n$.  Uniform
+selection occurs because one computes the next state $s_{i+1} = M_r
+\concat (M_\ell \xor \rho(i+i,M_r))$.  The graphical representation of
+this Markov chain is a $2^n$-regular graph with vertex set~$\calS$.
+Note that since the graph is regular, the stationary distribution is
+uniform.\footnote{In general, for a connected, non-bipartite graph, a
+  random walk has stationary distribution
+  $\vecpi(s)=\mathrm{deg}(s)/2|E|$.  Both connectedness and
+  non-bipartiteness are necessary for a unique stationary
+  distribution.}
+\tsnote{The relationship between Feistel (more generally,
+  substitution-permutation networks) and Markov chains seems to have
+  been known for a long time.  There are a bunch of papers from the
+  80s and 90s that use this viewpoint to do differential/linear cryptanalysis.}
+
+
+
+Casting this in our walk scheme syntax, we write
+$\mathcal{F}=(\bits^{2n},\matP,\vecpi,\propose,\decide)$ where
+$[\matP]_{s,t}=1/2^n$ if $s = X \concat Y$ and $t=Y \concat Z$ for
+$X,Y,Z \in \bits^n$, and $[\matP]_{s,t}=0$ otherwise. (Note
+that~$\matP$ is not symmetric, although it is doubly stochastic.)  The proposal
+algorithm is as follows: on input $\sigma=(\rho,i)$ and $s_{i-1}= X
+\concat Y$, return $Y \concat (X \xor \rho(i,Y))$.  (In the
+computational setting, $\sigma=(K,i)$ and $\rho(i,Y)$ is replaced by
+$F_K(i,Y)$ for PRF~$F$ with the appropriate domain and range.) The decision
+algorithm is trivial, namely on input any $(\sigma,s_{i-1},t)$, it returns~$t$.
+As we just noted, the target stationary distribution~$\vecpi$ for this
+walk scheme must be the uniform distribution.
+
+Observe that the Feistel walk is uniquely reversible, if one knows the
+description of~$\rho$, and the number of steps that were taken.
+Equivalently, if one knows the coins that were used at each step to
+sample the proposal.  Note that $\decide$ is deterministic, so each
+state has a uniquely determined ancestor.
+
+It is straightforward to cast unbalanced Feistel, and ciphers derived
+from shuffling (e.g. Thorpe, swap-or-not) as walk processes over
+appropriately specified walk schemes.
+\tsnote{It's curious that the intro to the ``Swap-or-not'' paper makes
+a big deal of the fact that everything in practice is either Feistel
+or a SP-network, and that swap-or-not is an entirely new kind of
+beast.  From our perspective, these are all examples of enciphering
+via a walk scheme.}
+
+\paragraph{Feistel with non-uniform output distributions. }
+By altering the decision algorithm, one can affect other-than-uniform
+distributions~$\vecpi$.
+For example, say one wished to bias the output
+towards bit strings that have many $0$-bits.  Then the target
+stationary distribution might be $\vecpi(s) = 2^{z(s)}/N$ where $z(s)$ is the
+number of 0-bits in string (state)~$s$, and~$N$ is the appropriate
+normalizing constant need to make $\vecpi(s)$ a distribution.\footnote{In
+this case, one could compute~$N$ analyticallly, but a selling point
+of Metropolis-Hastings walks is that one does not need to.}  To
+achieve this $\vecpi(s)$, the $\decide$ algorithm is as described for
+Metropolis-Hastings walks: on input~$(s,t)\in\bits^{2n}\times\bits^{2n}$, compute
+$\alpha=\min\left\{1,2^{(z(t)-z(s))}\frac{[\matP]_{t,s}}{[\matP]_{s,t}}\right\}$,
+and return~$t$ with 
+probability~$\alpha$ (i.e.\ ``accept'' the Feistel round
+proposal~$t$), and return~$s$ with probability~$1-\alpha$ (i.e.\
+``reject'' the proposal~$t$).\tsnote{BTW, this ``proposal'',
+  ``propose'', ``accept'' language is standard in MCMC literature.}
+The main algorithmic issue is to make sure the walk is reversible; see
+the following discussion of general MH-walk encryption, and
+the pseudocode in Figures~\ref{fig:walk-encrypt},\ref{fig:walk-encrypt-2}.
+
+
+\tsnote{An interesting application for, say, format-preserving
+  encrpytion of passwords might work like this.  The state space is
+  ASCII strings~$pw$ of length~$n$.  Transition matrix $\matP$ is
+  whatever.  The target stationary distribution $\vecpi$ is
+  something like $\vecpi(pw) = 2^{\sum_i T_i(pw)}/N$ where $T_1(pw)=1$
+iff $pw$ contains a number, $T_2(pw)=1$ iff $pw$ contains an
+uppercase, $T_3(pw)=1$ iff $pw$ contains a non-alphanumeric character,
+etc.  This would give ciphertexts (of plaintext passwords) that are
+biased towards being ``good'' passwords.}
+
+\subsection{Encryption via MH Walks}
+Here we describe how to implement stateful encryption
+from a walk scheme and a suitable PRF.  In particular, fix
+$\calS,\matP,\vecpi$. %such that $[\matP]_{s,s}=0$ for all~$s$, i.e.\ 
+%the graph associated to~$\matP$ has no self-loops.  \tsnote{Not sure
+%  this is strictly necessary for what follows, but affects decryption
+%  process.}\tsnote{NB: I don't think it's needed.  I believe one can
+%  define $\alpha=1$ if $\vecpi(s)[\matP]_{s,t}=0$ without any
+%  problems. Pseudocode updated.}
+Assume that there is a deterministic
+algorithm~$\sample_{\matP}\colon\calS\times\bits^*\to\calS$ that faithfully samples
+the distribution $[\matP]_s$ when provided a random coin-string $c\in\bits^*$ as input,
+this holding for all $s \in \calS$.
+Moreover, assume that $\sample$ is invertible in the following sense:
+for every~$c$ there is exactly one pair $(t,s)$ such that $t=\sample_\matP(s,c)$. 
+We write $s \gets \sample_\matP^{-1}(t,c)$ for computing the inverse.  (In a moment, we'll see how to implement such a $\sample_\matP$ in specific cases.)
+
+Let $F\colon \bits^k \times (\bits \times \mathbb{Z} \times \mathbb{Z}) \to\bits^*$ 
+be a function family.  Then we can define a stateful encryption algorithm $\mhenc \colon \bits^k \times \mathbb{Z} \times \mathbb{Z} \times \calS \to \mathbb{Z} \times \calS$ as shown in Figure~\ref{fig:walk-encrypt}.
+Encryption is relatively simple.  Given a message counter~$j$ and an agreed upon parameter~$\mathrm{rnds}$, we take a MH walk, staring from message $M\in\calS$, using the PRF to generate coins for sampling proposals and deciding whether or not proposals are accepted.
+
+Figure~\ref{fig:walk-encrypt} also gives the code for decryption
+$\mhdec\colon \bits^k \times \mathbb{Z} \times
+(\mathbb{Z}\times\mathbb{R}) \times \calS \to \mathbb{Z} \times
+\calS$, which is signficantly trickier.  Consider the first step in
+the reverse-walk, which needs to find the message~$M \in \calS$ that
+corresponds to the input ciphertext~$C \in \calS$.  The state~$C$
+could have been reached in one of two ways: either from some other
+state~$s \neq C$, in which case it must have been that
+$\sample_\matP(s,c_\ell)$ returned~$C$ \textit{and} the coins~$d_\ell$
+resulted in~$C$ being accepted; or $C$ was reached from~$C$, as a
+result of $\sample_\matP(C,c_\ell)$ returning some state~$t \neq C$
+that was \textit{not} accepted.  Unfortunately, we cannot always
+determine which of the two cases is the correct one, and so we must
+keep both possibilities alive, and recurse.  Notice that one could
+have as many as $2^{\mathrm{rnds}}$ ``live'' paths at the end of this
+process, so we prune away paths based on a parameter~$\delta$.
+Namely, if the probability of a potential path is less than~$\delta$,
+it is dropped from further consideration.  Alternatively, we could
+keep the $N_p$ most probable paths alive at each step; see
+Figure~\ref{fig:walk-encrypt-2}.  \tsnote{This is probably the better option.}
+In either case, at the end of the process, decryption returns the most likely path endpoint (i.e.\ message) from among the paths that remain alive.
+
+
+\paragraph{Implementing $\sample_\matP$.} The choice of the proposal
+matrix~$\matP$ will have a large effect on the implementation of
+$\sample_\matP$, and (likely) the performance of encryption and
+decryption.  On one hand, consider $[\matP]_s$ as the uniform
+distribution for all~$s \in \calS$.  Then $\sample_\matP(s,c) = s \xor
+c$ appropriately samples $[\matP]_s$, assuming~$s$ is a bitstring and
+$|s|=|c|$.  Clearly, this is invertible in the required sense.  (Note
+that, in this case, $[\matP]_{s,t}=[\matP]_{t,s}$ and so the
+computation of the acceptance probability~$\alpha$ is simplified.)
+However, if the target distribution~$\vecpi$ is far from uniform --say
+it places most of its probability mass on a small subset of~$\calS$--
+then one expects to need a much longer MH walk to approach the
+target. \tsnote{More research required to understand this tradeoff.}
+
+Sampling proposals from $[\matP]_s$ that is the ``Feistel distribution'' (given current state~$s$) 
+is likewise
+straightforward, even though this is a highly non-uniform
+distribuion.  In particular, $\sample_\matP(s=X\concat Y,
+c=\rho(i,Y))= Y \concat (X \xor c)$.
+
+Sampling proposals from more general non-uniform distributions
+requires additional thought; in particular because decryption must be able invert it.  Certain distributions, for example the Normal distribution, can be approximately sampled by invoking the central limit theorem.  For example $\sample_\matP(s,c=(c_1,c_2,\ldots,c_m)) = s + (1/Z)\left( \sum_{1 \leq i \leq m} (c_{i}-\mathbb{E}[c_{i}]) \right)$ where~$Z$ normalizes to give the sum unit variance, and arithmetic operations are defined appropriately for the type of~$s$ and~$c$.  (Note that arithmetic operations must also allow invertibility, so modular addition may be the wrong choice.)  
+
+%General techinques such as rejection sampling of $[\matP]_s$ might be made to work, too, so long as decryption is still able to invert. \tsnote{No very good ideas here.}
+
+\begin{figure}
+\center
+\hfpagess{.42}{.55}{
+\underline{$\mhenc_K(j,\mathrm{rnds},M)$}\\[2pt]
+$s_0 \gets M$\\
+for $i=1$ to $\mathrm{rnds}$\\
+\nudge $c_i \gets F_K(0,j,i)$\hfill{\tiny $[\propose((K,j,i),s_{i-1})]$}\\ 
+\nudge $s \gets s_{i-1}$\\
+\nudge $t \gets \sample_\matP(s,c_i)$\\
+%\nudge if $\vecpi(s)[\matP]_{s,t} = 0$ then $\alpha\gets 1$\\
+%\nudge else 
+\nudge $\alpha \gets \min\left\{1,\frac{\vecpi(t)}{\vecpi(s)}\frac{[\matP]_{t,s}}{[\matP]_{s,t}} \right\}$ 
+        \hfill{\tiny $[\decide((K,j,i),s_{i-1},t)]$} \\
+\nudge if $\alpha=1$ then $s_i \gets t$\\
+\nudge else\\
+\nudge\nudge $d_i \gets F_K(1,j,i)$\\
+\nudge\nudge if $d_i \leq \alpha$ then $s_i \gets t$\\
+\nudge\nudge else $s_i \gets s$\\
+Ret $(j+1,s_{\mathrm{rnds}})$
+} 
+{
+\underline{$\mhdec_K(j,(\mathrm{rnds},\delta),C)$}\\[2pt]
+for $i=1$ to $\mathrm{rnds}$\\
+\nudge $c_i \gets F_K(0,j,i)$, $d_i \gets F_K(1,j,i)$ \hfill{\tiny [regenerate all coins]}\\
+$\calP \gets (C,1)$ \hfill{\tiny [initial set of posible paths]}\\
+for $\ell=\mathrm{rnds}$ to 1\\
+\nudge $\calQ \gets \emptyset$\\
+\nudge for $(v,p) \in \calP$ \hfill{\tiny[ancestor of~$v$ is either~$v$ or some unique~$s$...]}\\
+\nnudge $s \gets \sample_{\matP}^{-1}(v,c_\ell)$ \hfill{\tiny[...start by finding~$s$]}\\
+%\nnudge if $\vecpi(s)[\matP]_{s,v}=0$ then $\alpha\gets 1$\\
+%\nnudge else 
+\nnudge$\alpha \gets \min\left\{1,\frac{\vecpi(v)}{\vecpi(s)}\frac{[\matP]_{v,s}}{[\matP]_{s,v}} \right\}$\\
+\nnudge if $d_\ell > \alpha$ then \hfill{\tiny [$s$ not possible ancestor of $v$...]}\\
+\nnudge\nudge $\calQ \gets \calQ \cup \{(v,p)\}$ \hfill{\tiny [...so $v$ must be ancestor of $v$]}\\
+\nnudge else \hfill{\tiny [$s$ possible ancestor of $v$, but must check~$v$ still]}\\
+\nnudge\nudge $t \gets \sample_{\matP}(v,c_\ell)$ \hfill{\tiny [$t$
+  would have been sampled if~$v$ was ancestor of $v$]}\\
+%\nnudge\nudge if $\vecpi(v)[\matP]_{v,t}=0$ then $\beta\gets 1$\\
+%\nnudge\nudge else 
+\nnudge\nudge $\beta \gets \min\left\{1,\frac{\vecpi(t)}{\vecpi(v)}\frac{[\matP]_{t,v}}{[\matP]_{v,t}} \right\}$\\
+\nnudge\nudge if $d_\ell \leq \beta$ \hfill{\tiny [would have gone $v\to t$, not $v \to v$...]}\\ 
+%\nudge\nudge\nudge $s_{\ell-1}\gets s$\\
+\nnudge\nudge\nudge $\calQ \gets \calQ \cup \{(s,p)\}$ \hfill{\tiny [...so $s$ must be ancestor of $v$]}\\
+\nnudge\nudge else  \hfill{\tiny [both $s$ and $v$ possible ancestors of $v$]}\\
+\nnudge\nudge\nudge if $p\alpha > \delta$ then $\calQ \gets \calQ \cup \{(s,p\alpha)\}$ \hfill{\tiny [keep $s$ alive]}  \\
+\nnudge\nudge\nudge if $p(1-\beta) > \delta$ then $\calQ \gets \calQ \cup \{(v,p(1-\beta))\}$ \hfill{\tiny [keep $v$ alive]} \\
+\nudge if $Q = \emptyset$ then Ret $(j+1,\bot)$\\
+\nudge $\calP \gets \calQ$ \hfill{\tiny [propagate all alive path-fronts]}\\
+$(s_0,p^*) \gets \max_{p}\{ (s,p) \in \calP \}$\\
+Ret $(j+1,s_0,p^*)$ 
+} 
+\caption{\textbf{Left:} Encryption using the MH walk. In the check ``$d_i
+\leq \alpha$'' we assume that $d_i$ is treated as a real number in 
+$[0,1)$. \textbf{Right:} Corresponding decryption algorithm.
+Parameter~$\delta$ is the probability threshold for keeping candidate
+decryption paths (i.e., reverse walks) alive.  Decryption returns the
+most likely path endpoint from among those remaining after
+$\mathrm{rnds}$ reverse-steps. \textcolor{blue}{[NOTE: to avoid underflow, use the
+log-trick instead of multiplying probabilities together]}}
+\label{fig:walk-encrypt} 
+\end{figure}
+
+
+
+%--------------------------------------------------%
+\begin{figure}
+\center
+\hfpagess{.42}{.55}{
+\underline{$\mhenc_K(j,\mathrm{rnds},M)$}\\[2pt]
+$s_0 \gets M$\\
+for $i=1$ to $\mathrm{rnds}$\\
+\nudge $c_i \gets F_K(0,j,i)$\hfill{\tiny $[\propose((K,j,i),s_{i-1})]$}\\ 
+\nudge $s \gets s_{i-1}$\\
+\nudge $t \gets \sample_\matP(s,c_i)$\\
+%\nudge if $\vecpi(s)[\matP]_{s,t} = 0$ then $\alpha\gets 1$\\
+%\nudge else 
+\nudge $\alpha \gets \min\left\{1,\frac{\vecpi(t)}{\vecpi(s)}\frac{[\matP]_{t,s}}{[\matP]_{s,t}} \right\}$ 
+        \hfill{\tiny $[\decide((K,j,i),s_{i-1},t)]$} \\
+\nudge if $\alpha=1$ then $s_i \gets t$\\
+\nudge else\\
+\nudge\nudge $d_i \gets F_K(1,j,i)$\\
+\nudge\nudge if $d_i \leq \alpha$ then $s_i \gets t$\\
+\nudge\nudge else $s_i \gets s$\\
+Ret $(j+1,s_{\mathrm{rnds}})$
+} 
+{
+\underline{$\mhdec_K(j,(\mathrm{rnds},N_p,\delta),C)$}\\[2pt]
+for $i=1$ to $\mathrm{rnds}$\\
+\nudge $c_i \gets F_K(0,j,i)$, $d_i \gets F_K(1,j,i)$ \hfill{\tiny [regenerate all coins]}\\
+$\calP \gets (C,1)$ \hfill{\tiny [initial set of posible paths]}\\
+for $\ell=\mathrm{rnds}$ to 1\\
+\nudge $\calQ \gets \emptyset$\\
+\nudge for $(v,p) \in \calP$ \hfill{\tiny[ancestor of~$v$ is either~$v$ or some unique~$s$...]}\\
+\nnudge $s \gets \sample_{\matP}^{-1}(v,c_\ell)$ \hfill{\tiny[...start by finding~$s$]}\\
+%\nnudge if $\vecpi(s)[\matP]_{s,v}=0$ then $\alpha\gets 1$\\
+%\nnudge else 
+\nnudge $\alpha \gets
+\min\left\{1,\frac{\vecpi(v)}{\vecpi(s)}\frac{[\matP]_{v,s}}{[\matP]_{s,v}}
+\right\}$\\
+\nnudge if $d_\ell > \alpha$ then \hfill{\tiny [$s$ not possible ancestor of $v$...]}\\
+\nnudge\nudge $\calQ \gets \calQ \cup \{(v,p)\}$ \hfill{\tiny [...so $v$ must be ancestor of $v$]}\\
+\nnudge else \hfill{\tiny [$s$ possible ancestor of $v$, but must check~$v$ still]}\\
+\nnudge\nudge $t \gets \sample_{\matP}(v,c_\ell)$ \hfill{\tiny [$t$ would have been sampled if~$v$ was ancestor of $v$]}\\
+%\nnudge\nudge if $\vecpi(v)[\matP]_{v,t}=0$ then $\beta\gets 1$\\
+%\nnudge\nudge else 
+\nnudge\nudge $\beta \gets
+\min\left\{1,\frac{\vecpi(t)}{\vecpi(v)}\frac{[\matP]_{t,v}}{[\matP]_{v,t}}
+\right\}$\\
+\nnudge\nudge if $d_\ell \leq \beta$ \hfill{\tiny [would have gone $v\to t$, not $v \to v$...]}\\ 
+%\nudge\nudge\nudge $s_{\ell-1}\gets s$\\
+\nnudge\nudge\nudge $\calQ \gets \calQ \cup \{(s,p)\}$ \hfill{\tiny [...so $s$ must be ancestor of $v$]}\\
+\nnudge\nudge else \hfill{\tiny [both $s$ and $v$ possible ancestors of $v$]}\\
+\nnudge\nudge\nudge $\calQ \gets \calQ \cup \{(s,p\alpha),(v,p(1-\beta))\}$ \hfill{\tiny [keep $s$ and $v$ alive]}  \\
+\nudge sort $(\cdot,\cdot)\in\calQ$ by second component\\
+\nudge $\calP \gets$ top $N_p$ pairs in sorted~$\calQ$\\
+\nudge if $\max_{p}\{(s,p) \in \calP\} < \delta$ then Ret $(j+1,\bot)$\\
+$(s_0,p^*) \gets \max_{p}\{ (s,p) \in \calP \}$\\
+Ret $(j+1,s_0,p^*)$ 
+} 
+\caption{(Maximum Likelihood with threshold) \textbf{Left:} Encryption using the MH walk. In the check ``$d_i
+\leq \alpha$'' we assume that $d_i$ is treated as a real number in
+$[0,1)$. \textbf{Right:} Corresponding decryption algorithm.  At each
+step in the reverse walk, the most probable $N_p$ states are
+kept. Decryption aborts if, at any time, the most probable current
+state has probability $< \delta$ of being correct. (Note: setting $\delta=0$ and $N_p=1$ gives the (one-step) maximum-likelihood decryption.) \textcolor{blue}{[NOTE: to avoid underflow, use the
+log-trick instead of multiplying probabilities together]}}
+\label{fig:walk-encrypt-2} 
+\end{figure}
+
+\if{0}
+\subsection{Other stuff}
+
+\tsnote{Probably best if ignored.} 
+\newcommand{\valid}{\textsf{valid}}
+\paragraph{DME with Randomized Decryption}  
+Let $\DMEscheme=(\kg,\enc,\dec,\mdist,\cdist)$ %$\DMEscheme=(\kg,\enc,\dec,\valid,\mdist,\cdist)$. 
+We now allow both encryption and decryption to be randomized.  
+Also, decryption returns a message-bit pair $(\msg,b)$.  
+%The \textit{validity check}
+%algorithm~$\valid$ is deterministic: it takes as input a key~$K$ and a
+%ciphertext~$C$, and returns a bit~$b$.  
+For all keys~$K$ and
+plaintexts~$M$ (in the support of $\mdist$), we require that both of
+the following hold for some scheme-dependent parameter~$\delta$:
+\begin{eqnarray*}
+%\Prob{C \getsr \enc_K(M), (M',b) \getsr \dec_K(C)\,:\, \valid_K(C)=1
+%  \wedge b=1}=1\\
+\Prob{C \getsr \enc_K(M), (M',b) \getsr \dec_K(C)\,:\, b=1}=1\\
+\Prob{C \getsr \enc_K(M), (M',b) \getsr \dec_K(C) \,:\, M' \neq M} \leq \delta
+\end{eqnarray*} 
+where the probability is over
+the coins of both encryption and decryption. In other words,
+decryption must correctly announce when a cipehrtext is valid, and
+when this is the case, it correctly decrypts with probability at
+least $1-\delta$. 
+%\tsnote{I don't have this validity thing nailed,
+%  yet. I want to allow decryption to be randomized, but I want the
+%  value of~$b$ to be deterministic. I'm not even convinced that we
+%  need an explicit $\valid$ algorithm.}
+
+Allowing decryption to be randomized suggests a method for
+building randomized DME that have our desired two-way distribution matching
+property.  In particular, fix $\mdist$, $\cdist$ and a DME
+scheme~$\Pi=(\kg,\enc,\dec,\mdist,\cdist)$ such
+that $\enc_K(M) \approx R_c$ where $R_c \getsr \cdist$.  Let
+$\encode,\decode$ be deterministic encoding and decoding functions,
+where $\decode(\encode(X))=X$ for all~$X$ in the domain of
+$\encode$. Let~$F\colon\mathcal{L} \times \{0,1\}^* \to \{0,1\}^\tau$ be a
+PRF.  
+From these, we
+build
+$\Pi'=(\kg,\overline{\enc},\overline{\dec},\valid,\mdist,\cdist)$
+where $\overline{\enc}_{K,L}(M)=\enc_K(\encode(M,F_L(M)))$, and
+$\overline{\dec}_K(C) = (M,1)$ if $(M,T)\gets\decode(\dec_K(C))$
+and $T=F_L(M)$; otherwise
+%$\valid_K(C)=1$, and if
+%$\valid_K(C)=0$ then 
+$\overline{\dec}_K(C)$ samples $M' \getsr
+\mdist$ and returns~$(M',0)$.  % The validity check is the obvious one.
+
+\paragraph{Authenticity notion for randomized DME schemes.}
+\tsnote{See \figref{fig:hd-games}.}  In \figref{fig:hd-games} we give
+games for a notion of authenticity for randomized DME schemes.
+Loosely, the attacker may ask for encryptions of messages (of a
+specified length) sampled according to $\mdist$, each query returning
+the sampled message and the corresponding ciphertext.  It may also ask
+for decryptions of chosen ciphertexts.  In the ``real'' world
+($\mathrm{AUTH1}$) valid ciphertexts are responded to with $(\msg,1)$
+where~$\msg$ is the plaintext returned by the randomized decryption
+algorithm.  In the ``fake'' world ($\mathrm{AUTH0}$), valid
+ciphertexts are responded to with $(\msg,0)$, instead.  In either
+setting, invalid ciphertexts are responded to with $(\msg',0)$ where
+$\msg'$ is a message sampled according to $\mdist$, whose length is
+appropriate for the the length of the queried ciphertext.  
+
+If efficient attacker can distinguish between these two settings, then
+the messages returned by decryption do not leak information about
+whether or not an attempted ciphertext forgery was valid.  Moreover,
+invalid forgery attempts produce messages that are indistinguishable
+from samples from the message space.
+
+\begin{figure}
+\center
+\hfpages{.25}{
+\underline{$\mathrm{AUTH1}_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\ell)$}\\
+$\msg \getm \mspace(\ell)$\\
+$\ctxt \getsr \enc_\key(\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $(\msg,\ctxt)$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+if $\ctxt \in \queriedC$ then Ret $\bot$\\
+$(\msg,d) \getsr \dec_\key(\ctxt)$\\
+if $d=1$ then\\
+%if $\valid_K(\ctxt)=1$ then\\
+\nudge {Ret $(\msg,1)$}\\
+else\\
+\nudge Ret $(\msg,0)$\\ %$(\msg,d)$
+\phantom{\nudge $\ell \gets \mathsf{Mlen}(|\ctxt|)$\\
+\nudge $\msg' \getm \mspace(\ell)$\\}
+}{
+\underline{$\mathrm{AUTH0}_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\ell)$}\\
+$\msg \getm \mspace(\ell)$\\
+$\ctxt \getsr \enc_\key(\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $(\msg,\ctxt)$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+if $\ctxt \in \queriedC$ then Ret $\bot$\\
+$(\msg,d) \getsr \dec_\key(\ctxt)$\\
+if $d=1$ then\\
+%if $\valid_K(\ctxt)=1$ then\\
+\nudge {Ret $(\msg,0)$}\\
+else\\
+\nudge $\ell \gets \mathsf{Mlen}(|\ctxt|)$\\
+\nudge $\msg' \getm \mspace(\ell)$\\
+\nudge Ret $(\msg',0)$ %$(\msg,d)$
+}
+ 
+\caption{A notion of authenticity for randomized
+  DME scheme %$\DMEscheme=(\kg,\enc,\dec,\valid,\mdist,\cdist)$
+$\DMEscheme=(\kg,\enc,\dec,\mdist,\cdist)$}
+\label{fig:hd-games} 
+\end{figure}
+
+\newcommand{\DMECPA}{\textnormal{DME-CPA}}
+\newcommand{\DMECPAreal}{\mathrm{DMECPA1}}
+\newcommand{\DMECPAfake}{\mathrm{DMECPA0}}
+
+\newcommand{\DMECCA}{\textnormal{DME-CCA}}
+\newcommand{\DMECCAreal}{\mathrm{DME1}}
+\newcommand{\DMECCAfake}{\mathrm{DME0}}
+
+\newcommand{\fINDCCA}{\textnormal{$\overrightarrow{\IND}$-CCA}}
+\newcommand{\fINDCCAreal}{\overrightarrow{\mathrm{IND1}}}
+\newcommand{\fINDCCAfake}{\overrightarrow{\mathrm{IND0}}}
+
+\newcommand{\bINDCCA}{\textnormal{$\overleftarrow{\IND}$-CCA}}
+\newcommand{\bINDCCAreal}{\overleftarrow{\mathrm{IND1}}}
+\newcommand{\bINDCCAfake}{\overleftarrow{\mathrm{IND0}}}
+
+\newcommand{\fINDCPA}{\overrightarrow{\mathrm{IND}}\mbox{-}\mathrm{CPA}}
+ 
+\begin{figure}[t]
+\center
+\hfpages{.48}{
+\underline{$\DMECCAreal_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getsr \enc(\key,\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \gets \dec(\key,\ctxt)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+}{
+\underline{$\DMECCAfake_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getc \cspace$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \getm \mspace$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+} 
+\caption{Games used to define security of DME schemes with strong keys. Top: DME-CCA security}
+\label{fig:} 
+\end{figure}
+
+
+\begin{figure}[t]
+\center
+\hfpages{.48}{
+\underline{$\bINDCCAreal_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getsr \enc(\key,\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \gets \dec(\key,\ctxt)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+}{
+\underline{$\bINDCCAfake_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getsr \enc(\key,\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \getm \mspace$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+}
+\hfpages{.48}{
+\underline{$\fINDCCAreal_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getsr \enc(\key,\msg)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \gets \dec(\key,\ctxt)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+}{
+\underline{$\fINDCCAfake_{\DMEscheme}^\advA$}\\[2pt]
+$\key \getsr \kg$\\
+$b' \getsr \advA^{\encOracle,\decOracle}$\\
+Ret $b'$\medskip
+
+\underline{proc.~$\encOracle(\msg)$}\\
+%If $\msg \in \queriedM$ then Ret $\bot$\\
+$\ctxt \getm \mspace$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\ctxt$\medskip
+
+\underline{proc.~$\decOracle(\ctxt)$}\\
+%If $\ctxt \in \queriedC$ then Ret $\bot$\\
+$\msg \gets \dec(\key,\ctxt)$\\
+%$\queriedM \gets \queriedM \cup \{\msg\}$\\
+%$\queriedC \gets \queriedC \cup \{\ctxt\}$\\
+Ret $\msg$
+}
+ 
+\caption{Games used to define security of DME schemes with strong keys. Top: IND-CCA-security, distinguishing decryption behavior, only; Bottom: IND-CCA-security, distinguishing encryption behavior, only.  IND-CPA is IND-CCA without the $\decOracle$-oracle.}
+\label{fig:} 
+\end{figure}
+
+\begin{theorem} ($\fINDCPA \wedge \bINDCCA \Rightarrow \DMECCA$)
+\end{theorem} 
+Not at all unexpected, since $\fINDCPA$ is an FTE goal, $\bINDCCA$ is
+an HE goal, so if we put them together, we get DME.
+
+\fi

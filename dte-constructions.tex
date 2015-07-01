@@ -1,0 +1,201 @@
+\section{DTE constructions}
+\begin{figure}[t]
+\center
+\hfpagess{.25}{.25}
+{ 
+\underline{$\SAMP1_{\DTE}(\advA)$}\\[2pt]
+$X \getx \mathcal{X}$\\
+$Y \getsr \encode(X)$\\
+$b \getsr \advA(X,Y)$\\
+Ret $b$\medskip
+}
+{
+\underline{$\SAMP0_{\DTE}(\advA)$}\\[2pt]
+$Y \gety \mathcal{Y}$\\
+$X \getsr \decode(Y)$\\
+$b \getsr \advA(X,Y)$\\
+Ret $b$\medskip
+
+}
+\caption{Games used to define security of DTE scheme $\DTE=(\encode,\decode,\xdist,\ydist)$.}
+\label{fig:dte-security}
+\end{figure}
+
+\subsection{Pseudorandom sampling: Improved DTE for RSA private keys}
+In~\cite{}, an HE scheme is introduced for encryption of RSA private keys. An RSA private key consists of a pair of $\ell$-bit primes $(p,q)$, where $\ell$ is a security parameter. The target distribution in~\cite{}, one closely approximating key generation for real-world applications, such as SSL, is such that $p$ and $q$ are uniformly and independently distributed over $\ell$-bit primes. It is convenient in our exploration here to focus on encryption of a single prime $\pi$, i.e., $\mspace$ is the set of $\ell$-bit primes.
+
+The HE scheme proposed in~\cite{} relies on a DTE based on rejection sampling. A seed $s$ consists of a sequence of $t$ independent random integers $\pi_1, \pi_2, \ldots, \pi_t \in [2^{\ell-1}, 2^{\ell})$. The DTE maps a seed $s$ to a corresponding prime by applying a primality test (e.g., Miller-Rabin) to each integer in the sequence until a prime $\pi$ is identified.\footnote{If no prime is identified, then a prime is generated at random. Thus the DTE is probabilistic.} The prime number theorem states that the probability that a randomly selected $\ell$-bit integer is prime is $O(1 / \ell)$. Unfortunately, this means that a randomly generated seed $s$ contains a prime with high probability only if $t = \omega(\ell)$. Thus the DTE proposed in~\cite{} results in an HE with superlinear ciphertext expansion.\footnote{It might seem that a more efficient construction is possible in which $s$ is a seed for a PRNG yielding as output the sequence of $\ell$-bit integers $\pi_1, \ldots, \pi_t$. For this DTE construction, however, there exists no efficient encoding, i.e., way to select $s$ such that $\pi \in \{pi_1, \ldots, \pi_t\}$.}
+
+We propose a DTE with small constant (a factor of 2) ciphertext expansion.
+
+\paragraph{Preliminaries:}
+Let ${\sf prng}_{\ell}(\sigma,i)$ denote a PRNG that takes as input a PRNG seed $\sigma \in \{0,1\}^{\ell}$ (distinct from a DTE seed) and index $i \in \mathbb{Z}$ and yields an $\ell$-bit output $r_i$.  We drop the subscript $\ell$ where it is clear from context. Let $[z]_{\uparrow 1}$ denote the result of setting the leading bit of a binary representation of integer $z$ to 1. Let $\primetest(z) \rightarrow \{{\tt false}, {\tt true}\}$ denote a primality testing algorithm, such as Miller-Rabin. Finally, let $\perp$ be a distinguished error symbol.
+
+\paragraph{Construction:}
+
+Our full DTE construction is specified in Figure~\ref{fig:primeDTE}. 
+
+In this construction, a DTE seed $s = (\sigma, \mask)$, where $\sigma$ is a PRNG seed and $\mask$ is a ``mask.'' In the {\sf decode} algorithm, a sequence of integers $r_1 \oplus \mask, r_2 \oplus \mask, \ldots$ is generated, where $r_j = \prng(\sigma, j)$ until a prime $\pi = r_i \oplus \mask$ is identified, i.e., $\primetest(r_i \oplus \mask) = {\tt true}$. We refer to this as the {\em seed sequence}.
+
+The mask $\mask$ allows a seed $s$ to be ``cooked'' for a given input $\pi$ to the {\sf encode} algorithm. Let $\gamma(i)$ denote the probability that the first prime in a sequence of random $\ell$-bit integers appears in the $i^{th}$ position. By selecting the $\mask$ appropriately, we can meet two requirements: (1) $\pi$ is assigned randomly to a position $i$ sampled from $\gamma$ and (2) $\pi$ is the first prime in the seed sequence.
+
+In the algorithm ${\sf encode}$, an index $i$ is sampled from $\gamma$ by selecting trial random integers until a prime is found; counting the number of such trials yields $i$. A seed $s = (\sigma, \mask)$ is then generated in which $\pi$ is set to position $i$ according to requirement (1); this is done by selecting $\sigma$ at random and letting $\mask = r_i \oplus \pi$. Of course, it is possible then that $\pi$ is not the first prime in the seed sequence for $s$, i.e., that requirement (2) is violated. In this case, the seed is rejected and another generated. Such rejection sampling continues until requirement (2) is met.
+
+
+
+\paragraph{Security:} 
+
+Let us assume for simplicity that ${\sf primetest}$ is ideal, i.e, always correct. We will prove security information theoretically, while modeling $\prng$ as a random oracle. This means that we compute probabilities over coins $\coins$ specifying the oracle.
+
+Let $\Gamma(t) = \sum_{j=t+1}^{\infty} \gamma(i)$. In other words, $\Gamma(t)$ is the probability that a seed sequence of length $t$ contains no prime. Let $\Pi_{\ell}$ denote the set of $\ell$-bit primes. Let $\ind(s)$ denote the position of the first prime in the seed sequence of $s$, i.e., the smallest index (position) $i$ such that $\primetest([{\sf prng}(\sigma, i) \oplus \mask]_{\uparrow 1}) = {\tt true}$.
+
+Let $p_s$ denote the probability distribution defined by $\pr[s = s': \pi \stackrel{\$}{\leftarrow} \Pi_{\ell}; s \leftarrow \enc(\pi)]$. In other words, it is the distribution over seeds induced by encoding a prime randomly selected from $\Pi$.
+
+Define $\dist(p_s, U) = \sum_{s \in \sspace} | p_s - 1 / |\sspace| |$, i.e., $\dist(p_s, U)$ is the $L_1$ distance between $p_s$ and the uniform distribution over seeds.
+
+\begin{lemma}
+ Suppose $\gamma(i) \geq 2^{-\ell / 4}$ for $i \in [1,t]$ and $\Gamma(t) \leq 2^{-z}$ for some $0 \leq z < 5\ell / 4$. Let $\prng$ be a random oracle instantiated with coins $\coins$. With probability at least $1 - 2(t+1)|\Pi|e^{-(2^{\ell/4} - 1)}$ over $\coins$, it is the case that $\dist(p_s, U) \leq 2^{-z} + 2^{-(\ell / 4) + 1}$.
+\end{lemma}
+
+\begin{proof}
+For a given set of coins $\coins$, partition the seed space $\sspace$ into sets $\{S_{\pi,i}\}\}_{\pi \in \Pi, i \in [1,t]} \bigcup S_{\perp}$. Here, $S_{\pi,i}$ is  the set of seeds $s \in \sspace$ such that $\decode(s) = (\pi,i)$, and and $S_{\perp}$ is the set of seeds such that $\ind(s) > t$ and thus $\decode(s) = \perp$. Finally, let $X_{\pi,i} = |S_{\pi,i}|$.
+
+The function $\encode(\pi)$ selects an index $i$ from distribution $\gamma$. Then it selects an $\ell$-bit $\sigma$ uniformly at random and tests whether $(\sigma, \mask) \in S_{\pi, i}$ for $\mask = \prng(\sigma, i) \oplus \pi$. Thus, $\encode(\pi)$ may be viewed as selecting a prime $\pi$, then an index $i$, and then a seed $s$ uniformly at random from $S_{\pi,i}$. Hence
+
+\begin{equation}
+\label{eq:seed_prob}
+p_s(s) = \gamma(i) / (|\Pi| X_{\pi,i}). 
+\end{equation}
+
+Let $X_{\pi,i}(s)$ be a Bernoulli random variable such that $X_{\pi,i}(s) = 1$ iff $\decode(s) = (\pi,i)$. (Similarly $s \in X_{\perp}$ iff $\decode(s) = \perp$.) Thus $X_{\pi,i} = \sum_{s \in \sspace} X_{\pi,i}(s)$. 
+
+Now, $X_{\pi,i}(s) = \pr_{\coins}[s \in S_{\pi,i}] = \pr[[r_i \oplus \mask]_{\uparrow 1} = \pi | \ind(s) = i] \pr[\ind(s) = i] = \gamma(i) / |\Pi|$. Define $\mu_{\pi,i} = E[X_{\pi,i}]$. We see that $\mu_{\pi,i} = \gamma(i)2^{2\ell} / |\Pi|$.
+
+By assumption, $\gamma(i) \geq 2^{-\ell / 4}$, implying that $\gamma(i) / |\Pi| \geq 2^{-5\ell / 4}$.
+Taking the standard Chernoff Bound $\pr[X \not \in [(1 - \delta) \mu, (1 + \delta)\mu] \leq 2e^{-(\delta^2 \mu) / 2}$ for $\delta \in [0,1]$ and setting $\delta = 2^{-\ell / 4}$, therefore, we obtain:
+
+\begin{equation}
+\pr[X_{\pi,i} \not \in [(1 - \delta) \mu_{\pi,i}, (1 + \delta)\mu_{\pi,i}]] \leq 2e^{-2^{-\ell/4-1} }.
+\end{equation}
+
+Now $\mu_{\perp} = \Gamma(t)2^{2\ell}$. Taking the standard Chernoff bound $\pr[X > (1 + \delta)\mu] \leq 2e^{-(\delta^2 \mu) / 3}$, noting that $\Gamma(t) < 2^{-z}$ by assumption, and letting $\delta = 2^{-\ell / 4}$, we observe that
+
+\begin{equation}
+\pr[X_{\perp} > (1 + \delta)\mu_{\perp}] \leq e^{-2^{-\ell/4-1}}/2
+\end{equation}
+
+\noindent for $z \leq 5/4 \ell$. 
+\qed
+
+\end{proof}
+
+\begin{figure}[t]
+\center
+\hpages{.42}{
+\fpage{.97}{
+\underline{${\sf decode}(\sigma, \mask)[\ell,t]$}\\[2pt]
+if $\sigma \not \in \{0,1\}^{\ell}$ or $\mask \not \in \{0,1\}^{\ell}$ then ret $\perp$\\
+$i \leftarrow 0$\\
+do\\
+\nudge $\pi \leftarrow [{\sf prng}(\sigma, i) \oplus \mask]_{\uparrow 1}$\\
+\nudge $i \leftarrow i+1$\\
+until (${\sf primetest}(\pi) = {\tt true}$ or $i = t+1$)\\
+if $i = t+1$ ret $\perp$\\
+ret $(\pi, [i])$
+}
+}{
+\fpage{.97}{
+\underline{${\sf encode}(\pi)[\ell,t]$}\\[2pt]
+if $\pi \not \in \{0,1\}^{\ell}$ or ${\sf primetest}(\pi) = {\tt false}$ then ret $\perp$\\
+$i \leftarrow 0$\\
+do \\
+\nudge $z \stackrel{\$}{\leftarrow} \{0,1\}^{\ell}$\\
+\nudge $i \leftarrow i + 1$\\
+until ${\sf primetest}(z)$ = {\tt true}\\
+do\\
+\nudge $\sigma \stackrel{\$}{\leftarrow} \{0,1\}^{\ell}$\\
+\nudge $\mask \leftarrow \pi \oplus {\sf prng}(\sigma,i)$\\
+until ${\sf decode}(\sigma, \mask) = (\pi, [i])$\\
+ret $(\sigma, \mask)$\medskip
+}
+}
+\caption{DTE for primes.}
+\label{fig:primeDTE}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%% J U N K Y A R D  /  O L D   S T U F F %%%%%%%%%%%%%%%%%%%%
+\if{0}
+\paragraph{Rejection-sampling DME}
+
+\paragraph{Markov-Chain-based DME (deterministic/randomized)}
+
+\tsnote{Largely lifted from proposal, which was lifted from stuff I wrote back
+in summer 2012} 
+
+We will explore other ways of building DME schemes that do not rely upon 
+rejection sampling. For example, we will explore techniques based used in
+Markov-chain Monte Carlo (MCMC) methods.  There is a large literature
+on MCMC methods and, to our knowledge, this has never been rigorously explored
+for building encryption schemes.\footnote{There is an example of
+using MCMC in Bellare et al.~\cite{BRRS09}, in the context of
+format-preserving encryption. They show how to encrypt plaintext graph-colorings
+into ciphertext graph-colorings.
+%, implementing the transition rule by
+%having a PRF output a vertex index and a color, and updating the
+%coloring accordingly.
+}
+Let us give an example of how MCMC might be used.
+
+%\heading{Computationally Reversible MCMC idea}
+Let~$L$ be a set with distribution~$f$, and consider a Markov
+chain whose states are the elements of~$L$.  Let~$S_f$ be an efficiently
+computable mapping that takes in an MC state~$q$ and a bitstring~$c$, and
+returns an MC state $q'$.  
+Specifically, let $S_f$ have the property
+that $S_f(\cdot,c)$ is invertible, so that there exists a mapping
+$S_f^{-1}$ with the property that $S_f^{-1}(S_f(q,c),c)=q$.  
+Finally, fix a value $\tau>0$.
+To encrypt a plaintext string~$M$, we first (efficiently) encode~$M$ into an arbitrary MC
+state~$q_0$.  For $i=0,1,\ldots,\tau-1$ let~$c_i$ be an 
+externally provided string of uniform bits, and let~$q_{i+1} =
+S_{f}(q_i,c_i)$.  When the Markov chain walk finished, set $C=q_\tau$
+and return~$C$.
+
+We desire that~$\Pr_c(S_f(q_i,c)=q_j)=[P]_{i,j}$ where~$P$ is the MC
+transition matrix whose stationary distribution is~$f$.
+\tsnote{Can't store~$P$, since it will be huge.  Building $S_f$ will
+  be easier if we relax to $\Pr_c(S_f(q_i,c)=q_j) =
+  [P]_{i,j}+\epsilon$. It 
+would suffice if $S_f(q_i,c)$ where computationally
+indistinguishable from a sample from $[P]_i$; could view $S_f$ itself
+as a ``small'' DME, and the walk as a mode? 
+Might try having $S_f(q_i,c)$ compute a more coarse approximation of
+$[P]_i$, although I don't know how the errors would build up. }
+If this is met, and the walk length~$\tau$
+is at least the mixing time for the chain,
+then the distribution of~$C$ will be (statistically) indistinguishable
+from~$f$.  \tsnote{Statistical indistinguishability is overkill.}
+Note that 
+the~$c_i$ can be provided by a PRF using a shared secret key, and a
+counter that is synchronized between sender and receiver.  Thus one
+can decrypt~$C$ by generating the $c_i$ in reverse order, and use the
+invertibility of~$S_f$ to walk the chain backwards to~$q_0$, and then
+recover~$M$ from this. 
+
+The Metropolis-Hastings algorithm shows how, given any valid transition matrix~$\tilde{P}$
+(i.e. describing an irredicible, aperiodic chain), to produce a transition matrix~$P$
+whose stationary distribution is the target~$f$. 
+
+We note that one does not have to use a MC over~$L$.  If there is a
+more attractive MC to use, and there is an invertible mapping from
+its states to~$L$, then one finishes the walk and maps $q_\tau$ to~$L$
+to produce~$C$.
+
+\tsnote{Actually, I have some initial ideas about how to actually
+  implement this.  Slowly starting to understand what MH is actuallly
+  doing...  Anyway, my ideas are pretty simple, so won't be very
+  efficient, yet.}
+\fi
+
+

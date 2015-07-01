@@ -1,0 +1,84 @@
+\eject
+\section{AJ's workspace}
+
+\newcommand{\coincomp}{\textsf{coinextr}}
+\newcommand{\randdist}{{\cal \rho}}
+\newcommand{\stego}{{\mathsf{steg}}}
+
+For a given $\DTE = (\encode, \decode)$, let $\encode^*$ represent the deterministic function over coins that computes $\encode$. Specifically, for $\rho$ a probability distribution over bitstrings $\{0,1\}^r$, define $\encode$ as the algorithm $R \stackrel{\randdist}{\leftarrow} \{0,1\}^r; \seed \leftarrow \encode^*(\msg; R).$ 
+
+We define a DTE as {\em $\epsilon$-coin-extractable} if there exists a (probabilistic) function $\coincomp$ such that
+
+\begin{equation}
+\pr[\seed = \seed^* \,|\, \seed \getsr \sspace; \msg \leftarrow \decode(\seed); R \leftarrow \coincomp(\seed, \msg); \seed^* \leftarrow \encode^*(\msg; R)] \geq 1 - \epsilon.
+\end{equation}
+
+\begin{figure}
+\center
+\fpage{.5}{
+\underline{$\stego(\kappa, C)$}\\[2pt]
+Parse $\ctxt$ as $\ctxt = \ctxt_1 \parallel \ldots, \parallel \ctxt_n$, where $\ctxt_i \in \{0,1\}^{\ell - r}$\\
+$R_0 \gets 0^r$ \\
+for $j = 1$ to $n$ do\\
+\nudge \nudge $\tilde{R}_{j} \leftarrow \enc_{\kappa}(R_{j-1};j)$
+\hfill{\tiny [deterministic encrypt $R_{j-1}$ under IV~$j$]}\\
+\nudge \nudge $\seed_j = \tilde{R}_{j} \,\parallel\, \ctxt_j$\\
+\nudge \nudge $\msg_j \leftarrow \decode(\seed_j)$ \hfill{\tiny[deterministic\
+  decode]}\\
+\nudge \nudge $R_j \getsr \coincomp(\seed_j, \msg_j)$
+\hfill{\tiny[probabilistic recovery (whp) of coins]}\\
+$\tilde{R}_{n+1} \leftarrow \enc_{\kappa}(R_{n};i)$ \hfill{\tiny [determinsitic encrypt $R_{j-1}$ under IV~$j$]}\\
+Encode $\tilde{R}_{n+1}$  under CMU scheme as covertext $\msg$\\ 
+Ret $\left( \{\msg_j\}_{j=1}^n, \msg \right)$
+}
+\caption{Chained steganographic encoding}
+\label{fig:chained_stego}
+\end{figure}
+
+Suppose that $\ctxt$ is a (long) message (typically a ciphertext) for which we wish to create a sequence of corresponding covertexts. Assume that $\sspace = \{0,1\}^{\ell}$, for $\ell > r$. Given input a secret key $\kappa$, and a ciphertext $C$ of length $n(\ell - r)$, our encoding scheme is sketched in Figure~\ref{fig:chained_stego}.
+
+Note that DTE decoding on a seed selected uniformly at random achieves the target distribution sampling required by the CMU scheme.
+
+
+\tsnote{Should it be $R_j \gets \coincomp(\seed_j,\msg_j)$, above in
+  Figure~\ref{fig:chained_stego}? And $\tilde{R}_{n+1} \gets
+  \enc_\kappa(R_n;n)$, rather than $\enc_\kappa(R_n;i)$?}
+
+\tsnote{ Also, does
+  $\enc_{\kappa}(R_{j-1};j)$ mean to encrypt $R_{j-1}$ under
+  ``randomness''~$j$ (which would be consistent with your notatation,
+  above, for $\encode^*$), or to encrypt~$j$ under
+  randomness~$R_{j-1}$ (which is more intuitive)?  If the former, is
+  $\enc$ randomized with its own internal coins (in which case
+  $|\tilde{R_j}| > |R_{j-1}|$) or deterministic?}
+
+
+
+A natural question: Can we characterize modifications to an image as a DTE in order to formalize steganography via embedding in images? Probably not.
+
+\subsection{DTE-sampling separation}
+Given a DTE $(\encode, \decode = G_1, \xdist, \ydist)$, there is an efficient sampling algorithm over $\xdist$: $Y \leftarrow_{\ydist} \calY; X \leftarrow \decode(Y)$. We wish to show, however, that the converse does not hold, i.e., a poly-time sampling algorithm for $\xdist$ does not imply a poly-time DTE.
+
+Referring to the definition of a DTE in Section~\ref{sec:gencons}, let $\calX^* = \{0,1\}^{2\ell}$ and $\calY = \{0,1\}^{\ell}$.
+Let $G_1: \calY \rightarrow \calX^*$ be a PRG and $\calX = G_1(\calY)$. Let $\ydist$ be the uniform distribution over $\calY$ and $\xdist(X) = \Prob{X = G_1(Y) \,|\, Y \leftarrow_{\ydist} \calY}$.
+
+Observe that there is a trivial efficient sampling algorithm for $\calX$ under $\xdist$. But...
+
+\begin{observation}
+There does not exist a polynomial-time computable DTE $(\encode, \decode = G_1, \xdist, \ydist)$.
+\end{observation}
+
+\begin{proof}[sketch]
+Suppose such a DTE exists. Then for any $X \in \calX$, by definition, $\decode(\encode(X)) = X$. Suppose $\tilde{X} \in \calX^* - \calX$. Then either: (1) $\encode(\tilde{X}) \not \in \calY$ or (2) $\decode(\encode(\tilde(X))) \neq X$. Therefore there is a poly-time algorithm that distinguishes $\calX$ from $\calX^* - \calX$ and thus breaks the PRG.
+\end{proof}
+
+One objection to this example is that $\xdist$ is an uninteresting distribution in practice: There is no efficient membership test for $\calX$, so it is not a natural message distribution in practice. 
+
+Consider, therefore, a variant scheme $G_2: \calY \rightarrow \calX* \times \calP$ that outputs $X = G_1(Y)$ along with a NIZK proof $P \in calP$ that $X \in \calX$. In this case, there is a trivial membership test for $\calX$, verification of the proof $P$. Nonetheless, there remains no poly-time computable DTE. A simulator can be constructed for proof $P$ that enables any such DTE to be used to break the PRG $G_1$.
+
+\subsection{DTE composition theorem}
+
+
+
+
+

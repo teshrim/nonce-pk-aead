@@ -1,0 +1,43 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+Low-entropy secrets such as passwords are likely to persist in computer systems
+for many years. Their use in encryption leaves resources vulnerable to offline
+attack.  Honey encryption can offer valuable additional protection in such
+scenarios. HE yields plausible looking plaintexts under decryption with
+invalid keys (passwords), so that offline decryption attempts alone are
+insufficient to discover the correct plaintext. 
+%HE uses less space compard to existing approaches involving explicit
+%encryption of lists of decoys (e.g.,~\cite{Bojinov:2010:KLP:1888881.1888904}).
+HE also offers a gracefully degrading hedge against partial disclosure of
+high min-entropy keys, and, by simultaneously meeting standard PBE security notions
+should keys be high entropy, HE never provides worse security than existing PBE schemes.
+
+We showed applications in which HE security upper bounds are 
+equal to an adversary's conditional knowledge of the key
+distribution, i.e., they min-entropy of keys. These settings have
+message space entropy greater than the entropy of keys, but our framework
+can also be used to analyze other settings.
+
+A key challenge for HE---as with all schemes involving decoys---is the
+generation of plausible honey messages through good DTE construction. We have
+described good DTEs for several natural problems. For the case where plaintexts
+consist of passwords, e.g., password vaults, the relationship between
+password-cracking and DTE construction mentioned above deserves further
+exploration. DTEs offer an intriguing way of potentially
+repurposing improvements in cracking technology 
+to achieve improvements in encryption security by way of HE.
+
+More generally, for human-generated messages (password vaults, e-mail, etc.),
+estimation of message distributions via DTEs is interesting as a natural
+language processing problem. Similarly, the reduction of security bounds in HE
+to the expected maximum load for balls-and-bins problems offers an interesting
+connection with combinatorics. The concrete bounds we present can undoubtedly
+be tightened for a variety of cases. Finally, a natural question to pursue is
+what kinds of HE bounds can be realized in the standard model via, e.g., $k$-wise
+independent hashing. 
+%Such connections inside and outside cryptography are just
+%a few of the many stimulating directions for future research presented by honey
+%encryption. 
+
+

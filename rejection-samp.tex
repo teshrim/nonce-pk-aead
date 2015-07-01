@@ -1,0 +1,780 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\stoploop}{\textsc{stop}}
+\newcommand{\cnt}{\mathrm{cnt}}
+\newcommand{\outputs}{\Rightarrow} 
+\newcommand{\bad}{\textsc{bad}}
+\newcommand{\marked}{0}%{\textsc{used}}
+\newcommand{\keyguess}{\textsc{key}}
+\newcommand{\sampguess}{\textsc{samp}}
+
+\begin{figure}[tph]
+\begin{center}
+\hfpages{.33}
+{
+\underline{$\enc^H_K(m;(h,N))$}\\[2pt]
+$\stoploop\gets\false$, $\cnt\gets 0$\\
+while $\stoploop=\false$\\
+\nudge $s \getsr \mathcal{C}_h$\\
+%\nudge if $H(K \concat \langle N \rangle \concat \langle \cnt \rangle\concat s)=m$ then \\
+\nudge if $H(K \concat \langle N \rangle \concat s)=m$ then \\
+\nudge\nudge $\stoploop\gets\true$, $c\gets s$\\
+\nudge $\cnt \gets \cnt+1$\\
+\nudge if $\cnt = T$ then\\
+\nudge\nudge $\stoploop\gets\true$, $c \getsr \mathcal{C}_h$\\
+$h \gets h \concat c$\\
+$N \gets N+1$\\ 
+return $((h,N),c)$
+}
+{
+\underline{$\dec^H_K(c;(h,N))$}\\[2pt]
+$m \gets H(K \concat \langle N \rangle \concat c)$\\
+return $((h,N+1),m)$
+}
+
+\caption{Rejection-sampling encryption of a one-bit
+  message. Stopping threshold~$T$ is a system
+  parameter.}
+\label{fig:rejection-one-bit}
+\end{center}
+\end{figure}
+
+\subsection{Security analysis of (Truncated) Rejection Sampling}
+\tsnote{Following lemma is for a single-bit message, and a single ciphertext.  But I think it extends to multiple-bit and multiple-ciphertexts pretty directly (inclusion of $N$ in the RO-input would allow domain separation across ciphertexts).}
+%\tsnote{Also, should be able to get a bound that includes, for
+%  example, the min-entropy of the message distribution. Just need to
+%  carefully write down the games.}
+\begin{lemma} (Informal.)(Warm-up.) \rm If not provided access to the RO, no adversary can distinguish between an ouput of rejection-sampling encryption and a direct channel sample.
+\end{lemma}
+\begin{proof}
+Fix a one-bit message~$m$.  
+Let $s_0,s_1,\ldots$ be the samples used in the process of
+encrypting~$m$, and let $G_i$ be the event that the while-loop halts with sample~$s_i$, either because the resampling threshold was reached ($\cnt=T$), or because the $i$-th sample was the first to satisfy~$H(K \concat \langle N \rangle \concat s_i)=m$.  Then we can write
+\begin{align*}
+&\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z}\\
+&\quad=\Prob{s_0=z \wedge G_0} + \Prob{s_1=z \wedge G_1 \wedge  \neg G_0} + \cdots \\
+&\quad\quad+ \Prob{s_{T-1}=z \wedge  G_{T-1} \wedge \neg G_{T-2} \wedge \cdots  \wedge \neg G_1 \wedge \neg G_0}
++ \Prob{s_T=z \wedge \neg G_{T-1} \wedge \neg G_{T-2} \wedge \cdots \wedge \neg G_1 \wedge \neg G_0}
+\end{align*}
+Now, note that 
+$
+\Prob{s_1=z \wedge G_1 \wedge \neg G_0 } = \Prob{G_1 \wedge \neg G_0 \given s_1=z}\Prob{s_1=z},
+$
+and that if the event $\neg G_0 \wedge G_1$ holds given $s_1=z$, it cannot be the case that $s_0=s_1=z$.  (We do not care about $s_0=s_1\neq z$, obviously.)  The same argument can be made for the other terms $\Prob{s_i=z \wedge G_{i-1} \wedge \neg G_{i-2}\wedge \cdots \wedge \neg G_0 }$. Thus we do not have to additionally consider collisions among channel samples in the analysis.  Continuing, let $\mathcal{C}_h(z)$ be the probability that $\mathcal{C}_z$ assigns to~$z$, so that
+\begin{align*}
+&\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z}\\
+&\quad=\mathcal{C}_h(z)(1/2) + \mathcal{C}_h(z)(1/2)(1-(1/2)) + \cdots + \mathcal{C}_h(z)(1/2)(1-(1/2))^{T-1} +\mathcal{C}_h(z)(1-(1/2))^{T} \phantom{~~~~~~~~~~~~~~~~~~~~}\\
+&\quad= \mathcal{C}_h(z)(1/2)\left(\sum_{i=0}^{T-1}(1/2)^i \right) + \mathcal{C}_h(z)(1/2)^{T}\\
+&\quad=\mathcal{C}_h(z)(1/2)\frac{1-(1/2)^T}{1-1/2} + \mathcal{C}_h(z)(1/2)^{T}\\ 
+&\quad=\mathcal{C}_h(z) 
+\end{align*}
+\hfill\qed
+\end{proof}
+Thus we see that the rejection sampling scheme (for one-bit messages) yields ciphertexts that perfectly mimic samples from the channel distribution.  Notice that this is independent of the underlying message~$m$, hence of the message distribution~$\mdist$.
+%%%%%%%%%%%%%%%%%%%%%%%
+
+Using the previous lemma as a warm-up, consider now the case that the adversary is told the entire RO table ``for free''.  The structure of the proof of the next lemma is very similar to that of the previous one.
+
+\begin{lemma} (Informal.) \rm Fix a channel history~$h$, 
+thereby fixing a channel distribution~$\mathcal{C}_h$, and fix an integer~$N$. Assume the random oracle~$H$ in rejection-sampling encryption takes on a particular instantiation~$H=f$.
+For any message~$m\in\mspace$ and key~$K$, let $f_K^{-1}(m)$ be the
+set of points~$c$ such that $f(K \concat \langle N \rangle \concat c)=m$.  Then, for any particular $z \in \mathcal{C}_h$, 
+\[
+\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f}= 
+\left\{
+\begin{array}{cl}
+\mathcal{C}_h(z) \left( \frac{1-(1-\mathcal{C}_h(f^{-1}_K(m)))^T}{\mathcal{C}_h(f^{-1}_K(m))}  +  (1-\mathcal{C}_h(f^{-1}_K(m)))^T \right)  &\mbox{if } z \in f_K^{-1}(m)\\
+ \mathcal{C}_h(z)\left(1 - \mathcal{C}_h(f^{-1}_K(m))\right)^T  &\mbox{otherwise}
+\end{array}
+\right.
+\]
+where $\mathcal{C}_h(\cdot)$ is the total probability assigned
+by~$\mathcal{C}_h$ to the indicated point or set.  Thus, as $T\to\infty$,
+\[
+\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f}= 
+\left\{
+\begin{array}{cl}
+\frac{\mathcal{C}_h(z)}{\mathcal{C}_h(f^{-1}_K(m))}  &\mbox{if } z \in f_K^{-1}(m)\\
+0 &\mbox{otherwise}
+\end{array}
+\right.
+\]
+\end{lemma}
+The full expression in the lemma statement is complex, but the asymptotic version is intutive. Essentially, it says that the probability of~$m$ encrypting to~$z$ goes to the probability of sampling the the point~$z$ given that we are sampling from the set~$f^{-1}_k(m)$.
+As a sanity check, we note that $\sum_{z \in \supp(\mathcal{C}_h)} \mathcal{C}_h(z) / \mathcal{C}_h(f^{-1}_K(m)) = \mathcal{C}_h(f^{-1}_K(m)) / \mathcal{C}_h(f^{-1}_K(m)) = 1$.
+\medskip
+\begin{proof}
+%The adversary is given $H=f$ and a covertext~$c$ as input.
+Using the same notation and events from the previous proof
+\begin{align}
+&\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f} \nonumber\\
+&\quad=\Prob{s_0=z \wedge G_0 \given H=f} + \Prob{s_1=z \wedge G_1 \wedge  \neg G_0 \given H=f} + \cdots \nonumber\\
+&\quad\quad+ \Prob{s_{T-1}=z \wedge  G_{T-1} \wedge \neg G_{T-2} \wedge \cdots  \wedge \neg G_1 \wedge \neg G_0 \given H=f}\nonumber\\
+&\quad\quad + \Prob{s_T=z \wedge \neg G_{T-1} \wedge \neg G_{T-2}
+  \wedge \cdots \wedge \neg G_1 \wedge \neg G_0 \given H=f} \label{eq:main}
+\end{align}
+Consider the first term in this sum.  Notice that 
+\begin{align*}
+\Prob{s_0 = z \wedge G_0 \given H=f} 
+&=\Prob{s_0=z \wedge s_0 \in f^{-1}_K(m) \given H=f}\\
+&=\Prob{s_0=z}\mathbb{I}[z \in f^{-1}_K(m)]\\
+&=\mathcal{C}_h(z) \mathbb{I}[z \in f^{-1}_K(m)]
+\end{align*}
+where
+$\mathbb{I}[z \in f^{-1}_K(m)]$ where $\mathbb{I}[x]=1$ iff~$x$ is true.  
+More generally, for $0 \leq i < T$
+\begin{align*}
+\Prob{s_i=z \wedge G_i \wedge \neg G_{i-1} \wedge \cdots \wedge \neg G_0} &=
+\Prob{s_i=z \wedge G_i \, \left| \, \bigwedge_{j=0}^{j-1} \neg G_j \right.} \Prob{\bigwedge_{j=0}^{j-1} \neg G_j}\\
+&=\Prob{s_i=z \wedge G_i \, \left| \, \bigwedge_{j=0}^{j-1} \neg G_j \right.} \prod_{j=0}^{i-1} \Prob{\neg G_j}
+\end{align*}
+where the second line follows because the~$s_i$ are sampled independently.  We notice immediately that $\Prob{\neg G_j} = 1 - \Prob{G_j} = 1-\Prob{s_j \in f^{-1}_K(m)} = 1 - \mathcal{C}_h(f^{-1}_K(m))$.  Now, as above, 
+\begin{align*}
+\Prob{s_i = z \wedge G_i \,\left|\, \bigwedge_{j=0}^{i-1}\neg G_j \right.} 
+&= \Prob{s_i = z \wedge s_i \in f^{-1}_K(m) \,\left|\, \bigwedge_{j=0}^{i-1}\neg G_j \right.} \\
+&= \Prob{s_i = z \wedge s_i \in f^{-1}_K(m) }\\
+&= \mathcal{C}_h(z)\mathbb{I}[z \in f^{-1}_K(m)]
+\end{align*}
+where we have again used the fact that~$s_i$ is independently sampled.  Thus
+$
+\Prob{s_i=z \wedge G_i \wedge \neg G_{i-1} \wedge \cdots \wedge \neg G_0} = 
+\mathcal{C}_h(z)\mathbb{I}[z \in f^{-1}_K(m)]\left(1 - \mathcal{C}_h(f^{-1}_K(m))\right)^i\
+$.
+For the case that~$i=T$, the last term on the righthand side of Equation~\ref{eq:main},
+we have 
+\begin{align*}
+\Prob{s_T=z \wedge \neg G_{T-1} \wedge \neg G_{T-2}
+  \wedge \cdots \wedge \neg G_1 \wedge \neg G_0 \given H=f} 
+&= \Prob{s_T=z \, \left| \, \bigwedge_{j=0}^{T-1} \neg G_j \right.}  \Prob{\neg G_j} \\
+&= \mathcal{C}_h(z)\left( 1 - \mathcal{C}_h(f^{-1}_K(m)) \right)^T
+\end{align*}
+and so, overall, we have 
+\begin{align*}
+\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f} &= 
+\mathcal{C}_h(z) \mathbb{I}[z \in f^{-1}_K(m)] 
+\left( \sum_{i=0}^{T-1}\left(1 - \mathcal{C}_h(f^{-1}_K(m))\right)^i \right) \\
+&\quad + \mathcal{C}_h(z)\left( 1 - \mathcal{C}_h(f^{-1}_K(m)) \right)^T 
+\end{align*}
+So, when $z \not\in f^{-1}_K(m)$, this evaluates to 
+$\mathcal{C}_h(z)\left( 1 - \mathcal{C}_h(f^{-1}_K(m)) \right)^T$, as the lemma states.  On the other hand, when $z \in f^{-1}_K(m)$, we have
+\begin{align*}
+\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f} &= 
+\mathcal{C}_h(z)
+\left( \sum_{i=0}^{T-1}\left(1 - \mathcal{C}_h(f^{-1}_K(m))\right)^i \right) 
++ \mathcal{C}_h(z)\left( 1 - \mathcal{C}_h(f^{-1}_K(m)) \right)^T \\
+&= \mathcal{C}_h(z)\frac{1-(1-\mathcal{C}_h(f^{-1}_K(m)))^T}{1-(1-\mathcal{C}_h(f^{-1}_K(m)))} + \mathcal{C}_h(z) (1-\mathcal{C}_h(f^{-1}_K(m)))^T\\
+&=\mathcal{C}_h(z) \left( \frac{1-(1-\mathcal{C}_h(f^{-1}_K(m)))^T}{\mathcal{C}_h(f^{-1}_K(m))}  +  (1-\mathcal{C}_h(f^{-1}_K(m)))^T \right)
+\end{align*}
+as claimed in the lemma statement.
+\hfill\qed
+\end{proof}
+%
+
+%%%%%%%%%%%%%%%%%%  BIAS DISCUSSION %%%%%%%%%%%%%%%%%%%%%%%%%%%
+We would like to establish what would make a
+function~$f$ ``good'' for a given $\mathcal{C}_h$ and message
+distribution $\mdist$.  There are at least two things to consider,
+corresponding to the two possible values of
+$\Prob{c\getsr\enc^H_K(m;(h,N)) \colon c=z \given H=f}$ given by the lemma. [...]
+\tsnote{I had written stuff up for the old, incorrect version of Lemma 3. It's commented out now; I'll try to revisit it tonight, before I leave.}
+%
+\if{0}
+%
+First, it is intutitive that we want $|f^{-1}_K(m)|$ to be
+proportional to the probabilty that~$m$ will be sampled.  
+Then when~$m$ is more likely, there are a correspondingly greater
+number of $z \in f^{-1}_K(m)$, and in the lemma it is more often the
+case that rejection-sampling encryption perfectly matches the channel distribution.
+This leads to the following definition.
+\begin{definition} The mapping $f$ is $\epsilon$-biased with repect
+  to $\mdist$ and $\supp(\mathcal{C}_h)$ if, for all $K,m$,
+\[
+\left| \frac{|f^{-1}_K(m)|}{|\supp(\mathcal{C}_h)|} - \mdist(m)
+\right| \leq \epsilon
+\]
+\end{definition}
+%
+%On the other hand, we also desire to make $\mathcal{C}_h(z)
+%\left(1 -\mathcal{C}_h(f^{-1}_K(m))\right)^T \approx \mathcal{C}_h(z)$ when $z \not\in f^{-1}_K(m)$. 
+
+On the other hand, notice that $\mathcal{C}_h(z)\left(1 -
+  \mathcal{C}_h(f^{-1}_K(m))\right)^T \to 0$ as $T\to\infty$, and the
+rate of this convergence increases as $\mathcal{C}_h(f^{-1}_K(m))$
+does.  In particular, if $\mathcal{C}_h(f^{-1}_K(m)) \geq \delta$,
+then $\left(1 -
+  \mathcal{C}_h(f^{-1}_K(m))\right)^T) \leq e^{-\delta T}$.  To have
+uniformly good convergence over values of~$m$, we desire a
+large~$\delta$ for all~$m$.  Now, since
+$\sum_m \mathcal{C}_h(f^{-1}_K(m))=1$, we achieve the best average
+convergence rate (over~$m$) when $\mathcal{C}_h(f^{-1}_K(m)) =
+1/|\mspace|=\delta$ for all~$m$.  
+%\tsnote{Hmm, I'm currently confused about whether we want $\mathcal{C}_h(z)\left(1 -
+%  \mathcal{C}_h(f^{-1}_K(m))\right)^T \approx 0$ or $\approx \mathcal{C}_h(z)$ when $z \not\in f^{-1}_K(m)$. For correctness, the former, I'm pretty sure.  For security... I'll continue on under the assumption we want the former.}
+This suggests another definition.
+\begin{definition}
+The mapping $f$ is~$\alpha$-biased with respect to $\mathcal{C}_h$
+if, for all $K,m$
+\[
+\left|\mathcal{C}_h(f^{-1}_K(m)) - \frac{1}{|\mspace|} \right| \leq \alpha
+\]
+\end{definition}
+
+The relationship between these two definitions of bias is
+subtle. Assume for sake of discussion that the support of
+$\mathcal{C}_h$ is constant.  To
+minimize~$\epsilon$ in the first definition, with \textit{a priori} knowledge
+of~$\mdist$ there is a clear approach to designing~$f_K$ for any value of~$K$.  Simply
+place the~$c \in \supp(\mathcal{C}_h)$ (``balls'') into the preimage
+sets (``bins'')
+$f^{-1}_K(m)$ so that $|f^{-1}_k(m)|$ (number of balls in a particular
+bin) differs from
+$\mdist(m)|\supp(\mathcal{C}_h)|$ as little as possible in every
+bin.  Notice that this design task effectively treats each~$c$ as
+having the same probability mass, since it is only the number of balls
+placed in a bin that matters.
+
+However, to simultaneously
+minimize~$\alpha$ in the second definition, our choices of
+which points~$c$ go in each preimage set \textit{are} constrained by
+their true probability mass.
+With \textit{a priori} knowledge of~$\mathcal{C}_h$, one might
+consider a two-stage design algorithm.
+ \tsnote{This discussion suggests that the history~$h$
+  should be an input to the RO in the actual construction,
+  allowing~$f$ to depend on~$h$, here.}  
+In the first stage, one partitions $\supp(\mathcal{C}_h)$ into sets
+$f^{-1}_K(m)$ so as to globally minimize~$\epsilon$, without
+considering the probability mass $\mathcal{C}_h(c)$ associated to
+each~$c$.  In balls-and-bins language, the balls are placed into the
+bins without looking at the label $\mathcal{C}_h(c)$ appearing on each
+ball. In the second stage, one looks at these labels and makes
+pairwise swaps of balls (in distinct bins) until the total mass of the
+balls in each individual bin is as close to $1/|\mspace|$ as possible.
+
+Note that this process does not change the number of balls in a bin,
+so the first-stage outcome is respected.  In effect, this design
+favors minimizing~$\epsilon$, because it may be that~$\alpha$ could be
+made smaller by allowing the number of balls within a bin to change.
+Certainly one could favor~$\alpha$ by reversing the order of the
+stages.  More sophisticated simultaneous optimizations may achieve an
+overall better design.  In general, the choice of which is more
+important to minimize, $\epsilon$ or $\alpha$, will depend on external
+considerations.  For example, if one is willing to let encryption run
+(potentially) for an very long time, then~$T$ can be very large, and
+minimizing~$\alpha$ becomes much less important.
+%
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%  OLDER STUFF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\paragraph{Attack and proofs workspace (old stuff). }
+\tsnote{The rest of this section should be considered
+  ``intuition building''.  It may disappear as we move forward.}
+However, when the adversary is provided access to the random oracle~$H$, there is a simple, efficient attack that distinguishes with good probability, when both keys and plaintexts are drawn according to low min-entropy distributions, and the message space is sufficiently large.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\begin{theorem}\rm Fix a channel history~$h$.  Let $\mu$ be the min-entropy of~$\mdist$, $\kappa$ be the min-entropy of $\kg$, and $\sigma$ be the min-entropy of the channel distribution~$\mathcal{C}_h$.   Let encryption succeed 
+(i.e., halts before reaching the threshold~$T$) 
+with probability $\epsilon=\epsilon(T,\sigma)$ for all $m \in \mspace$.  
+(Note that in the ROM for~$H$, this is a function of~$T$ and $\sigma$.) 
+There exists an adversary~$\advA$ such that
+%\[
+%\AdvleROD{}(\advA) \geq 
+%\left( \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}\right) \epsilon 
+%+ \left( \frac{1}{|\mspace|} 
+%\left( 1 - (2-2^{-\kappa})\left(1-\frac{T}{2^\sigma}\right) \right) \right)
+%(1-\epsilon)
+% - \frac{1}{|\mspace|} 
+%\]
+\[
+\AdvleROD{\textnormal{rej}}(\advA) \geq \left( \frac{1}{2^{\kappa+\mu}} + 
+\frac{1-2^{-\mu}}{|\mspace|} \right) \epsilon  - \frac{1}{|\mspace|}\,.
+\]
+Thus, as $\epsilon \to 1$, the advantage bound goes to 
+\[
+\AdvleROD{\textnormal{rej}}(\advA) \geq \frac{1}{2^{\mu}}\left(\frac{1}{2^{\kappa}}-\frac{1}{|\mspace|} \right)\,.
+\]
+\end{theorem}
+\begin{proof} Assume that the adversary knows the channel history~$h$ and the plaintext counter~$N$. \tsnote{I think this will likely be our convention, anyway.}  On input~$c$, adversary~$\advA$ sets~$L$ to be the most likely key, $X$~to be the most likely plaintext, and outputs 1 iff query $H(L\concat \langle N \rangle \concat c)=X$.  
+
+If~$c$ was produced by direct sampling from~$\mathcal{C}_h$, as in experiment \leROD0, then $\Prob{\advA \Rightarrow 1}=1/|\mspace|$, as no queries to~$H$ were made to produce~$c$.  
+
+Now, consider experiment \leROD1, so that~$c$ was produced via $\enc^H_L(M;(h,N))$, where $M \getm \mspace$ and $K \getsr \kg$. Let~$E$ be the event that~$c$ was output because $H(K\concat\langle N \rangle \concat c)=M$, rather than because the sampling counter had reached the threshold~$T$.  Then 
+\begin{align*}
+\Prob{\advA \Rightarrow 1 \given E} &= \Prob{\advA \Rightarrow 1\given E \wedge (K,M) = (L,X)}\Prob{(K,M)=(L,X)}  \\
+&\quad\quad + \Prob{\advA \Rightarrow 1\given E \wedge (K,M) \neq (L,X)}\Prob{(K,M)\neq(L,X)}\\
+&=(1)\Prob{(K,M)=(L,X)} + \Prob{\advA \Rightarrow 1 \wedge (K,M) \neq (L,X) \given E } \\
+&= \frac{1}{2^{\kappa+\mu}} + \Prob{\advA \Rightarrow 1 \wedge (K,M) \neq (L,X) \given E }
+\end{align*}
+where $\Prob{(K,M)=(L,X)}=\Prob{K=L}\Prob{M=X}=2^{-\kappa}2^{-\mu}$ because of how~$L$ and~$M$ were fixed.  Let us consider the second term in the last line,
+\begin{align*}
+\Prob{\advA \Rightarrow 1 \wedge (K,M) \neq (L,X) \given E }=& 
+ \Prob{\advA \Rightarrow 1 \wedge (K\neq L \wedge M=X) \given E } \\
+&+ \Prob{\advA \Rightarrow 1 \wedge (K\neq L \wedge M \neq X) \given E } \\
+&+ \Prob{\advA \Rightarrow 1 \wedge (K = L \wedge M \neq X) \given E }\\
+=& \Prob{\advA \Rightarrow 1 \wedge (K\neq L \wedge M=X) \given E } \\
+&+ \Prob{\advA \Rightarrow 1 \wedge (K\neq L \wedge M \neq X) \given E } \\
+=& \Prob{\advA \Rightarrow 1 \given (K\neq L \wedge M=X) \wedge E }\cdot\Prob{(K\neq L \wedge M=X) \given E} \\
+&+ \Prob{\advA \Rightarrow 1 \given (K\neq L \wedge M \neq X) \wedge E }\cdot\Prob{(K\neq L \wedge M \neq X) \given E} \\
+=&\frac{1}{|\mspace|} \left(\Prob{(K\neq L \wedge M=X) \given E} + \Prob{(K\neq L \wedge M \neq X) \given E} \right)\\
+=&\frac{1}{|\mspace|} \Prob{K\neq L \given E} \\
+=&\frac{1-2^{-\mu}}{|\mspace|}
+\end{align*}
+and so, combining with our earlier derivation, we have,
+$
+\Prob{\advA \Rightarrow 1 \given E}
+= \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}
+$. 
+%\if{0}
+
+On the other hand, if $\neg E$ holds then~$c$ was a direct sample from~$\mathcal{C}_h$, without a corresponding~$H$ query.  Given that $\neg E$ holds, there were previous samples~$s_0,s_1,\ldots,s_{T-1}$, some of which may have taken on the same value.  Let~$S$ be the (multi)set of these samples.  Then we can write
+\begin{align*}
+\Prob{\advA \Rightarrow 1 \given \neg E} &= \Prob{H(L \concat \langle N \rangle \concat c)=X \given  c \not\in S \wedge L = K }\Prob{ c \not\in S \wedge L=K} \\
+&\quad + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \not\in S \wedge L \neq K }\Prob{ c \not\in S \wedge L\neq K} \\
+&\quad + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L=K}\Prob{ c \in S \wedge L=K } \\
+&\quad + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L\neq K}\Prob{ c \in S \wedge L\neq K } \\
+&= \frac{1}{|\mspace|} \Prob{ c \not\in S} + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L=K}\Prob{ c \in S \wedge L=K }  \\
+&\quad\quad\quad + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L\neq K}\Prob{ c \in S \wedge L\neq K } \\
+%&\quad + \Prob{H(K \concat \langle N \rangle \concat c)=X | c \in \{s_0,s_1,\ldots,s_{t-1}\} }\Prob{ c %\in \{s_0,s_1,\ldots,s_{t-1}\} } \\
+&\geq \frac{1}{|\mspace|} \Prob{ c \not\in S} + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L\neq K}\Prob{ c \in S \wedge L\neq K } \\
+&=\frac{1}{|\mspace|} (1-\Prob{ c \in S}) + \Prob{H(L \concat \langle N \rangle \concat c)=X \given c \in S \wedge L\neq K}\Prob{ c \in S \wedge L\neq K } \\
+&=\frac{1}{|\mspace|} (1-\Prob{ c \in S}) +\frac{1}{|\mspace|}\Prob{ c \in S \wedge L\neq K } \\
+&=\frac{1}{|\mspace|} (1-\Prob{ c \in S}) +\frac{1}{|\mspace|}\Prob{ c \in S}(1-\Prob{L= K })\\
+&\geq\frac{1}{|\mspace|} (1-\Prob{ c \in S}) +\frac{1}{|\mspace|}\Prob{c \in S}\left(1 - 2^{-\kappa}\right)\\
+&=\frac{1}{|\mspace|}\left( 1 - \Prob{ c \in S} + \Prob{c \in S}\left(1 - 2^{-\kappa}\right) \right)\\
+&=\frac{1}{|\mspace|}\left( 1 - (2-2^{-\kappa})\Prob{ c \in S} \right)\\
+&\geq \frac{1}{|\mspace|}\left( 1 - (2-2^{-\kappa})\left(1-\frac{T}{2^\sigma}\right) \right)
+%&\geq \frac{1}{|\mspace|} \left( 1 - \frac{T}{2^\sigma} \right) + \frac{1}{|\mspace|}\Prob{ c \in S \wedge L\neq K }\\
+%&= \frac{1}{|\mspace|} \left( 1 - \frac{T}{2^\sigma} \right) + \frac{1}{|\mspace|}\Prob{ c \in S}(1-\Prob{L= K })\\
+%&\geq \frac{1}{|\mspace|} \left( 1 - \frac{T}{2^\sigma} \right) + \frac{1}{|\mspace|}\Prob{ c \in S}\left(1 - 2^{-\kappa}\right)
+\end{align*}
+where, recall, $\sigma$ is the min-entropy of the channel.  Hence, in total for the \leROD1\ experiment, we have
+\[
+\Prob{\advA^H \Rightarrow 1} \geq 
+\left( \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}\right) \Prob{E} 
++ \left( \frac{1}{|\mspace|} 
+\left( 1 - (2-2^{-\kappa})\left(1-\frac{T}{2^\sigma}\right) \right) \right)
+\Prob{\neg E}
+\]
+%Via the trivial lowerbound $\Prob{\neg E} \geq 0$, 
+%and 
+and, using the fact that $\epsilon \leq \Prob{E} \leq 1$ \tsnote{Sadly, I don't know what to do with the $\Prob{\neg E}$ term, since I have to \textit{lower}bound it.  I'm forced to lowerbound it by zero, for lack of better ideas.}
+\[
+\Prob{\advA^H \Rightarrow 1} \geq 
+\left( \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}\right) \epsilon 
+%+ \left( \frac{1}{|\mspace|} 
+%\left( 1 - (2-2^{-\kappa})\left(1-\frac{T}{2^\sigma}\right) \right) \right)
+%\Prob{\neg E}
+\] 
+Finally, using our observation above that in the ideal setting $\Prob{\advA^H \Rightarrow 1} = 1/|\mspace|$, we reach the conclusion that
+\[
+\AdvleROD{}(\advA) \geq 
+\left( \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}\right) \epsilon
+%+ \left( \frac{1}{|\mspace|} 
+%\left( 1 - (2-2^{-\kappa})\left(1-\frac{T}{2^\sigma}\right) \right) \right)
+%(1-\epsilon(T))
+ - \frac{1}{|\mspace|} 
+\]
+so as $\epsilon \to 1$, the bound goes to 
+\[
+\AdvleROD{}(\advA) \geq 
+%\left( \frac{1}{2^{\kappa+\mu}} + \frac{1-2^{-\mu}}{|\mspace|}\right) - \frac{1}{|\mspace|} =
+\frac{1}{2^{\mu}}\left(\frac{1}{2^{\kappa}}-\frac{1}{|\mspace|} \right)
+\]
+\hfill\qed
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\eject
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{theorem}\rm (Rejection-sampling encryption is \leROD-secure for uniform messages.) If the keyspace has min-entropy~$\kappa$ and $\mdist$ is uniform over $\mspace$, then $\AdvleROD{}(\advA) \leq 2q/2^{\kappa}|M|$
+\end{theorem}
+\begin{proof}(Sketch.)
+Consider an adversary~$\advA^H(c)$, provided input~$c$ that was
+either produced by~$\enc^H_K(m;(h,N))$ or by directly
+sampling~$\mathcal{C}_h$.  The preceding lemma tells us that without access to~$H$, no adversary can distinguish the two cases.
+It remains to argue that oracle access
+to~$H$ does not significantly increase the ability to distinguish
+between these two possibilities.  
+For simplicity, we silently assume that~$\advA$ also knows~$(h,N)$. 
+
+Consider the following experiment: $K \getsr \kg$, $c \getsr
+\mathcal{C}_h$, let~$m$ be sampled from~$\mspace$ according to an arbitrary distribution, 
+and then the adversary is given~$c$.  We ignore~$N$ when discussing~$\advA$'s queries,  
+since we assume this is known by the adversary, and can therefore
+assume that it is implicitly part of each query it makes.  
+Let $(L_1,X_1),\ldots,(L_q,X_q)$ be the sequence of the
+adversary's queries, these returning~$Y_1,\ldots,Y_q$, respectively.
+Let $\mathcal{L} = \{(L_i,X_i,Y_i) \given L_i=K \}$, i.e., the set of
+queries that were for the correct key.  We say that $\mathcal{L}$ is
+\textit{inconsistent with~$c$} if there exists~$(K,X,Y)\in\mathcal{L}$ such
+that $X \neq c$ and $Y=M$.  Otherise, $\mathcal{L}$ is consistent with~$c$.
+
+Note that if $\mathcal{L}$ is consistent, then none of the adversaries
+queries are inconsistent with an encryption of~$m$ under key~$K$.
+This is because either a query $(L_i,X_i)$ was for $L_i \neq K$, in
+which case~$H(L_i \concat \langle N \rangle \concat X_i)$ would never
+be called to encrypt~$m$ under~$K$; or $H(L_i,X_i)=H(K,X_i)\neq m$, in
+which case~$X_i$ (if sampled) would not cause encryption to halt and
+return~$X_i \neq c$.  Thus, we say the set of queries/responses
+$\mathcal{Q}=\{(L_i,X_i,Y_i)\}_{i\in[q]}$ is consistent with~$c$
+if~$\mathcal{L}\subseteq\mathcal{Q}$ is consistent with~$c$.
+\tsnote{I want to conclude that if $\mathcal{Q}$ is consistent with~$c$, then the RO-queries give no help to~$\advA$ in distinguishing.  Intuitively, it seems right.  See the lemma, below.}
+
+
+\textcolor{red}{Still cleaning up.}
+\begin{figure}[t]
+\begin{center}
+\hfpagesss{.33}{.33}{.33}
+{
+\underline{$G0(\advA)$, \fbox{$G1(\advA)$}:}\\[2pt]
+$K \getsr \kg$\\
+$c \getsr \mathcal{C}_h$\\
+%$m \getm \mspace$ \\
+$m \getsr \mspace$\\
+$b \getsr \advA^{H}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $H(Z)$:}\\[2pt]
+$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+$Y \getsr \mspace$\\
+$Y'\getsr \mspace\setminus\{Y\}$\\
+if $L=K$ and $X=c$ then\\
+\nudge $Y\gets m$\\
+if $L=K$ and $X \neq c$ then\\
+\nudge if $Y=m$ then\\
+\nudge\nudge $\bad\gets\true$\\
+\nudge\nudge \fbox{$Y \gets Y'$}\\
+%$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+}
+%{
+%\underline{$G2(\advA)$:}\\[2pt]
+%$K \getsr \kg$\\
+%$c \getsr \mathcal{C}_h$\\
+%%$m \getm \mspace$ \\
+%$m \getsr \mspace$\\
+%$b \getsr \advA^{H}(c)$ \\
+%if $\exists Y\in\mathcal{L}$ such that $Y=m$ then\\
+%\nudge $\bad\gets\true$\\
+%return~$b$
+%
+%\medskip
+%\underline{Oracle $H(Z)$:}\\[2pt]
+%$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+%$Y \getsr \mspace$\\
+%$Y'\getsr \mspace\setminus\{Y\}$\\
+%if $L=K$ and $X=c$ then\\
+%\nudge $Y\gets m$\\
+%if $L=K$ and $X \neq c$ then\\
+%\nudge $\mathcal{L}\gets\mathcal{L}\cup\{Y\}$\\
+%\nudge if $Y=m$ then $Y \gets Y'$\\
+%$\mathtt{H}[L,X] \gets Y$\\
+%return~$Y$
+%}
+%
+{
+\underline{\fbox{$G4(\advA)$,} $G5(\advA)$:}\\[2pt]
+$K \getsr \kg$\\
+$m \getsr \mspace$\\
+$c \getsr \enc^G_K(m;(h,N))$\\
+%$m \getm \mspace$ \\
+$b \getsr \advA^{H}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $G(Z)$:}\\[2pt]
+$Y \getsr \mspace$\\
+$K \concat \langle N \rangle \concat X \gets Z$ \\
+if $\mathtt{H}[K,X] \neq \bot$ then\\
+\nudge $Y \gets \mathtt{H}[L,X]$\\
+$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+
+\medskip
+\underline{Oracle $H(Z)$:}\\[2pt]
+$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+$Y \getsr \mspace$\\
+$Y'\getsr \mspace\setminus\{Y\}$\\
+if $L=K$ and $X=c$ then\\
+\nudge return $\mathtt{H}[K,c]$\\
+%\nudge $Y\gets m$\\
+if $L=K$ and $X \neq c$ then\\
+\nudge if $\mathtt{H}[K,X]\neq\bot$ then return $\mathtt{H}[K,X]$\\
+\nudge if $Y=m$ then \\
+\nudge\nudge $\bad\gets\true$\\
+\nudge\nudge \fbox{$Y \gets Y'$}\\
+%$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+} 
+{
+\underline{$G6(\advA)$:}\\[2pt]
+\if{0}
+$K \getsr \kg$\\
+$m \getm \mspace$\\
+$c \getsr \enc^G_K(m;(h,N))$\\
+%$m \getm \mspace$ \\
+$b \getsr \advA^{H}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $G(Z)$:}\\[2pt]
+$Y \getsr \mspace$\\
+$K \concat \langle N \rangle \concat X \gets Z$ \\
+if $\mathtt{H}[K,X] \neq \bot$ then\\
+\nudge $Y \gets \mathtt{H}[L,X]$\\
+$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+
+\medskip
+\underline{Oracle $H(Z)$:}\\[2pt]
+$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+$Y \getsr \mspace$\\
+$Y'\getsr \mspace\setminus\{Y\}$\\
+if $L=K$ and $X=c$ then\\
+\nudge return $\mathtt{H}[K,c]$\\
+%\nudge $Y\gets m$\\
+if $L=K$ and $X \neq c$ then\\
+\nudge if $\mathtt{H}[K,X]\neq\bot$ then return $\mathtt{H}[K,X]$\\
+%\nudge if $Y=m$ then \\
+%\nudge\nudge $\bad\gets\true$\\
+%\nudge\nudge \fbox{$Y \gets Y'$}\\
+%$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+\fi
+}
+\caption{Games for the proof of this theorem}
+\label{fig:games-rej-proof}
+\end{center}
+
+\end{figure}
+
+Consider the games in Figure~\ref{fig:games-rej-proof}.  
+By inpsection~$\Prob{G0(\advA)=1}=\Prob{\leROD0(\advA)=1}$.
+Game~$G1$, which contains the boxed statement, differs from~$G0$ in that it forces consistent query-response tuples, just after the setting of the $\bad$-flag.  We have
+\begin{align*}
+\Prob{G1(\advA)\outputs 1} 
+%&=\Prob{G1(\advA)\outputs 1 \wedge \neg\bad} 
+%  + \Prob{G1(\advA)\outputs 1 \wedge \bad} \\
+%&=  \Prob{G0(\advA)\outputs 1 \wedge \neg\bad} + \Prob{G1(\advA)\outputs 1 \wedge \bad}\\
+%&\leq \Prob{\leROD0(\advA)=1} +  \Prob{G1(\advA)\outputs 1 \wedge \bad}\\
+&\leq \Prob{G0(\advA) \outputs 1} +  \Prob{G0(\advA):\;\bad} \\
+&= \Prob{\leROD0(\advA)=1} + \Prob{G0(\advA):\;\bad}
+\end{align*}
+since~$G0$ and~$G1$ are identical-until-$\bad$.
+In~$G0$ we observe that all~$H$ queries are responded to by uniformly sampled values from~$\mspace$. (The values $Y'$ are never used.)  So, by a simple union bound, we have $\Prob{G0(\advA):\;\bad} \leq q/2^{\kappa}|\mspace|$. \tsnote{I'd feel a bit better about this if we could push sampling of key until after $\advA$ runs, but I don't see how to do that. Should be fine as is.}
+
+In game~$G1$ it is clear that the set query-response tuples~$\mathcal{Q}$ is consistent with~$c$, as the game is constructed to force consistency. To continue, we appeal to the following lemma.
+
+\begin{lemma}Let $c$ and let~$\mathcal{Q}$ be any set of query-response tuples that is consistent with~$c$, in the way described at the beginning of this proof.  Then, given~$\mathcal{Q}$ and~$c$ as input (and no further oracle access), no adversary can distinguish between the cases $c\getsr\mathcal{C}_h$ and $c \getsr \enc_K(m;(h,N))$ for any message~$m$. 
+\end{lemma}
+\begin{proof}[lemma](Sketch.) Consider a ciphertext $c \getsr \enc_K(m;(h,N))$.  During encryption, zero or more queries of the form $K \concat \langle N \rangle \concat s_i$ were made, where the~$s_0,s_1,\ldots,s_t$ (for some $t<T-1$) were independent channel samples. Note that $H(K \concat \langle N \rangle \concat s_i) \neq m$ for all of these~$s_i$, because~$c$ was the first channel sample such that $H(K \concat \langle N \rangle \concat s_i) = m$.   In fact, notice that \textit{any} sequence of channel samples $s_0,s_1,\ldots,s_t,c$ (for $t < T-1$) such that $\forall i$: 
+(1) $H(K \concat \langle N \rangle \concat s_i) \neq m$, and (2) $s_i \neq c$ would result in~$c$ being the ciphertext for~$m$.  Crucially, this is true no matter what is~$m$.
+
+Now, say that~$c$ was actually the result of sampling just once from the channel, as in the \leROD0\ game.  If the adversary has asked queries that are consistent with~$c$, then those queries explain equally well the case that~$c$ is a ciphertext of some message.\tsnote{getting handwavy in here, but it's intuitive.}  So these queries offer no help in distinguishing the \leROD1\ and \leROD0\ games. \hfill$ \square$ \\
+\end{proof}
+
+
+With this lemma, we move to game~$G4$, which is a rewriting of~$G1$ to allow for separate oracle ``interfaces''~$H$ and~$G$ to the underlying random-oracle table~$\mathtt{H}[]$.  Thus, $\Prob{G1(\advA)\outputs 1} = \Prob{G4(\advA)\outputs 1}$.  We note that in~$G4$ the introduction of new code to check for $L=K,X\neq c$ and $\mathtt{H}[K,c]$ does not violate consistency.  This is true because, if $\mathtt{H}[K,c]\neq\bot$, it must be that it was set during encryption by one of the rejected samples.
+
+In~$G4$, we also reintroduce a $\bad$-flag, to allow us to give an identical-until-$\bad$ game, $G5$.  As usual,
+\[
+\Prob{G4(\advA)\outputs 1} \leq \Prob{G5(\advA)\outputs 1} + \Prob{G5(A):\; \bad}
+\]
+and by the same argument used earlier, $\Prob{G5(A):\; \bad} \leq q/2^{\kappa}|\mspace|$.
+
+By~$G5$, we notice that the distribution of the plaintext~$m$ no longer matters, since the simulation of the random oracle~$H$ for~$\advA$ no longer depends on the distribution of~$m$, only its particular value.  (In fact, we could use a fixed string, independent of~$m$ for the test ``if $Y=m$'' that determines the setting of~$\bad$.)  Thus in~$G6$ we simply change the distribution of~$m$ from uniform to that described by~$\mdist$.  [...]
+At this point, we have $\Prob{\mbox{le-ROD1}(\advA)=1}=\Prob{G6(\advA)\outputs 1}$.  Thus we conclude that
+\[
+\Adv(\advA) \leq 2q/2^{\kappa}|\mspace|
+\]
+given the previous lemma, which remains to be proved.
+
+
+%[... Note that~$G3$ will result in query-response tuples that are consistent with~$c$ when~$m$ is sampled uniformly from~$\mspace$.  From the perspective of consistency, and the distribution of real ciphertexts produced by rejection-sampling encryption, it makes no difference how~$m$ was sampled.  This is because the probability that $H(K \concat \langle N \rangle \concat c)=m$ is the same, for any~$m$.  However, notice that in~$G3$, when a query is made with $L=K$ and $X=C$, the response is ``programmed'' to be the previously sampled~$m$. ...]
+
+\if{0}
+\begin{figure}[t]
+\begin{center}
+\hfpagesss{.33}{.33}{.33}
+{
+\underline{\fbox{$G4(\advA)$,} $G5(\advA)$:}\\[2pt]
+$K \getsr \kg$\\
+$m \getsr \mspace$\\
+$c \getsr \enc^G_K(m;(h,N))$\\
+%$m \getm \mspace$ \\
+$b \getsr \advA^{H}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $G(Z)$:}\\[2pt]
+$Y \getsr \mspace$\\
+$K \concat \langle N \rangle \concat X \gets Z$ \\
+if $\mathtt{H}[K,X] \neq \bot$ then\\
+\nudge $Y \gets \mathtt{H}[L,X]$\\
+$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+
+\medskip
+\underline{Oracle $H(Z)$:}\\[2pt]
+$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+$Y \getsr \mspace$\\
+$Y'\getsr \mspace\setminus\{Y\}$\\
+if $L=K$ and $X=c$ then\\
+\nudge return $\mathtt{H}[K,c]$\\
+%\nudge $Y\gets m$\\
+if $L=K$ and $X \neq c$ then\\
+\nudge if $\mathtt{H}[K,X]\neq\bot$ then return $\mathtt{H}[K,X]$\\
+\nudge if $Y=m$ then \\
+\nudge\nudge $\bad\gets\true$\\
+\nudge\nudge \fbox{$Y \gets Y'$}\\
+%$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+} 
+{
+\underline{$G6(\advA)$:}\\[2pt]
+$K \getsr \kg$\\
+$m \getm \mspace$\\
+$c \getsr \enc^G_K(m;(h,N))$\\
+%$m \getm \mspace$ \\
+$b \getsr \advA^{H}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $G(Z)$:}\\[2pt]
+$Y \getsr \mspace$\\
+$K \concat \langle N \rangle \concat X \gets Z$ \\
+if $\mathtt{H}[K,X] \neq \bot$ then\\
+\nudge $Y \gets \mathtt{H}[L,X]$\\
+$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+
+\medskip
+\underline{Oracle $H(Z)$:}\\[2pt]
+$L \concat \langle N \rangle \concat X \gets Z$, where $|L|=|K|$ \\
+$Y \getsr \mspace$\\
+$Y'\getsr \mspace\setminus\{Y\}$\\
+if $L=K$ and $X=c$ then\\
+\nudge return $\mathtt{H}[K,c]$\\
+%\nudge $Y\gets m$\\
+if $L=K$ and $X \neq c$ then\\
+\nudge if $\mathtt{H}[K,X]\neq\bot$ then return $\mathtt{H}[K,X]$\\
+%\nudge if $Y=m$ then \\
+%\nudge\nudge $\bad\gets\true$\\
+%\nudge\nudge \fbox{$Y \gets Y'$}\\
+%$\mathtt{H}[L,X] \gets Y$\\
+return~$Y$
+}
+{} 
+\caption{blah: more games}
+\end{center}
+
+\end{figure}
+
+
+\fi
+
+
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if{0}
+Game~$G0$ is designed so that $\Prob{\advA^{H}(c,h,N)\outputs 1 \given b=1}=\Prob{G0(\advA)=1}$; in particular, it includes the boxed statement. Game~$G1$ is identical to~$G0$ until~$\bad$, in which case $G1$'s code for~$H$ does not execute the boxed statement.  Thus
+\[
+\Prob{\advA^{H}(c)\outputs 1 \given b=1}=\Prob{G0(\advA)=1}\leq\Prob{G1(\advA)=1}+\Prob{G1(\advA)\colon \bad=\true}\,.
+\]
+Next, we introduce a game~$G2$ that is~$G1$, but replaces the output of encryption 
+$c\getsr\enc^H_K(m;(h,N))$ by
+sampling $c\getsr\mathcal{C}_h$.  (We actually run the encrpytion algorithm so as to generate the channel samples~$s_i$, and to make the corresponding $H$-queries.)  Since~$H$ in~$G1$ (hence~$G2$) returns values independent of those used for producing~$c$ via encryption, we use our previous result to argue that $\Prob{G1(\advA)=1}=\Prob{G2(\advA)=1}$, and then observe that $\Prob{G2(\advA)=1}=\Prob{\advA^H(c)\outputs 1 \given b=0}$.  Thus
+\[
+\Adv(\advA) \leq \Prob{G1(\advA)\colon \bad=\true} = \Prob{G2(\advA)\colon \bad=\true}
+\]
+so that we just need to bound the probability of~$\bad$ being set in~$G2$.  This boils down to guessing~$(K,s_i)$ for one of the~$s_i$.  We now make a game~$G3$ that delays sampling of~$m$, $K$, and the encryption of~$m$ under~$K$ (hence, the $s_i$) until after~$\advA$ halts.  In fact, no encryption needs to be done, but rather encryption is simulated and~$\bad$ is set if any of the resulting $K \concat \langle N \rangle \concat s_i$ were queried by~$\advA$.  The probability of setting~$\bad$ in~$G2$ and~$G3$ are would be the same, since the ciphertext~$c$ and the RO responses are actually just random bits, independent of the actual strings queried to the RO.  Let~$\mathcal{Q}$ be the set of~$\advA$'s queries, and let~$t \leq T$ be the number of channel samples made in~$G3$. If the keyspace has min-entropy~$\kappa$, and $\mathcal{C}_h$ has min-entropy~$\beta$, then by a union bound
+\[
+\Prob{G3(\advA)\colon \bad=\true} \leq \sum_{i=0}^{t-1} \Prob{K\concat\langle N \rangle \concat s_i \in \mathcal{Q}}
+\leq qt/2^{\kappa+\beta}
+\]
+since the key and the channel samples are mutually
+independent.  With probability at most $xxx$ we have $t \geq yyy$, and so
+\[
+\Adv(\advA) \leq q(yyy)/2^{\kappa+\beta} + xxx
+\]
+
+\tsnote{This seems overly conservative.  Still looking for a better bound/proof...}
+
+
+\end{proof}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\if{0}
+\begin{figure}[th]
+\begin{center}
+\hfpagesss{.3}{.3}{.25}
+{
+\underline{\fbox{$G0(\advA)$}, $G1(\advA)$:}\\[2pt]
+$K \getsr \kg$\\
+$m^* \getm \mspace$\\
+$c \getsr \enc^{H}_K(m^*;(h,N))$\\
+$b \getsr \advA^{G}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $H(X)$:}\\[2pt]
+$d \getsr \mspace$\\
+if $\mathtt{H}[X] \neq \bot$ then\\
+\nudge $d \gets \mathtt{H}[X]$\\
+$\mathtt{H}[X]\gets d$\\
+return~$d$
+
+\medskip
+\underline{Oracle $G(X)$:}\\[2pt]
+$d \getsr \mspace$\\
+if $\mathtt{H}[X] \neq \bot$ then\\
+\nudge $\bad\gets\true$\\
+\nudge \fbox{$d \gets \mathtt{H}[X]$}\\
+return~$d$
+
+
+}
+{
+\underline{$G1(\advA)$:}\\[2pt]
+$K \getsr \kg$\\
+$m^* \getm \mspace$\\
+$c \getsr \enc^{H(\cdot)}_K(m^*;(h,N))$\\
+$b \getsr \advA^{H(\cdot)}(c)$ \\
+return~$b$
+
+\medskip
+\underline{Oracle $H(X)$:}\\[2pt]
+$d \getsr \mspace$\\
+if $\mathtt{H}[X] \neq \bot$ then\\
+%\nudge $\bad\gets\true$\\
+%\nudge \fbox{$d \gets \mathtt{H}[X]$}\\
+%if $a=0$ and $\mathtt{H}[X] \neq \bot$\\
+\nudge $d \gets \mathtt{H}[X]$\\
+$\mathtt{H}[X]\gets d$\\
+return~$d$
+}
+{
+\underline{$G3(\advA)$:}\\[2pt]
+
+\medskip
+\underline{Oracle $H(X)$:}\\[2pt]
+
+}
+\caption{play space, trying to find a better bound for rejection sampling}
+\end{center}
+
+\end{figure}
+
+
+
+
+
+
+\fi

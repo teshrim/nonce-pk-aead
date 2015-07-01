@@ -1,0 +1,25 @@
+
+
+
+- Figure out ECC standard curve DTEs
+- Sort out details on Z_p^* or QR subgroup DTEs
+- Get students implementing simple PAKE using aforementioned DTEs + FTE-based
+  DTE_c
+
+
+- Investigate DTE_c's for statistical attack resistance
+    . Computational model approach for general purpose?
+    . For particular (sets of) statistical attacks
+
+
+- Formalizing the primitives further, giving these other constructions for
+  dist enc concentrator and Markov chain one
+
+
+- Details of a simple PAKE protocol
+    . Start implementation 
+
+
+- Start getting transcripts for various analyses
+    . Maybe start with FTE paper pcaps?
+    . 

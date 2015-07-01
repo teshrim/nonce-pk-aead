@@ -1,0 +1,25 @@
+\section{Constructions}
+\label{sec:constructions}
+
+\begin{figure}
+\begin{center}
+\fpage{.45}
+{
+ \hpages{.45}{
+ \underline{$\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\ro}$}:\\[2pt]
+ $R \gets \ro(\pk,\header,\pubiv,\seciv)$\\
+ $(K,X) \gets \encap_{\pk}(R)$\\
+ $C \gets \encprim{K}{\header,\pubiv}{M}$\\
+ Return $(X,C)$
+ }
+ {
+ \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2pt]
+ $K \gets \decap_\sk(X)$\\
+ $M \gets \decprim{K}{\header,\pubiv}{C}$\\
+ Return $M$
+ } 
+}
+\caption{An IV-based PK-AEAD scheme, secure in the random-oracle model for~$\ro$.}
+\label{fig:kem-dem options}
+\end{center}
+\end{figure}

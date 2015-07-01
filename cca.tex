@@ -1,0 +1,287 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{CCA Security}
+\label{sec:cca}
+
+Our primary security goals in the body exclude chosen-ciphertext attacks.
+While in many applications of HE CCA attacks seem unlikely to be important, 
+we have no evidence that they may not be security-relevant in some settings. 
+We therefore formalize notions of message recovery security under CCAs, 
+and show how to achieve it. 
+%We also describe an ideal functionality based 
+%notion of security for HE, and relate it to CCA under MR security.
+%\tnote{Not sure we'll keep the ideal HE, but thought I'd dump this stuff in here
+%for now.}
+
+
+We modify the MR security notion from~\cite{JR14}
+to include a decryption oracle in a standard way. See \figref{fig:mrcca-def}.
+We define the MR-CCA advantage for an adversary $\advA$ against a scheme $\HEscheme$ by 
+\bnm
+\AdvMRCCA{\HEscheme,\mdist,\kdist}(\advA) = \Prob{\MRCCA_{\HEscheme,\mdist,\kdist}^\advA\Rightarrow \true} \;.
+      %- \maxguess_\mdist
+\enm
+When working in the ROM, the game has an additional oracle $\Hash(\cdot)$ that associates to each
+unique input message a returned string drawn randomly from $\bits^n$.  
+Below we will work in the ideal cipher model, in which case the game has an additional 
+pair of oracles implementing a random family of permutations $E(\cdot,\cdot)$ and their
+inverses $E^{-1}(\cdot,\cdot)$. 
+We let $q$ represent the number of queries by $\advA$ to the its oracles.
+%where $\maxguess_\mdist = \max_{M} \Pr[M' = M \::\: M' \getm \mspace]$ reflects the probability
+%of success when simply outputing the most
+%likely point according to the distribution $\mdist$ over $\mspace$.
+
+\begin{figure}[t]
+\center
+\fpage{.55}{
+\hpages{.48}{
+\underline{$\MRCCA_{\HEscheme,\mdist,\kdist}^\advA$}\\[2pt]
+$\key^* \getk \kspace \next \msg^* \getm \mspace$\\
+$\ctxt^* \getsr \encHE(\key^*,\msg^*)$\\
+$\msg \getsr \advA^\decOracle(\ctxt^*)$\\
+ret $\msg = \msg^*$\medskip
+}{
+\underline{subroutine $\decOracle(\ctxt)$}\\[2pt]
+If $\ctxt = \ctxt^*$ then ret $\bot$\\
+$\msg \gets \decHE(\key^*,\ctxt)$\\
+ret $\msg$
+}
+}
+\caption{Game used to define message recovery under chosen-ciphertext attack security.}
+\label{fig:mrcca-def}
+\end{figure}
+
+It is easy to see that the hash-function based construction from \cite{JR14} does not meet
+this notion of security. In particular, one need only flip a single bit of the ciphertext, 
+query the decryption oracle, and from the response the adversary can determine the true 
+plaintext precisely.
+
+Let $\DTE$ be a DTE scheme with seed space $\sspace$.
+Consider instead the following DTE-then-encrypt style scheme, $\HEscheme[\DTE,E]$ 
+that uses an ideal cipher $E\Colon\bits^*\times\sspace\rightarrow\sspace$. 
+It encrypts by encoding with the DTE to get a seed $\seed$, chooses a random $R$ of sufficient length, 
+and then outputs $(R,E(K\concat R,\seed))$. The random value $R$ is only needed for achieving semantic security
+when $K$ is large enough and we omit it in the following.
+Then we have the following CCA analogue of \thref{thm:gen-cons}.
+
+\begin{theorem}
+\label{thm:gen-cons}
+Fix distributions $\mdist,\kdist$, an encoding scheme $\DTE$ for $\mdist$ with seed space $\sspace$,
+and the HE scheme $\HEscheme[\DTE,E]$ for ideal cipher $E\Colon\bits^*\times\sspace\rightarrow\sspace$. 
+%and $\HEscheme[\DTE,\SEscheme]$ be the DTE-then-Encrypt scheme defined above. 
+Let $\advA$ be an MR adversary against $\HEscheme$ making at most $q$ queries to its oracles. 
+Then we give a specific adversary $\advB$ in the proof below such that 
+%(1) $\AdvMR{\HEscheme,\mdist,\kdist}(\advA)
+%    \;\le\; \AdvDTE{\DTE,\mdist}(\advB) \cdot \Ex{\load_{\HEscheme,\kdist}}$
+%and
+\bnm
+  \AdvMRCCA{\HEscheme,\mdist,\kdist}(\advA)
+    \;\le\; \AdvMR{\DTE,\mdist}(\advB) + \frac{q^2}{|\sspace|}
+\enm
+Adversary $\advB$ runs in time that of $\advA$ plus the time of at most $q$ samples from $\mdist$.
+\end{theorem}
+
+
+\begin{proof}[Sketch]
+We first apply a standard birthday-bound argument to transition to a setting in which $E$ and $E^{-1}$ 
+can be used with sampling with replacement. This accounts for the $q^2/|\sspace|$ term. In this world, now,
+each query to $\decOracle$ uses an seeds chosen uniformly and independently of the one used by the challenge
+encryption. (The attacker cannot query on the challenge ciphertext.) Thus the decryption oracle gives no
+information about the challenge point, and so can be simulated by just returning draws from $\mdist$
+\end{proof}
+
+
+
+
+
+\iffalse
+
+\tnote{Below needs to be revised... }
+\paragraph{Ideal HE.}  Returning to the intuition given above, our goal 
+for HE security is to ensure that trial decryptions result in plausible 
+honeymessages. This should hold \emph{even} for low-entropy keys and 
+messages, setting HE security apart from more traditional goals.
+Informally, our security goal will be to show that encryption and decryption under
+chosen message, ciphertext, and key attack is indistinguishable from such attacks against
+an ideal honey encryption primitive. Towards this, we use an indifferentiability-style
+security game in which an adversary interacts with one of two worlds. The first gives it
+oracles including encryption, decryption, and an underlying ideal primitive $\prim$ (e.g., a RO or 
+ideal cipher). The second ``ideal'' world gives it access to ideal HE encryption which always
+returns random strings, ideal HE decryption which returns previously encrypted messages when
+appropriate or, otherwise, returns a message sampled according to
+$\mdist$, and a simulator $\simu$ that has access to the ideal encryption and decryption and
+uses it to simulate $\prim$. Most importantly, the attacker is able to choose not only messages and
+ciphertexts for its queries, but keys as well. 
+A good HE scheme should be such that there exists a simulator for which no
+adversary can distinguish between the two worlds.
+%The latter is a pair of algorithms, the first 
+%returns to each key and message input a new, random point. The second, upon input a 
+%key and ciphertext, checks if that ciphertext was returned by the first algorithm previously
+%and for that key, returning the associated message if so, and otherwise outputs a message
+%randomly chosen according to $\mdist$. 
+\figref{fig:sim-def} presents pseudocode for the two worlds.
+
+\begin{figure}[t]
+\hfpages{.2}{
+\underline{proc.~$\OEnc(\key,\msg)$}:\\
+$\ctxt \getsr \encHE^\PrimProc(\key,\msg)$\\
+ret $\ctxt$\medskip
+
+\underline{proc.~$\ODec(\key,\ctxt)$}:\\
+$\msg \gets \decHE^\PrimProc(\key,\ctxt)$\\
+ret $\msg$\medskip
+
+\underline{proc.~$\PrimProc(X)$}\\
+Ret $\prim(X)$
+}{
+\underline{proc.~$\IEnc(\key,\msg)$}:\\
+$\ctxt \getsr \encHE(\key,\msg)$\\
+$\ctxt \getsr \bits^{|\ctxt|}$\\
+$\TabC[\key,\ctxt] \gets \msg$\\
+ret $\ctxt$\medskip
+
+\underline{proc.~$\IDec(\key,\ctxt)$}:\\
+If $\TabC[\ctxt] \ne \bot$ then\\
+\hspace*{1em} ret $\TabC[\key,\ctxt]$\\
+$\msg \getm \mspace$\\
+ret $\msg$\medskip
+
+\underline{proc.~$\SimuProc(X)$}:\\
+Ret $\simu^{\IEnc,\IDec}(X)$
+}
+\caption{Algorithms describing an ideal HE scheme.}
+\label{fig:sim-def}
+\end{figure}
+
+For a given HE scheme $\HEscheme$, primitive $\prim$, and simulator $\simu$,  
+we define the advantage of an adversary $\advA$ 
+by:
+\begin{multline*}
+  \AdvHEDIST{\HEscheme,\prim,\simu}(\advA) = \\
+        \Prob{\advA^{\OEnc,\ODec,\PrimProc} \Rightarrow 1} 
+        - \Prob{\advA^{\IEnc,\IDec,\SimuProc} \Rightarrow 1}  \;.
+\end{multline*}
+We will consider both the random oracle model (ROM) and 
+ideal cipher model (ICM). In the former case $\prim$ implements
+a random function $\Hash$ (whose domain and range will be specified as appropriate) 
+and in the latter case $\prim$ implements a pair of procedures $\Cipher$ and $\CipherInv$
+that together implement a family of random permutations and their inverses.
+%include a procedure implementing a random function or a pair of procedures
+%implementing a family of ideal permutations and their inverses. 
+%We denote the hash procedure by $\Hash$ and the ideal permutation procedures by
+%$\Cipher$ and $\CipherInv$.  In this case $\encHE$ and $\decHE$ 
+%are given oracle access to $\Hash$ or $\Cipher,\CipherInv$ as well. Correctness
+%of the HE scheme must hold for any fixed coins of the oracles.
+
+
+\paragraph{Ideal HE and message recovery.} We now show how ideal HE 
+implies message recovery security. 
+%Intuitively, we show that message
+%recovery is as difficult with or without the target ciphertext, 
+%since even brute-force key recovery doesn't help
+%the adversary against an ideal HE scheme.  
+%
+We first must formalize message recovery security. Ideally one would like
+message recovery to be impossible, meaning the probability of recovering a message
+from a ciphertext is negligible. But this is only possible when both messages and
+keys have high entropy, and here we have neither. We will therefore ask that, intuitively
+speaking, that obtaining a ciphertext of the target message does not help the attacker in
+learning the message. Formally, we define the MR security game as shown in \figref{fig:mr-def}
+and define advantage for an adversary $A$ against a scheme $\HEscheme$ by 
+\bnm
+\AdvMR{\HEscheme,\mdist,\kdist}(\advA) = \Prob{\MR_{\HEscheme,\mdist,\kdist}^\advA\Rightarrow \true} \;.
+      %- \maxguess_\mdist
+\enm
+%where $\maxguess_\mdist = \max_{M} \Pr[M' = M \::\: M' \getm \mspace]$ reflects the probability
+%of success when simply outputing the most
+%likely point according to the distribution $\mdist$ over $\mspace$.
+
+\begin{figure}[t]
+\center
+\fpage{.25}{
+\underline{$\MR_{\HEscheme,\mdist,\kdist}^\advA$}\\[2pt]
+$\key^* \getk \kspace \next \msg^* \getm \mspace$\\
+$\ctxt^* \getsr \encHE(\key^*,\msg^*)$\\
+$\msg \getsr \advA(\ctxt^*)$\\
+ret $\msg = \msg^*$
+}
+\caption{Game used to define message recovery security.}
+\label{fig:mr-def}
+\end{figure}
+
+We have the following theorem. 
+Fix a message space $\mspace$ and distribution $\mdist$. 
+Then we let $\msg_1,\ldots,\msg_n$ be an ordering of $\mspace$ such 
+that $\mdist(\msg_i) \ge \mdist(\msg_{i+1})$ for $1 \le i < n$.
+
+\tnote{Ari suggested the below doesn't make sense: in particular,
+one should just output an arbitrary message from the set. 
+The intuition is that at this stage the attacker only gets 
+a set of $\kappa$ iid samples from
+the message distribution, so what else can he do?}
+
+\begin{theorem}
+Let $\mdist$ be a message distribution 
+and $\kdist$ be a uniform key distribution over a set of $\kappa$ keys.
+Let $\advA$ be an MR adversary in the ideal HE model for $\mdist$. 
+Then
+\bnm
+    \AdvMR{\idealHE,\mdist,\kdist}(\advA) \le 
+        \sum_{1 \le i \le n} \mdist(\msg_i) \cdot \gamma_i^{\kappa -1}
+\enm
+where $\gamma_i = \sum_{j \le i} \mu(\msg_j)$.
+\end{theorem}
+
+\begin{proof}
+Let $\advA^*$ be the MR adversary that queries $\IDec(\key,\ctxt^*)$ for
+each key $\key \in \kspace$. Let the resulting set of $\kappa$ messages 
+be $G$. Then $\advA^*$ outputs the message $\msg \in G$ for which $\mdist(\msg)$
+is highest. Adversary $\advA^*$ is optimal, meaning that no 
+adversary $\advA$ achieves better advantage. To see this, first note that no 
+adversary can increase advantage by making further queries; $\IEnc$ provides
+no information and querying $\IDec$ on ciphertexts other than $\ctxt^*$ can
+be replaced by fresh samples according to $\mdist$. Second outputing any
+message other than the one 
+\end{proof}
+
+\begin{theorem}
+Let $\mdist$ be a message distribution, $\HEscheme$ be an HE scheme built for $\mdist$,
+and $\kdist$ be a key distribution. Let $\advA$ be an MR adversary against $\HEscheme$.
+Then for any simulator $\simu$ there exists an adversary $\advB$ such that 
+\bnm
+  \AdvMR{\HEscheme,\mdist,\kdist,\prim}(\advA) \le \AdvHEDIST{\HEscheme,\simu,\prim}(\advB)
+\enm
+\end{theorem}
+
+\tnote{Actually ok this theorem is wrong. Of course the attacker can just decrypt if
+the keys are likely to be known. Sigh.}
+
+\begin{proof}
+Adversary $\advB$ works as follows. It chooses a key $\key^* \getk \kspace$ and 
+a target message $\msg^*\getm\mspace$ and then queries $\encHE(\key^*,\msg^*)$ to
+get back ciphertext $\ctxt^*$. It then runs $\advA^\PrimProc(\ctxt^*)$. Anytime
+$\advA$ queries $\PrimProc$, adversary $\advB$ forwards the query to its own
+$\PrimProc$. When $\advA$ finishes with output $\msg$, $\advB$ checks if $\msg = \msg^*$.
+If so, it outputs $1$ (guessing it is in the real world) and otherwise outputs $0$. 
+
+First, by construction we have that 
+\bnm
+  \Prob{\MR_{\HEscheme,\mdist,\kdist}^\advA\Rightarrow\true} = 
+      \Prob{\advB^{\OEnc,\ODec,\PrimProc}\Rightarrow 1} \;.
+\enm
+We will next show that
+\bne
+\label{eqn:mr-indiff-proof}
+  \maxguess(\mdist) \ge \Prob{\advB^{\IEnc,\IDec,\simu}\Rightarrow 1} \;.
+\ene
+Which, combined with the definitions of advantage for MR security and ideal HE 
+security give the advantage statement of the theorem. Then to justify 
+\eqref{eqn:mr-indiff-proof} we observe that $\advA$ recieves no information about $\msg^*$ 
+during the course of its execution within $\advB^{\IEnc,\IDec,\simu}$. 
+Thus $\advA$ can at best 
+e now seek to lower bound the advantage of $\advB$. To do so we first note that
+
+
+\end{proof}
+\fi
+
+
