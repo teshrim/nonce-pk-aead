@@ -124,6 +124,8 @@ full version\fi}
 \newcommand{\fpage}[2]{\framebox{\begin{minipage}[t]{#1\textwidth}\setstretch{1.1}\gamesfontsize  #2 \end{minipage}}}
 
 \newcommand{\hpages}[3]{\begin{tabular}{cc}\begin{minipage}[t]{#1\textwidth} #2 \end{minipage} & \begin{minipage}[t]{#1\textwidth} #3 \end{minipage}\end{tabular}}
+\newcommand{\hpagess}[4]{\begin{tabular}{cc}\begin{minipage}[t]{#1\textwidth}
+      #3 \end{minipage} & \begin{minipage}[t]{#2\textwidth} #4  \end{minipage}\end{tabular}}
 
 
 \newcommand{\hfpages}[3]{\hfpagess{#1}{#1}{#2}{#3}}
@@ -246,11 +248,11 @@ full version\fi}
 \newcommand{\incErr}{\epsilon_{\textnormal{inc}}}
 \def \kg{{\textsf{kg}}}
 \def \decode {{\textsf{decode}}}
-\def \enc {{\textsf{enc}}}
-\def \dec {{\textsf{dec}}}
+\def \enc {{\mathsf{enc}}}
+\def \dec {{\mathsf{dec}}}
 \def \DMEscheme {{\textsf{DME}}}
-\def \Enc {{\textsf{Enc}}}
-\def \Dec {{\textsf{Dec}}}
+\def \Enc {{\mathsf{Enc}}}
+\def \Dec {{\mathsf{Dec}}}
 
 \def \SEscheme {{\textsf{SE}}}
 \def \HEscheme {{\textsf{HE}}}
@@ -498,7 +500,7 @@ full version\fi}
 \newcommand{\nnudge}{\nudge\smidge}
 \newcommand{\xor}{\oplus}
 
-\newcommand{\Kgen}{\mathsf{Key}}
+\newcommand{\Kgen}{\mathsf{Kgen}}
 \newcommand{\pubkeys}{\mathcal{K}_P}
 \newcommand{\seckeys}{\mathcal{K}_S}
 \newcommand{\header}{A}
@@ -521,7 +523,17 @@ full version\fi}
 \newcommand{\EncprimO}[4]{\Enc_{#1}^{#4,(#2)}(#3)}
 \newcommand{\DecprimO}[4]{\Dec_{#1}^{#4,(#2)}(#3)}
 
+\newcommand{\pkgen}{\mathsf{kgen}}
 \newcommand{\encap}{\mathsf{encap}}
 \newcommand{\decap}{\mathsf{decap}}
+\newcommand{\encapprim}[3]{\encap_{#1}^{#2}(#3)}
+\newcommand{\decapprim}[3]{\decap_{#1}^{#2}(#3)}
+\newcommand{\OLencapprim}[3]{\overline{\encap}_{#1}^{#2}(#3)}
+\newcommand{\OLdecapprim}[3]{\overline{\decap}_{#1}^{#2}(#3)}
+\newcommand{\encapprimO}[4]{\encap_{#1}^{#4,(#2)}(#3)}
+\newcommand{\decapprimO}[4]{\decap_{#1}^{#4,(#2)}(#3)}
 
+
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\wraps}{\mathcal{W}}
 \newcommand{\ro}{\mathsf{RO}}
