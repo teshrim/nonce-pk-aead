@@ -451,9 +451,8 @@ full version\fi}
 \newcounter{mynote}[section]
 \newcommand{\notecolor}{blue}
 \newcommand{\mythenote}{\thesection.\arabic{mynote}}
-\newcommand{\tnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\bf \textcolor{\notecolor}{$\ll$TomR~\mythenote: {\sf #1}$\gg$}}\fi}
 \newcommand{\tsnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\bf
-    \textcolor{cyan}{$\ll$TomS~\mythenote: {\sf #1}$\gg$}}\fi}
+    \textcolor{cyan}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}\fi}
 \newcommand{\fixme}[1]{\ifnum\authnotes=1{\textcolor{red}{[[FIXME: #1]]}}\fi}
 
 

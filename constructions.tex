@@ -1,5 +1,13 @@
 \section{Constructions}
 \label{sec:constructions}
+We begin by giving a simple construction of an IV-based PK-AEAD scheme
+that is secure in the random-oracle model. \tsnote{This probably relates closely to existing
+schemes for deterministic PKE.}
+%
+\tsnote{Hmm... may be another variant that is interesting, one that
+  allows the randomness~$R$ and/or the secret-IV~$S$ to be recovered
+  from $(A,N,X)$.  Would allow for additional authentication check (on
+the decapsulated key~$K$, and recovering~$S$ may enable applications.}
 
 \begin{figure}
 \begin{center}
@@ -14,7 +22,6 @@
  \underline{$\encapprimO{\pk}{\header,\pubiv}{\seciv}{\ro}$}:\\[2pt]
  $R \gets \ro(\pk,\header,\pubiv,\seciv)$\\
  $(K,X) \gets \OLencapprim{\pk}{}{R}$\\
- $C \gets \encprim{K}{\header,\pubiv}{M}$\\
  Return $(K,X)$
 
  }
@@ -27,8 +34,7 @@
  \medskip
  \underline{$\decapprim{\sk}{}{X}$}:\\[2pt]
  $K \gets \OLdecapprim{\sk}{}{X}$\\
- $M \gets \decprim{K}{}{X}$\\
- Return $M$
+ Return $K$
 
  } 
 }
