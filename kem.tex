@@ -1,0 +1,18 @@
+\section{Encapsulation Schemes}
+\label{sec:kem}
+
+\paragraph{Encapsulation schemes. }
+Let $\pubkeys, \seckeys, \adata, \pubivs, \secivs$ be as above, and let $\keys,\wraps$ be a nonempty sets.
+%
+An encapsulation scheme is a triple $\encapscheme=(\pkgen,\encap,\decap)$.   The randomized \emph{key generation} algorithm~$\pkgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\pkgen$ for the operation of key generation. 
+
+The encapsulation algorithm $\encap \colon \pubkeys \times \adata \times \pubivs \times \secivs \to \keys \times \wraps$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$, and returns a key $K \in \keys$ and an encapsulation $X \in \wraps$. 
+When $\secivs$ is empty, then the encapsulation algorithm is randomized.  Otherwise, it is \emph{IV-based} and deteministic.  Following our notational conventions, we write $\encapprim{\pk}{\header,\pubiv}{S}$ for the operation of encapsulation, and $\encapprimO{\pk}{\header,\pubiv}{\seciv}{\mathcal{O}}$ when it takes an oracle.  When one or more of $\header,\pubiv$, or~$\seciv$ is absent, it will be clear from context (rather than position) what inputs are present.
+
+The decapsulation algorithm $\decap \colon \seckeys \times \wraps \to \keys \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$ and an encapsulation $X \in \wraps$, and returns a key $K \in \keys$, or the distinguished symbol~$\bot \not\in \keys$.  We write $K \gets \decap_{\sk}(X)$ for the operation of decapsulation. 
+
+For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, if $\encap_{\pk}(\header,\pubiv,\seciv)$ returns $(K,X)$, then $\decap_{\sk}(X)=K$.
+
+Our formalization of encapsulation schemes is a bit non-standard, as it allows encapsulation to take IVs and associated data.
+
+\paragraph{Security notions. }

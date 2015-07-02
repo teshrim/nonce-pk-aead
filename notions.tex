@@ -1,2 +1,41 @@
 \section{Security Notions}
 \label{sec:notions}
+\begin{figure}
+\begin{center}
+\fpage{.5}{
+ \hpagess{.425}{.55}{
+ \underline{$\ExpINDCDA{\pkscheme,\advD}{\advA}$}:\\[2pt]
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b\getsr\bits$\\
+ $S\getsr\advD$\\
+ $b'\getsr\advA^{\OEnc(\cdot,\cdot,\cdot,\cdot)}(\pk)$\\
+ Return $[b'=b]$\\
+
+\medskip
+ \underline{$\ExpINDCDAR{\pkscheme,\advD}{\advA}$}:\\[2pt]
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b\getsr\bits$\\
+ $S\getsr\advD$\\
+ $b'\getsr\advA^{\OEnc(\cdot,\cdot,\cdot)}(\pk)$\\
+ Return $[b'=b]$
+
+ }
+ {
+ \Oracle{$\OEnc(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+ Return $\encprim{\pk}{\header,\pubiv}{S,M_b}$\\[54pt]
+
+\medskip
+ \Oracle{$\OEnc(\header,M_0,M_1)$}:\\[2pt]
+ $N \getsr \pubivs$\\
+ $C \gets  \encprim{\pk}{\header,\pubiv}{S,M_b})$\\
+ Return $(N,C)$
+
+ }
+}
+\caption{\textbf{Above:} The IND-CDA notion for IV-based PK-AEAD scheme~$\pkscheme$
+  when the secret-IV sampler is~$\advD$.  We assume~$\advA$ is
+  nonce-respecting. \textbf{Below:} The IND-CDA-IV notion, in which
+  the public-IV~$\pubiv$ is a per-message random value.}
+\label{fig:ind-cda}
+\end{center}
+\end{figure}
