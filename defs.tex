@@ -68,10 +68,14 @@
 %\newcommand{\AdvDTE}[1]{\Adv^\mathrm{dte}_{#1}}
 
 \newcommand{\Exp}{\mathbf{Exp}}
-\newcommand{\AdvINDCDA}[2]{\Adv^{\mathrm{ind\textnormal{-}cda}}_{#1}{(#2)}}
-\newcommand{\ExpINDCDA}[2]{\Exp^{\mathrm{ind\textnormal{-}cda}}_{#1}{(#2)}}
-\newcommand{\AdvINDCDAR}[2]{\Adv^{\mathrm{ind\textnormal{-}cda\textnormal{-}iv}}_{#1}{(#2)}}
-\newcommand{\ExpINDCDAR}[2]{\Exp^{\mathrm{ind\textnormal{-}cda\textnormal{-}iv}}_{#1}{(#2)}}
+\newcommand{\AdvINDCDA}[2]{\Adv^{\mathrm{priv}}_{#1}{(#2)}}
+\newcommand{\ExpINDCDA}[2]{\Exp^{\mathrm{priv}}_{#1}{(#2)}}
+\newcommand{\AdvINDCDAR}[2]{\Adv^{\mathrm{priv\textnormal{-}iv}}_{#1}{(#2)}}
+\newcommand{\ExpINDCDAR}[2]{\Exp^{\mathrm{priv\textnormal{-}iv}}_{#1}{(#2)}}
+%\newcommand{\AdvINDCDA}[2]{\Adv^{\mathrm{ind\textnormal{-}cda}}_{#1}{(#2)}}
+%\newcommand{\ExpINDCDA}[2]{\Exp^{\mathrm{ind\textnormal{-}cda}}_{#1}{(#2)}}
+%\newcommand{\AdvINDCDAR}[2]{\Adv^{\mathrm{ind\textnormal{-}cda\textnormal{-}iv}}_{#1}{(#2)}}
+%\newcommand{\ExpINDCDAR}[2]{\Exp^{\mathrm{ind\textnormal{-}cda\textnormal{-}iv}}_{#1}{(#2)}}
 
 \newcommand{\encOracle}{\textbf{Enc}}
 \newcommand{\decOracle}{\textbf{Dec}}
@@ -506,7 +510,7 @@ full version\fi}
 \newcommand{\nnudge}{\nudge\smidge}
 \newcommand{\xor}{\oplus}
 
-\newcommand{\pkscheme}{\textsc{pke}}
+\newcommand{\pkaead}{\textsc{pkaead}}
 \newcommand{\Kgen}{\mathsf{Kgen}}
 \newcommand{\pubkeys}{\mathcal{K}_P}
 \newcommand{\seckeys}{\mathcal{K}_S}
@@ -529,8 +533,8 @@ full version\fi}
 \newcommand{\decprimO}[4]{\dec_{#1}^{#4,(#2)}(#3)}
 \newcommand{\Encprim}[3]{\Enc_{#1}^{#2}(#3)}
 \newcommand{\Decprim}[3]{\Dec_{#1}^{#2}(#3)}
-\newcommand{\EncprimO}[4]{\Enc_{#1}^{#4,(#2)}(#3)}
-\newcommand{\DecprimO}[4]{\Dec_{#1}^{#4,(#2)}(#3)}
+\newcommand{\EncprimO}[4]{\Enc_{#1}^{#4|\, #2}(#3)}
+\newcommand{\DecprimO}[4]{\Dec_{#1}^{#4|\, #2}(#3)}
 
 \newcommand{\encapscheme}{\textsc{encap}}
 \newcommand{\pkgen}{\mathsf{kgen}}
@@ -540,8 +544,8 @@ full version\fi}
 \newcommand{\decapprim}[3]{\decap_{#1}^{#2}(#3)}
 \newcommand{\OLencapprim}[3]{\overline{\encap}_{#1}^{#2}(#3)}
 \newcommand{\OLdecapprim}[3]{\overline{\decap}_{#1}^{#2}(#3)}
-\newcommand{\encapprimO}[4]{\encap_{#1}^{#4,(#2)}(#3)}
-\newcommand{\decapprimO}[4]{\decap_{#1}^{#4,(#2)}(#3)}
+\newcommand{\encapprimO}[4]{\encap_{#1}^{#4|\,#2}(#3)}
+\newcommand{\decapprimO}[4]{\decap_{#1}^{#4|\,#2}(#3)}
 
 
 \newcommand{\keys}{\mathcal{K}}
