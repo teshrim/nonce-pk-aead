@@ -15,7 +15,7 @@ Fix sets $\pubkeys, \seckeys, \adata, \pubivs, \secivs, \ptxts,
 (PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen$ for the operation of key generation.
 
 The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata \times \pubivs \times \secivs \times \ptxts \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$ and a plaintext~$M \in \ptxts$, and returns a ciphertext~$C \in \ctxts$. 
-When $\secivs$ is empty, then encryption is randomized.  Otherwise, it is \emph{IV-based} and deteministic.
+When $\secivs$ is empty, then encryption is randomized.  Otherwise, it is \emph{IV-based} and deterministic.
 To stress the differing semantics of the inputs, key and non-private/private data, we write $\Encprim{\pk}{\header,\pubiv}{S,M}$ instead of $\Enc(\pk,\header,\pubiv,\seciv,M)$ for the operation of encryption.  When encryption takes an oracle, we $\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\mathcal{O}}$ to clearly separate oracles from inputs.
 
 The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
