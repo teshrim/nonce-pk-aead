@@ -15,7 +15,9 @@ For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckey
 
 Our formalization of encapsulation schemes is a bit non-standard, as it allows encapsulation to take IVs and associated data.
 
-\paragraph{Security notions. }
+\paragraph{Security notions. }  In Figure~\ref{fig:kem-notions} we give the standard security experiment for a randomized KEM scheme.  On the right, we give an experiment for an IV-based KEM scheme.  It allows multiple oracle queries to an encapsulation oracle, each using a secret-IV~$\seciv$ that was sampled by algorithm~$\advD$.
+
+
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
@@ -37,7 +39,6 @@ Our formalization of encapsulation schemes is a bit non-standard, as it allows e
  \hpages{.45}{
   \underline{$\ExpKEM{\encapscheme}{\advD,\advA}$}:\\[2pt]
   $(\pk,\sk)\getsr\pkgen$\\
-  $(\header,\pubiv) \getsr \advA(\pk)$\\
   $\seciv \getsr \advD$\\
   $b\getsr\bits$\\ 
   $b'\getsr\advA^{\encapOracle(\cdot,\cdot)}(\pk)$\\
@@ -52,6 +53,6 @@ Our formalization of encapsulation schemes is a bit non-standard, as it allows e
  } 
 \end{tabular}
 \caption{\textbf{Left:} Security notion for randomized KEM scheme $\encapscheme$ with output key set~$\keys$.  \textbf{Right:} Security notion for IV-based KEM scheme $\encapscheme$ with output key set~$\keys$, and secret-IV sampler~$\advD$.  The adversary~$\advA$ is restricted to be nonce-respecting for the public-IV.}
-\label{fig:kem}
+\label{fig:kem-notions}
 \end{center}
 \end{figure}
