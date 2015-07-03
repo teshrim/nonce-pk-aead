@@ -18,27 +18,40 @@ Our formalization of encapsulation schemes is a bit non-standard, as it allows e
 \paragraph{Security notions. }
 \begin{figure}
 \begin{center}
-\hfpages{.35}{
+\begin{tabular}{cc}
+\fpage{.25}{
+\hpagess{.99}{.01}
+{
  \underline{$\ExpKEM{\encapscheme}{\advA}$}:\\[2pt]
  $(\pk,\sk)\getsr\pkgen$\\
  $K_0 \getsr \keys$\\ 
  $(K_1,X) \getsr \encapprim{\pk}{}{}$\\
  $b\getsr\bits$\\ 
  $b'\getsr\advA(\pk,(K_b,X))$\\
- Return $[b'=b]$\\
+ Return $[b'=b]$
 }
-{
- \underline{$\ExpKEM{\encapscheme}{\advD,\advA}$}:\\[2pt]
- $(\pk,\sk)\getsr\pkgen$\\
- $(\header,\pubiv) \getsr \advA(\pk)$\\
- $\seciv \getsr \advD$\\
- $K_0 \getsr \keys$ \\ 
- $(K_1,X) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
- $b\getsr\bits$\\ 
- $b'\getsr\advA(\pk,\header,\pubiv,(K_b,X))$\\
- Return $[b'=b]$\\
+{}  %%%% <--- Getting the left and right fpages to line up was a pain in the ass.  I ended up using this hack....
 }
-\caption{\textbf{Left:} Security notion for randomized KEM scheme $\encapscheme$ with output key set~$\keys$.  \textbf{Right:} Security notion for IV-based KEM scheme $\encapscheme$ with public-IV and secret-IV sets $\pubivs,\secivs$ (resp.), and output key set~$\keys$.}
+&
+\fpage{.5}{
+ \hpages{.45}{
+  \underline{$\ExpKEM{\encapscheme}{\advD,\advA}$}:\\[2pt]
+  $(\pk,\sk)\getsr\pkgen$\\
+  $(\header,\pubiv) \getsr \advA(\pk)$\\
+  $\seciv \getsr \advD$\\
+  $b\getsr\bits$\\ 
+  $b'\getsr\advA^{\encapOracle(\cdot,\cdot)}(\pk)$\\
+  Return $[b'=b]$
+  }
+  {
+  \Oracle{$\encapOracle(\header,\pubiv)$}:\\[2pt]
+  $K_0 \getsr \keys$ \\ 
+  $(K_1,X) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
+  Return $(K_b,X)$
+  }
+ } 
+\end{tabular}
+\caption{\textbf{Left:} Security notion for randomized KEM scheme $\encapscheme$ with output key set~$\keys$.  \textbf{Right:} Security notion for IV-based KEM scheme $\encapscheme$ with output key set~$\keys$, and secret-IV sampler~$\advD$.  The adversary~$\advA$ is restricted to be nonce-respecting for the public-IV.}
 \label{fig:kem}
 \end{center}
 \end{figure}

@@ -56,11 +56,11 @@ In practice, security with respect to the first notion means that the PK-AEAD sc
 
  }
  {
- \Oracle{$\OEnc(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+ \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
  Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\[51pt]
 
 \medskip
- \Oracle{$\OEnc(\header,M_0,M_1)$}:\\[2pt]
+ \Oracle{$\encOracle(\header,M_0,M_1)$}:\\[2pt]
  $N \getsr \pubivs$\\
  $C \gets  \Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
  Return $(N,C)$
