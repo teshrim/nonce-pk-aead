@@ -1,27 +1,28 @@
 \section{Constructions}
 \label{sec:constructions}
-We begin by giving a simple construction of an IV-based PK-AEAD scheme
-that is secure in the random-oracle model. \tsnote{This probably relates closely to existing
-schemes for deterministic PKE.}
+We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=\left(g^{\overline{S}}\right)^x$ and $X=g^{\overline{S}}$, for a generator~$g$ and secret integer $\sk=x$.
 %
+\tsnote{This probably relates closely to existing
+schemes for deterministic PKE.}
 \tsnote{Hmm... may be another variant that is interesting, one that
   allows the randomness~$R$ and/or the secret-IV~$S$ to be recovered
   from $(A,N,X)$.  Would allow for additional authentication check (on
 the decapsulated key~$K$, and recovering~$S$ may enable applications.}
 
+
 \begin{figure}
 \begin{center}
 \fpage{.5}{
  \hpagess{.6}{.4}{
- \underline{$\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\ro}$}:\\[2pt]
- $(K,X) \gets \encapprimO{\pk}{\header,\pubiv}{\seciv}{\ro}$\\
+ \underline{$\Encprim{\pk}{\header,\pubiv}{\seciv,M}$}:\\[2pt]
+ $(K,X) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
  $C \gets \encprim{K}{\header,\pubiv}{M}$\\
  Return $(X,C)$\\
 
  \medskip
- \underline{$\encapprimO{\pk}{\header,\pubiv}{\seciv}{\ro}$}:\\[2pt]
- $R \gets \ro(\pk,\header,\pubiv,\seciv)$\\
- $(K,X) \gets \OLencapprim{\pk}{}{R}$\\
+ \underline{$\encapprim{\pk}{\header,\pubiv}{\seciv}$}:\\[2pt]
+ $\overline{S} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\
+ $(K,X) \gets \OLencapprim{\pk}{}{\overline{S}}$\\
  Return $(K,X)$
 
  }
@@ -38,8 +39,8 @@ the decapsulated key~$K$, and recovering~$S$ may enable applications.}
 
  } 
 }
-\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for~$\ro$. Note that the unspecified encapsulation algorithm $\OLencapprim{\pk}{}{R}$ does not take associated data or a public-IV, but does take a secret-IV ($R$) and
-is therefore deterministic. }
+\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
+}
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}

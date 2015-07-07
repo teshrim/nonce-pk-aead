@@ -16,6 +16,11 @@ For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckey
 Our formalization of encapsulation schemes is a bit non-standard, as it allows encapsulation to take IVs and associated data.
 
 \paragraph{Security notions. }  In Figure~\ref{fig:kem-notions} we give the standard security experiment for a randomized KEM scheme.  On the right, we give an experiment for an IV-based KEM scheme.  It allows multiple oracle queries to an encapsulation oracle, each using a secret-IV~$\seciv$ that was sampled by algorithm~$\advD$.  Note that adversary~$\advA$ must be nonce-respecting over public-IV values in this experiment.
+As before we define corresponding advantage measures for a given adversary~$\advA$, sampler~$\advD$, and scheme $\encapscheme$ as
+\begin{align*}
+\AdvKEM{\encapscheme}{\advA}&=2\Prob{\ExpKEM{\encapscheme}{\advD,\advA}=1}-1\\ \AdvKEMd{\encapscheme}{\advD,\advA}&=2\Prob{\ExpKEMd{\encapscheme}{\advD,\advA}=1}-1
+\end{align*}
+respectively.  In both experiments, we track the time-complexity~$t$ of~$\advA$, relative to some understood model of computation.  For the IV-based KEM experiement, we additionally track (1) the query-complexity~$q$, measured as the number of queries made by~$\advA$ to its oracle; and (2) the total query-length~$\sigma$, defined the be the sum over all query lengths, where $|(\header,\pubiv)|=|\header|+|\pubiv|$.
 
 
 \begin{figure}
@@ -37,7 +42,7 @@ Our formalization of encapsulation schemes is a bit non-standard, as it allows e
 &
 \fpage{.5}{
  \hpages{.45}{
-  \underline{$\ExpKEM{\encapscheme}{\advD,\advA}$}:\\[2pt]
+  \underline{$\ExpKEMd{\encapscheme}{\advD,\advA}$}:\\[2pt]
   $(\pk,\sk)\getsr\pkgen$\\
   $\seciv \getsr \advD$\\
   $b\getsr\bits$\\ 
