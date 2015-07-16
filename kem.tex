@@ -11,7 +11,7 @@ When $\secivs$ is empty, then the encapsulation algorithm is randomized.  Otherw
 
 The decapsulation algorithm $\decap \colon \seckeys \times \adata \times \pubivs \times \wraps \to \keys \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$ and an encapsulation $X \in \wraps$, and returns a key $K \in \keys$, or the distinguished symbol~$\bot \not\in \keys$.  We write $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$ for the operation of decapsulation. 
 
-For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, if $\encap_{\pk}(\header,\pubiv,\seciv)$ returns $(K,X)$, then $\decap_{\sk}(X)=K$.
+For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, if $\encapprim{\pk}{\header,\pubiv}{\seciv}$ returns $(K,\wrap)$, then $\decapprim{\sk}{\header,\pubiv}{\wrap}=K$.
 
 Our formalization of encapsulation schemes is a bit non-standard, as it allows encapsulation to take IVs and associated data.
 

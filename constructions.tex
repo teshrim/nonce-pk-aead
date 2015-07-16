@@ -2,7 +2,7 @@
 \label{sec:constructions}
 We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 
-This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}
+This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  \tsnote{Need to update KEM syntax to match figure.}  By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ (e.g. password) has been previously stored receiver-side, or transmitted out-of-band. \tsnote{???}
 
 
 \begin{figure}
@@ -17,10 +17,12 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
  {
  \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2.5pt]
  $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
+ if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
+ \hspace*{3ex} Return $\bot$\\
  $M \concat \overline{S} \gets \decprim{K}{\header,\pubiv}{C}$\\
- if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} = C$ then\\
- \hspace*{3ex} Return $M$\\
- Return $\bot$
+ if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} \neq C$ then\\
+ \hspace*{3ex} Return $\bot$\\
+ Return $(M \concat \overline{S})$\\
  }
 }
 
@@ -40,7 +42,6 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
 } 
 \caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
 }
-\tsnote{This construction is completely obvious.  Should check out exisiting constructions of deterministic and hedged PKE schemes.}
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
