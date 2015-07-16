@@ -1,8 +1,9 @@
 \section{Constructions}
 \label{sec:constructions}
 We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
-%
-\tsnote{This construction is completely obvious.  Should check out exisiting constructions of deterministic and hedged PKE schemes.}
+
+This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}
+
 
 \begin{figure}
 \begin{center}
@@ -15,7 +16,7 @@ We begin by giving a simple construction of an IV-based PK-AEAD scheme that is s
  }
  {
  \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2.5pt]
- $K \gets \decapprim{\sk}{}{X}$\\[3pt]
+ $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
  $M \concat \overline{S} \gets \decprim{K}{\header,\pubiv}{C}$\\
  if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} = C$ then\\
  \hspace*{3ex} Return $M$\\
@@ -24,7 +25,7 @@ We begin by giving a simple construction of an IV-based PK-AEAD scheme that is s
 }
 
 \medskip
-\fpage{.5}{
+\hspace*{.5ex}\fpage{.5}{
  \hpagess{.45}{.55}{
  \underline{$\encapprim{\pk}{\header,\pubiv}{\seciv}$}:\\[2pt]
  $\overline{S} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\
@@ -32,13 +33,14 @@ We begin by giving a simple construction of an IV-based PK-AEAD scheme that is s
  Return $(K,X,\overline{S})$
  }
  {
- \underline{$\decapprim{\sk}{}{X}$}:\\[2pt]
+ \underline{$\decapprim{\sk}{\header,\pubiv}{X}$}:\\[2pt]
  $K \gets \OLdecapprim{\sk}{}{X}$\\
  Return $K$
  } 
 } 
 \caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
 }
+\tsnote{This construction is completely obvious.  Should check out exisiting constructions of deterministic and hedged PKE schemes.}
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
