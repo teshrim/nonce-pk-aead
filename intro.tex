@@ -7,7 +7,7 @@ Traditionally, public-key encryption schemes are randomized and do not take expl
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=1.2]{kem-dem.pdf}
-\caption{The motivating question: how to build (labeled) public-key encryption, via KEM-DEM, over an IV-based AEAD scheme and a conventional (randomized) KEM scheme.}
+\caption{The motivating question: how to build (labeled) public-key encryption, via KEM-DEM, over an IV-based AEAD scheme and a conventional KEM scheme.}
 \label{fig:kem-example}
 \end{center}
 \end{figure}
@@ -56,28 +56,28 @@ $K \gets \decap_\sk(X)$\\
 $M \gets \decprim{K}{}{\header,\pubiv,C}$\\
 Return $M$
 }
-\caption{KEM-DEM constructions using an symmetric-key IV-based AEAD scheme $(\enc,\dec)$. \textbf{Left:} Randomized or stateful scheme, in which the encapsulation algorithm generates the IV.  \textbf{Center:} Randomized scheme, in which the IV is surfaced.  \textbf{Right:} Deterministic scheme, in which the externally provided IV is separated into public and private components. The leftmost and rightmost schemes require new syntax for the encapsulation (and decapsulation) algorithms.}
+\caption{KEM-DEM constructions of PKE using an symmetric-key IV-based AEAD scheme $(\enc,\dec)$. \textbf{Left:} Randomized or stateful scheme, in which the encapsulation algorithm generates the IV.  \textbf{Center:} Randomized scheme, in which the IV is surfaced.  \textbf{Right:} Deterministic scheme, in which the externally provided IV is separated into public and private components. The leftmost and rightmost schemes require new syntax for the encapsulation (and decapsulation) algorithms.}
 \label{fig:kem-dem options}
 \end{center}
 \end{figure}
 
 
-\paragraph{IV-based KEM-DEMs. }
-A second option is to follow the what has been done in the symmetric setting, and surface the IV (and the associated data) as inputs to the KEM-DEM construction; see the center panel of Figure~\ref{fig:kem-dem options}.  
-This shifts the requirements for IV generation to the calling environment, and unburdens the encapsulation algorithm~$\encap$.  We call any scheme that explicitly takes an IV as input \emph{IV-based}.  
+\paragraph{IV-based PKE(AD). }
+A second option is to follow the what has been done in the symmetric setting, and surface the IV (and the associated data) as inputs to encryption; see the center panel of Figure~\ref{fig:kem-dem options}.  
+This shifts the requirements for IV generation to the calling environment and, in the KEM-DEM construction under consideration, allows the encapsulation algorithm~$\encap$ to attend to its traditional goals.  %We call any scheme that explicitly takes an IV as input \emph{IV-based}.  
 
-The resulting IV-based public-key encryption scheme is still randomized, because $\encap$ is.  In some settings this may be appropriate.  For example, when the environment is not trusted to generate ---~and keep private~--- randomness for encapsulation, but can provide a reliable counter for the AEAD scheme.  \tsnote{What's a solid example of this?  HSMs accessed by many parties via a fixed API?  Cloud servers that don't know the clients and use TCP sequence number as counter}  In general, however, it seems cumbersome to have IV-based encryption that is also internally randomized.  
+The resulting \emph{IV-based} public-key encryption scheme is still randomized, because $\encap$ is.  In some settings this may be appropriate.  For example, when the environment is not trusted to generate ---~and keep private~--- randomness for encapsulation, but can provide a reliable counter for the AEAD scheme.  \tsnote{What's a solid example of this?  HSMs accessed by many parties via a fixed API?  Cloud servers that don't know the clients and use TCP sequence number as counter}  In general, however, it seems cumbersome to have IV-based encryption that is also internally randomized.  
 %And in applications in which the calling environment \emph{can} be trusted to generate a random IV for the underlying symmetric-key AEAD scheme, then it can provide randomness for other needs, too.
 Thus, we consider a third option, that of building a \emph{deterministic} public-key encryption scheme via a KEM-DEM construction over a \emph{deterministic} KEM and an IV-based symmetric-key AEAD scheme.  See the right panel of Figure~\ref{fig:kem-dem options} for details.  
 
-When the KEM-DEM scheme is made deterministic, no reasonable security seems achievable when the all inputs are known by the adversary.  So for our fully deterministic construction, we separate the IV into public and secret components $(\pubiv,\seciv)$.   
-Note that we do not necessarilly demand that~$S$ be uniformly random, or that it be recoverable upon decryption.  However, we will require that $(N,S)$ be non-repeating and have a reasonable amount of min-entropy, and that~$S$ be treated as private data.  For example, $N$~might be a counter, and~$S$ a password.  We will see simple constructions in the random-oracle model in which this will suffice. As expected, the security of the construction will depend on the min-entropy in $(N,S)$. \tsnote{Standard-model instantiations, in which encapsulation uses a randomness extractor? There may be a chicken-and-egg problem where, with the extractor key...}
+When the scheme is made deterministic, no reasonable security seems achievable when the all inputs are known by the adversary.  So for our fully deterministic construction, we separate the IV into public and secret components $(\pubiv,\seciv)$.   
+Note that we do not necessarilly demand that~$S$ be uniformly random, or that it be recoverable upon decryption.  However, we will require that $(N,S)$ be non-repeating and have a reasonable amount of min-entropy, and that~$S$ be treated as private data.  For example, $N$~might be a counter, and~$S$ a password.  We will see simple constructions in the random-oracle model in which this will suffice. As expected, the security of the construction will depend on the min-entropy in $(N,S)$. \tsnote{Standard-model instantiations, in which encapsulation uses a randomness extractor? I think you can publish the extractor key with the public key.}
 
 \paragraph{Syntactic and security requirements on encapsulation. }  The first and last options require obvious syntatic changes to KEM-scheme syntax, as shown in Figure~\ref{fig:kem-dem options}. The deterministic option will also require new security notions for KEM schemes; in particular, a kind of nonce-based KEM security will be needed.  Informally, we will require that the output $(K,X)\gets\encap_{\pk}(A,N,S)$ be indistinguishable from $(R,X)$ where~$R$ is a uniform key for the underlying symmetric AEAD scheme.  This will be required only for adversaries that respect some min-entropy bound on the distribution of $(N,S)$. \tsnote{Not sure how the single-query vs.\ multiple-query issue plays out here.  Seems like you should be able to to have~$S$ be a single password that is used with multiple nonces~$N$ during a session.}
 
 \paragraph{Prior work on PKE with associated data. } \tsnote{Definitely some work to consider.  Start with Shoup's paper: \texttt{http://www.shoup.net/papers/kdm-cca2.pdf}.  What problems has labeled PKE been used to solve?}
 
-\paragraph{Prior work on deterministic PKE. } \tsnote{Which prior deterministic PKE schemes can be seen as examples or special cases of this new primitive? Lots of work in this area over the past 5-7 years. Security notions will likely be different, as we can allow the adversary to have the public key throughout the experiment, and there are nonces.}
+\paragraph{Prior work on deterministic PKE. } \tsnote{Which prior deterministic PKE schemes can be seen as examples or special cases of this new primitive? Lots of work in this area over the past 5-7 years. Security notions will likely be different, as we can allow the adversary to have the public key throughout the experiment, and there are nonces.  Should check into hedged encryption, too.}
 
 \paragraph{Prior work on IV-based/deterministic KEM schemes. } \tsnote{I don't know if anyone has considered deterministic KEMs, but I'm guessing that this is a new primitive, too.  KEMs with associated data (``labels'') have been considered.  See H.\ Krawczyk, K.\ G.\ Paterson, and H.\ Wee, ``On the security of the TLS protocol: A systematic analysis'' and J.\ Jonsson and B.\ S.\ Kaliski. ``On the security of RSA encryption in TLS''}
 

@@ -1,14 +1,8 @@
 \section{Constructions}
 \label{sec:constructions}
-We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=\left(g^{\overline{S}}\right)^x$ and $X=g^{\overline{S}}$, for a generator~$g$ and secret integer $\sk=x$.
+We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 %
-\tsnote{This probably relates closely to existing
-schemes for deterministic PKE.}
-\tsnote{Hmm... may be another variant that is interesting, one that
-  allows the randomness~$R$ and/or the secret-IV~$S$ to be recovered
-  from $(A,N,X)$.  Would allow for additional authentication check (on
-the decapsulated key~$K$, and recovering~$S$ may enable applications.}
-
+\tsnote{This construction is completely obvious.  Should check out exisiting constructions of deterministic and hedged PKE schemes.}
 
 \begin{figure}
 \begin{center}
@@ -44,3 +38,9 @@ the decapsulated key~$K$, and recovering~$S$ may enable applications.}
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
+
+\tsnote{Hmm... may be another variant that is interesting, one that
+  allows the randomness~$\overline{S}$ and/or the secret-IV~$S$ to be recovered
+  from $(A,N,X)$.  Would allow for additional authentication check on
+the decapsulated key~$K$, and recovering~$S$ may enable applications.}
+
