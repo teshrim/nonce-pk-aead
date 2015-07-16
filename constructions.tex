@@ -7,40 +7,38 @@ We begin by giving a simple construction of an IV-based PK-AEAD scheme that is s
 \begin{figure}
 \begin{center}
 \fpage{.5}{
- \hpagess{.6}{.4}{
+ \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\header,\pubiv}{\seciv,M}$}:\\[2pt]
- $(K,X) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
- $C \gets \encprim{K}{\header,\pubiv}{M}$\\
- Return $(X,C)$\\
+ $(K,X,\overline{S}) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
+ $C \gets \encprim{K}{\header,\pubiv}{M \concat \overline{S}}$\\
+ Return $(X,C)$
+ }
+ {
+ \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2.5pt]
+ $K \gets \decapprim{\sk}{}{X}$\\[3pt]
+ $M \concat \overline{S} \gets \decprim{K}{\header,\pubiv}{C}$\\
+ if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} = C$ then\\
+ \hspace*{3ex} Return $M$\\
+ Return $\bot$
+ }
+}
 
- \medskip
+\medskip
+\fpage{.5}{
+ \hpagess{.45}{.55}{
  \underline{$\encapprim{\pk}{\header,\pubiv}{\seciv}$}:\\[2pt]
  $\overline{S} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\
  $(K,X) \gets \OLencapprim{\pk}{}{\overline{S}}$\\
- Return $(K,X)$
-
+ Return $(K,X,\overline{S})$
  }
  {
- \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2pt]
- $K \gets \decapprim{\sk}{\vphantom{\ro,\left(\header,\pubiv\right)}}{X}$\\[3pt]
- $M \gets \decprim{K}{\header,\pubiv}{C}$\\
- Return $M$\\
-
- \medskip
  \underline{$\decapprim{\sk}{}{X}$}:\\[2pt]
  $K \gets \OLdecapprim{\sk}{}{X}$\\
  Return $K$
-
  } 
-}
+} 
 \caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
 }
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
-
-\tsnote{Hmm... may be another variant that is interesting, one that
-  allows the randomness~$\overline{S}$ and/or the secret-IV~$S$ to be recovered
-  from $(A,N,X)$.  Would allow for additional authentication check on
-the decapsulated key~$K$, and recovering~$S$ may enable applications.}
-
