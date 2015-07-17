@@ -2,7 +2,7 @@
 \label{sec:constructions}
 We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 
-This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  \tsnote{Need to update KEM syntax to match figure.}  By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ (e.g. password) has been previously stored receiver-side, or transmitted out-of-band. \tsnote{???}
+This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  \tsnote{Need to update KEM syntax to match figure.}  By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  Note that the secret IV is not required to change across encryption calls, so $S=H(\mbox{password}\concat\mbox{salt})$ may be an option. \tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)}
 
 
 \begin{figure}
@@ -15,7 +15,7 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
  Return $(X,C)$
  }
  {
- \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2.5pt]
+ \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2pt]
  $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
  if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
  \hspace*{3ex} Return $\bot$\\

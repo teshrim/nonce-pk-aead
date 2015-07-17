@@ -56,7 +56,8 @@ $K \gets \decap_\sk(X)$\\
 $M \gets \decprim{K}{}{\header,\pubiv,C}$\\
 Return $M$
 }
-\caption{KEM-DEM constructions of PKE using an symmetric-key IV-based AEAD scheme $(\enc,\dec)$. \textbf{Left:} Randomized or stateful scheme, in which the encapsulation algorithm generates the IV.  \textbf{Center:} Randomized scheme, in which the IV is surfaced.  \textbf{Right:} Deterministic scheme, in which the externally provided IV is separated into public and private components. The leftmost and rightmost schemes require new syntax for the encapsulation (and decapsulation) algorithms.}
+\caption{Potential KEM-DEM constructions of PKE using an symmetric-key IV-based AEAD scheme $(\enc,\dec)$. \textbf{Left:} Randomized or stateful scheme, in which the encapsulation algorithm generates the IV.  \textbf{Center:} Randomized scheme, in which the IV is surfaced.  \textbf{Right:} Deterministic scheme, in which the externally provided IV is separated into public and private components. The leftmost and rightmost schemes require new syntax for the encapsulation (and decapsulation) algorithms.}
+\tsnote{An actual construction that does a bit more appears in Section~\ref{sec:constructions}}
 \label{fig:kem-dem options}
 \end{center}
 \end{figure}
