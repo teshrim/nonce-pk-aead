@@ -1,11 +1,6 @@
 \section{Constructions}
 \label{sec:constructions}
-We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
-
-This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  
-%By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  
-Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
-%\tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)} 
+We begin by giving a simple construction of an IV-based PK-AEAD scheme that provides privacy (only) in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 
 
 \begin{figure}
@@ -14,19 +9,17 @@ Note that the secret IV is not required to change across encryption calls, so $S
  \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\header,\pubiv}{\seciv,M}$}:\\[2pt]
  $\overline{\seciv} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\ 
- $(K,X) \gets \encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$\\
- $C \gets \encprim{K}{\header,\pubiv}{M \concat \overline{\seciv}}$\\
- Return $(X,C)$
+ $(K,\wrap) \gets \encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$\\
+ $C \gets \encprim{K}{\header,\pubiv}{M \concat \seciv}$\\
+ Return $(\wrap,C)$
  }
  {
- \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2pt]
- $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
+ \underline{$\Decprim{\sk}{\header,\pubiv}{\wrap,C}$}:\\[2pt]
+ $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
  if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
  \hspace*{3ex} Return $\bot$\\
- $M \concat \overline{\seciv} \gets \decprim{K}{\header,\pubiv}{C}$\\
- if $\encprim{K}{\header,\pubiv}{M \concat \overline{\seciv}} \neq C$ then\\
- \hspace*{3ex} Return $\bot$\\
- Return $M$ %$(M \concat \overline{\seciv})$\\
+ $M \concat S \gets \decprim{K}{\header,\pubiv}{C}$\\
+ Return $(\seciv, M)$\\
  }
 }
 
@@ -49,8 +42,10 @@ Note that the secret IV is not required to change across encryption calls, so $S
 \end{center}
 \end{figure}
 
-\begin{theorem}(Informal.) \rm If $\overline{\encapscheme}$ is secure when provided with uniformly random coins, then $\encapscheme$ is secure in the ROM.  (Concretely, up to the min-entropy of~$\seciv$.)  Moreover, if symmetric key AEAD scheme $\Pi$ is secure, then the IV-based PK-AEAD scheme in Figure~\ref{fig:ro-kem-dem-construction} is secure.
-\end{theorem}
 
-The intuition for the first part of this claim is obvious, as $\overline{\seciv}$ is uniform and independent of everything else until the adversary queries the ROM on $(\pk \concat \header \concat \pubiv \concat \seciv)$.  Thus, $\encapscheme$ inherits the security of $\overline{\encapscheme}$.  The second part of the claim is less obvious.  If $\encapscheme$ is only CPA-secure, then it may be possible to forge an~$X$ that decapsulates to a valid key~$K'$.  We do not necessarily get that $\decprim{K'}{\header,\pubiv}{C}=\bot$\tsnote{???}, so $M \concat \overline{\seciv}$ may be some valid string.  If so, we then need that $\encprim{K'}{\header,\pubiv}{M \concat \overline{S}} \neq C$ in order to prevent the adversary from winning.  As the adversary can compute AEAD-scheme encryptions and decryptions offline for any key~$K'$ of its choosing, we need to prevent forged~$X$ that decapsulate to a known key (at least). \tsnote{May need CCA-type security notions for deterministic KEMs.} 
+
+%This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  
+%By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  
+Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
+%\tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)} 
 
