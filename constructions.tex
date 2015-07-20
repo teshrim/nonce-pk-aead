@@ -10,8 +10,9 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
 \fpage{.5}{
  \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\header,\pubiv}{\seciv,M}$}:\\[2pt]
- $(K,X,\overline{S}) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
- $C \gets \encprim{K}{\header,\pubiv}{M \concat \overline{S}}$\\
+ $\overline{\seciv} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\ 
+ $(K,X,\overline{\seciv}) \gets \encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$\\
+ $C \gets \encprim{K}{\header,\pubiv}{M \concat \overline{\seciv}}$\\
  Return $(X,C)$
  }
  {
@@ -19,20 +20,19 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
  $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
  if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
  \hspace*{3ex} Return $\bot$\\
- $M \concat \overline{S} \gets \decprim{K}{\header,\pubiv}{C}$\\
- if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} \neq C$ then\\
+ $M \concat \overline{\seciv} \gets \decprim{K}{\header,\pubiv}{C}$\\
+ if $\encprim{K}{\header,\pubiv}{M \concat \overline{\seciv}} \neq C$ then\\
  \hspace*{3ex} Return $\bot$\\
- Return $(M \concat \overline{S})$\\
+ Return $(M \concat \overline{\seciv})$\\
  }
 }
 
 \medskip
 \hspace*{.5ex}\fpage{.5}{
  \hpagess{.45}{.55}{
- \underline{$\encapprim{\pk}{\header,\pubiv}{\seciv}$}:\\[2pt]
- $\overline{S} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\
- $(K,X) \gets \OLencapprim{\pk}{}{\overline{S}}$\\
- Return $(K,X,\overline{S})$
+ \underline{$\encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$}:\\[2pt]
+ $(K,X) \gets \OLencapprim{\pk}{}{\overline{\seciv}}$\\
+ Return $(K,X)$
  }
  {
  \underline{$\decapprim{\sk}{\header,\pubiv}{X}$}:\\[2pt]
@@ -40,8 +40,14 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
  Return $K$
  } 
 } 
-\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
+\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{\seciv}$.
 }
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
+
+\begin{theorem}(Informal.) \rm If $\overline{\encapscheme}$ is secure when provided with uniformly random coins, then $\encapscheme$ is secure in the ROM.  (Concretely, up to the min-entropy of~$\seciv$.)  Moreover, if symmetric key AEAD scheme $\Pi$ is secure, then the IV-based PK-AEAD scheme in Figure~\ref{fig:ro-kem-dem-construction} is secure.
+\end{theorem}
+
+The intuition for the first part of this claim is obvious, as $\overline{\seciv}$ is uniform and independent of everything else until the adversary queries the ROM on $(\pk \concat \header \concat \pubiv \concat \seciv)$.  Thus, $\encapscheme$ inherits the security of $\overline{\encapscheme}$.  \tsnote{Need to determine security notions for deterministic KEMs.} The second part of the claim is less obvious.  If $\encapscheme$ is only CPA-secure, then it may be possible to forge an~$X$ that decapsulates to a valid key~$K'$.  We do not necessarily get that $\decprim{K'}{\header,\pubiv}{C}=\bot$\tsnote{???}, so $M \concat \overline{\seciv}$ may be some valid string.  If so, we then need that $\encprim{K'}{\header,\pubiv}{M \concat \overline{S}} \neq C$ in order to prevent the adversary from winning.  As the adversary can compute AEAD-scheme encryptions and decryptions offline for any key~$K'$ of its choosing, we need to prevent forged~$X$ that decapsulate to a known key (at least).
+
