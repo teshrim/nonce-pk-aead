@@ -46,6 +46,6 @@ We begin by giving a simple construction of an IV-based PK-AEAD scheme that prov
 
 %This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  
 %By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  
-Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
+%Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
 %\tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)} 
 
