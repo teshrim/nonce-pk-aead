@@ -1,8 +1,6 @@
 \section{Constructions}
 \label{sec:constructions}
-We begin by giving a simple construction of an IV-based PK-AEAD scheme that is secure in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
-
-This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  \tsnote{Need to update KEM syntax to match figure.}  By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  Note that the secret IV is not required to change across encryption calls, so $S=H(\mbox{password}\concat\mbox{salt})$ may be an option. \tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)}
+We begin by giving a simple construction of an IV-based PK-AEAD scheme that provides privacy (only) in the random-oracle model. It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 
 
 \begin{figure}
@@ -10,29 +8,27 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
 \fpage{.5}{
  \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\header,\pubiv}{\seciv,M}$}:\\[2pt]
- $(K,X,\overline{S}) \gets \encapprim{\pk}{\header,\pubiv}{\seciv}$\\
- $C \gets \encprim{K}{\header,\pubiv}{M \concat \overline{S}}$\\
- Return $(X,C)$
+ $\overline{\seciv} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\ 
+ $(K,\wrap) \gets \encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$\\
+ $C \gets \encprim{K}{\header,\pubiv}{M \concat \seciv}$\\
+ Return $(\wrap,C)$
  }
  {
- \underline{$\Decprim{\sk}{\header,\pubiv}{X,C}$}:\\[2pt]
- $K \gets \decapprim{\sk}{\header,\pubiv}{X}$\\[3pt]
+ \underline{$\Decprim{\sk}{\header,\pubiv}{\wrap,C}$}:\\[2pt]
+ $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
  if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
  \hspace*{3ex} Return $\bot$\\
- $M \concat \overline{S} \gets \decprim{K}{\header,\pubiv}{C}$\\
- if $\encprim{K}{\header,\pubiv}{M \concat \overline{S}} \neq C$ then\\
- \hspace*{3ex} Return $\bot$\\
- Return $(M \concat \overline{S})$\\
+ $M \concat S \gets \decprim{K}{\header,\pubiv}{C}$\\
+ Return $(\seciv, M)$\\
  }
 }
 
 \medskip
 \hspace*{.5ex}\fpage{.5}{
  \hpagess{.45}{.55}{
- \underline{$\encapprim{\pk}{\header,\pubiv}{\seciv}$}:\\[2pt]
- $\overline{S} \gets H(\pk \concat \header \concat \pubiv \concat \seciv)$\\
- $(K,X) \gets \OLencapprim{\pk}{}{\overline{S}}$\\
- Return $(K,X,\overline{S})$
+ \underline{$\encapprim{\pk}{\header,\pubiv}{\overline{\seciv}}$}:\\[2pt]
+ $(K,X) \gets \OLencapprim{\pk}{}{\overline{\seciv}}$\\
+ Return $(K,X)$
  }
  {
  \underline{$\decapprim{\sk}{\header,\pubiv}{X}$}:\\[2pt]
@@ -40,8 +36,16 @@ This particular construction allows for recovery of~$\overline{S}$ upon decrypti
  Return $K$
  } 
 } 
-\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{S}$.
+\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style, that is secure in the random-oracle model for hash function~$H$. The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{\seciv}$.
 }
 \label{fig:ro-kem-dem-construction}
 \end{center}
 \end{figure}
+
+
+
+%This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  
+%By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  
+%Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
+%\tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)} 
+

@@ -20,7 +20,7 @@ To stress the differing semantics of the inputs, key and non-private/private dat
 
 The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
 
-For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=M$.
+For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
 
 
 \paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}

@@ -47,17 +47,17 @@ Return $M$
 {
 \underline{$\Encprim{\pk}{}{\header,\pubiv,\seciv,M}$}:\\[2pt]
 $(K,X) \gets \encap_{\pk}(\header,\pubiv,\seciv)$\\
-$C \gets \encprim{K}{}{\header,\pubiv,M}$\\
+$C \gets \encprim{K}{}{\header,\pubiv,M \concat \seciv}$\\
 Return $(X,C)$
 
 \medskip
 \underline{$\Decprim{\sk}{}{\header,\pubiv,X,C}$}:\\[2pt]
 $K \gets \decap_\sk(X)$\\
-$M \gets \decprim{K}{}{\header,\pubiv,C}$\\
-Return $M$
+$M \concat \seciv \gets \decprim{K}{}{\header,\pubiv,C}$\\
+Return $(\seciv,M)$
 }
 \caption{Potential KEM-DEM constructions of PKE using an symmetric-key IV-based AEAD scheme $(\enc,\dec)$. \textbf{Left:} Randomized or stateful scheme, in which the encapsulation algorithm generates the IV.  \textbf{Center:} Randomized scheme, in which the IV is surfaced.  \textbf{Right:} Deterministic scheme, in which the externally provided IV is separated into public and private components. The leftmost and rightmost schemes require new syntax for the encapsulation (and decapsulation) algorithms.}
-\tsnote{An actual construction that does a bit more appears in Section~\ref{sec:constructions}}
+%\tsnote{An actual construction that does a bit more appears in Section~\ref{sec:constructions}}
 \label{fig:kem-dem options}
 \end{center}
 \end{figure}
@@ -73,7 +73,7 @@ Thus, we consider a third option, that of building a \emph{deterministic} public
 
 
 When the scheme is made deterministic, no reasonable security seems achievable when the all inputs are known by the adversary.  So for our fully deterministic construction, we separate the IV into public and secret components $(\pubiv,\seciv)$.   
-Note that we do not necessarilly demand that~$S$ be uniformly random, or that it be recoverable upon decryption.  However, we will require that $(N,S)$ be non-repeating and have a reasonable amount of min-entropy, and that~$S$ be treated as private data.  For example, $N$~might be a counter, and~$S$ a password.  We will see simple constructions in the random-oracle model in which this will suffice. As expected, the security of the construction will depend on the min-entropy in $(N,S)$. \tsnote{Standard-model instantiations, in which encapsulation uses a randomness extractor? I think you can publish the extractor key with the public key.}
+Note that we do not necessarilly demand that~$S$ be uniformly random.  However, we will require that $(N,S)$ be non-repeating and have a reasonable amount of min-entropy, and that~$S$ be treated as private data. \tsnote{Should~$\seciv$ be recoverable?}  For example, $N$~might be a counter, and~$S$ some function of a password.  We will see simple constructions in the random-oracle model in which this will suffice. As expected, the security of the construction will depend on the min-entropy in $(N,S)$. \tsnote{Standard-model instantiations, in which encapsulation uses a randomness extractor? I think you can publish the extractor key with the public key.}
 
 
 \paragraph{Syntactic and security requirements on encapsulation. }  The first and last options require obvious syntatic changes to KEM-scheme syntax, as shown in Figure~\ref{fig:kem-dem options}. The deterministic option will also require new security notions for KEM schemes; in particular, a kind of nonce-based KEM security will be needed.  Informally, we will require that the output $(K,X)\gets\encap_{\pk}(A,N,S)$ be indistinguishable from $(R,X)$ where~$R$ is a uniform key for the underlying symmetric AEAD scheme.  This will be required only for adversaries that respect some min-entropy bound on the distribution of $(N,S)$. \tsnote{Not sure how the single-query vs.\ multiple-query issue plays out here.  Seems like you should be able to to have~$S$ be a single password that is used with multiple nonces~$N$ during a session.}
