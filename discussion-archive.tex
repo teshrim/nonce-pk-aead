@@ -1,7 +1,8 @@
 \eject
 \section*{Email discussion with Kenny}
-\begin{minipage}{\textwidth}
 \begin{lstlisting}
+Tom says:
+
 I wonder if the IV-based PK-AEAD primitive itself isn't still interesting.  From a crypto theory perspective, it is a natural thing to explore, in light of what's been done in the symmetric setting.  If it's only good for organizing previous works, well, that might be nothing more than a small paper.  But papers that start out with a new primitive in mind rarely seem to stay small, in my experience.
 
 If an application or two can be uncovered, then things will hot up considerably.  Some initial thoughts:
@@ -17,6 +18,35 @@ Phil, Meaw and I wrote a short note formalizing the syntax and candidate securit
 -- Network stacks: it's possible, even likely in some settings, that the public IV and the secret IV are provided by different entities.  The secret IV may come from the application layer, perhaps without the application's user knowing it, while the public IV comes from the transport/network layer.  I'm not naming any particular application here, just pointing out that modern stacks may be doing this already in some ad-hoc fashion.
 
 Note that it isn't immediately obvious how to make a single syntax that supports all of these. 
-\end{lstlisting}
 
-\end{minipage} 
+/* ------------------------------ */
+
+Kenny responds:
+
+I do think the primitive might be interesting in its own right, and is
+worth thinking more about. Especially:
+
+1. The AD part, which is related to labelled PKE, but perhaps not quite
+identical, so worth exploring on its own merits; and
+2. What can be done with imperfect randomness (specifically, your "(N,S)
+as auxiliary input" setting).
+
+The IoT scenario you sketch is quite realistic: on-board PRNGs are
+notoriously flakey or absent altogether in low-end, low-cost devices. Then
+the trick of using state (N) + secret value (S) + PRF can be brought into
+play. But I'm not sure that a device ID would be sufficiently private to
+act as a secret key - to my mind it would really need to be a private
+value dedicated to the purpose (devices are typically rather prolific in
+coughing up their IDs unless the design is done carefully). Making the
+assumption that such a value exists is probably not fully realistic in all
+IoT deployments. But it's a semi-realistic starting point. Note, however,
+that if you have such a state, key and PRF available, then any and all
+crypto randomness issues can be made to go away! So it's quite a powerful
+assumption to make in the context of dealing with imperfect randomness -
+and one that previous literature has tended to avoid (e.g. the pragmatic
+hedging work prefers to hash context in with the "believed to be random"
+value and uses the ROM to make everything OK; the more theoretical work
+jumps through all kinds of hoops to extract entropy from something else
+and has all this business with public keys being hidden from the
+adversary.)
+\end{lstlisting}
