@@ -34,7 +34,12 @@
 \usepackage{enumerate}
 \usepackage{algorithm}
 \usepackage{algorithmic}
-
+\usepackage{listings}
+\lstset{
+basicstyle=\small\ttfamily,
+columns=flexible,
+breaklines=true
+}
 
 \input{defs}
 
@@ -80,11 +85,11 @@ Portland State University, \email{teshrim@cs.pdx.edu}
 
 
 
-
 \bibliography{biblio}
 
 \ifnum\camready=0
 \appendix
+\input{discussion-archive}
 \fi
 
 
