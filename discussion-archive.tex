@@ -1,0 +1,22 @@
+\eject
+\section*{Email discussion with Kenny}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}
+I wonder if the IV-based PK-AEAD primitive itself isn't still interesting.  From a crypto theory perspective, it is a natural thing to explore, in light of what's been done in the symmetric setting.  If it's only good for organizing previous works, well, that might be nothing more than a small paper.  But papers that start out with a new primitive in mind rarely seem to stay small, in my experience.
+
+If an application or two can be uncovered, then things will hot up considerably.  Some initial thoughts:
+
+-- Are there settings in which the public key of a central server has been pre-deployed to many "users", but those users do not have reliable sources of randomness? I'm thinking IoT kinds of settings where a manufacturer may have installed a master public key on many embedded devices that do not have quality sources of randomness, but can keep a counter.  The counter need not be specifically for encryption, just something that could be co-opted for the purpose.  Perhaps there's no randomness source at all, but each device has a device ID that was burned in at the manufacturer, and thus can serve as a value with some amount of min-entropy. (Could be talking out of my ass here, since I know very little about real IoT scenarios.)
+
+-- Web applications: if the server already stores H(passwd || salt) for a user, then this can be used as the secret IV and enable password-authentication.  Likewise, if the server is willing to keep some additional state for the user, the public IV can help to prevent replay.  I wonder if IV-based PK-AEAD might be useful for reduced latency in resuming web sessions, etc.
+
+-- Traffic analysis: maybe one wants to hide the ordering of messages, i.e. "this is the third message in a stream", because this gives something away to an observer.  While a public counter/nonce would give this away, a secret counter/nonce would not.  So, maybe the public message number tells you that this is the third ciphertext in a stream, but the secret message number tells you the actual ordinality of the plaintext.  This is one of the motivations, I believe, for the explicit public and secret message number in the call for CAESAR submissions.  (The idea appears implicitly in David McGrew's RFC 5116 "An Interface and Algorithms for Authenticated Encryption", which predates CAESAR.) 
+
+Phil, Meaw and I wrote a short note formalizing the syntax and candidate security notions for appeared in the CAESAR call, and that served as a spark for my idea to have public and secret IVs in IV-based PKE-AEAD.
+
+-- Network stacks: it's possible, even likely in some settings, that the public IV and the secret IV are provided by different entities.  The secret IV may come from the application layer, perhaps without the application's user knowing it, while the public IV comes from the transport/network layer.  I'm not naming any particular application here, just pointing out that modern stacks may be doing this already in some ad-hoc fashion.
+
+Note that it isn't immediately obvious how to make a single syntax that supports all of these. 
+\end{lstlisting}
+
+\end{minipage} 
