@@ -4,7 +4,7 @@
 \paragraph{Encapsulation schemes. }
 Let $\pubkeys, \seckeys, \adata, \pubivs, \secivs$ be the sets of public keys, secret keys, associated data, public-IVs and secret-IVs (resp.), as before, and let $\keys,\wraps$ be a nonempty sets.
 %
-An encapsulation scheme is a triple $\encapscheme=(\pkgen,\encap,\decap)$.   The randomized \emph{key generation} algorithm~$\pkgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\pkgen$ for the operation of key generation. 
+An encapsulation scheme is a triple$\encapscheme=(\pkgen,\encap,\decap)$.   The randomized \emph{key generation} algorithm~$\pkgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\pkgen$ for the operation of key generation. \tsnote{Should $\pkgen$ take AD as input?  What have labeled KEM schemes done in the past?}
 
 The encapsulation algorithm $\encap \colon \pubkeys \times \adata \times \pubivs \times \secivs \to \keys \times \wraps$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$, and returns a key $K \in \keys$ and an encapsulation $X \in \wraps$. 
 When $\secivs$ is empty, then the encapsulation algorithm is randomized.  Otherwise, it is \emph{IV-based} and deterministic.  Following our notational conventions, we write $\encapprim{\pk}{\header,\pubiv}{\seciv}$ for the operation of encapsulation, and $\encapprimO{\pk}{\header,\pubiv}{\seciv}{\mathcal{O}}$ when it takes an oracle.  When one or more of $\header,\pubiv$, or~$\seciv$ is absent, it will be clear from context (rather than position) what inputs are present.
