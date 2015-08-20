@@ -2,7 +2,7 @@
 \label{sec:intro}
 We introduce a new primitive, that of public-key, IV-based authenticated-encryption with associated data. The genesis of this primitive came from considering the construction of a public-key encryption scheme via the KEM-DEM paradigm, using an off-the-shelf symmetric-key, IV-based AEAD scheme for the DEM.  The latter turns a plaintext message~$M$ into a ciphertext~$C$ under control of a key~$K$, associated data~$\header$ and initial value (IV)~$\pubiv$, written $C \gets \enc_{K}^{\header,\pubiv}(M)$.  In a KEM-DEM construction, the key~$K$ is produced by a (randomized) key-encapsulation algorithm~$(K,X)\getsr\encap_\pk$, where the encapsulation~$X$ is used by the receiver to recover~$K$.  
 
-The associated data input (AD) of the underlying AEAD scheme can be surfaced as an input to the KEM-DEM construction, resulting in a PKE scheme with ``labels'', the name given in previous works to AD in the public-key setting. \tsnote{Kenny thinks there may be some useful distinctions between labels as used in PKE literature, and AD as used the symmetric encryption literature.}  The IV input can be fixed to any particular value, because the key~$K$ that is produced by the encapsulation scheme is fresh each time the KEM-DEM construction is called.  For sake of argument, however let's say that we want a proper IV for the AEAD scheme.  \tsnote{Maybe you don't trust encapsulation to produce full-entropy keys?  Intuitively, it is better to have a mediocre key and a mediocre IV than a mediocre key and a fixed IV.}  Then there are a few options for its origin.
+The associated data input (AD) of the underlying AEAD scheme can be surfaced as an input to the KEM-DEM construction, resulting in a PKE scheme with ``labels'', the name given in previous works to AD in the public-key setting. \tsnote{Although I don't know that the implications of AD have really been explored for PKE.} The IV input can be fixed to any particular value, because the key~$K$ that is produced by the encapsulation scheme is fresh each time the KEM-DEM construction is called.  For sake of argument, however let's say that we want a proper IV for the AEAD scheme.  \tsnote{Maybe you don't trust encapsulation to produce full-entropy keys?  Intuitively, it is better to have a mediocre key and a mediocre IV than a mediocre key and a fixed IV.}  Then there are a few options for its origin.
 
 \begin{figure}[h]
 \begin{center}
@@ -21,38 +21,38 @@ Although some syntactic changes are required to the standard KEM formalism, it s
 \hfpagesss{.25}{.25}{.25}
 {
 \underline{$\Encprim{\pk}{}{\header, M}$}:\\[2pt]
-$(K,X,\pubiv) \getsr \encap_\pk()$\\
+$(K,\wrap,\pubiv) \getsr \encap_\pk()$\\
 $C \gets \encprim{K}{}{\header,\pubiv,M}$\\
-Return $(X,N,C)$
+Return $(\wrap,\pubiv,C)$
 
 \medskip
-\underline{$\Decprim{\sk}{}{\header,X,N,C}$}:\\[2pt]
-$K \gets \decap_\sk(X)$\\
+\underline{$\Decprim{\sk}{}{\header,\pubiv,\wrap,C}$}:\\[2pt]
+$K \gets \decap_\sk(\wrap)$\\
 $M \gets \decprim{K}{}{\header,\pubiv,C}$\\
 Return $M$
 }
 {
 \underline{$\Encprim{\pk}{}{\header,\pubiv,M}$}:\\[2pt]
-$(K,X) \getsr \encap_\pk()$\\
+$(K,\wrap) \getsr \encap_\pk()$\\
 $C \gets \encprim{K}{}{\header,\pubiv,M}$\\
-Return $(X,C)$
+Return $(\wrap,C)$
 
 \medskip
-\underline{$\Decprim{\sk}{}{\header,\pubiv,X,C}$}:\\[2pt]
-$K \gets \decap_\sk(X)$\\
+\underline{$\Decprim{\sk}{}{\header,\pubiv,\wrap,C}$}:\\[2pt]
+$K \gets \decap_\sk(\wrap)$\\
 $M \gets \decprim{K}{}{\header,\pubiv,C}$\\
 Return $M$
 
 }
 {
 \underline{$\Encprim{\pk}{}{\header,\pubiv,\seciv,M}$}:\\[2pt]
-$(K,X) \gets \encap_{\pk}(\header,\pubiv,\seciv)$\\
+$(K,\wrap) \gets \encap_{\pk}(\header,\pubiv,\seciv)$\\
 $C \gets \encprim{K}{}{\header,\pubiv,M \concat \seciv}$\\
-Return $(X,C)$
+Return $(\wrap,C)$
 
 \medskip
-\underline{$\Decprim{\sk}{}{\header,\pubiv,X,C}$}:\\[2pt]
-$K \gets \decap_\sk(X)$\\
+\underline{$\Decprim{\sk}{}{\header,\pubiv,\wrap,C}$}:\\[2pt]
+$K \gets \decap_\sk(\wrap)$\\
 $M \concat \seciv \gets \decprim{K}{}{\header,\pubiv,C}$\\
 Return $(\seciv,M)$
 }
@@ -75,14 +75,14 @@ When the scheme is made deterministic, no reasonable security seems achievable w
 Note that we do not necessarilly demand that~$S$ be uniformly random.  However, we will require that $(N,S)$ be non-repeating and have a reasonable amount of min-entropy, and that~$S$ be treated as private data. \tsnote{Should~$\seciv$ be recoverable?}  For example, $N$~might be a counter, and~$S$ some function of a password.  We will see simple constructions in the random-oracle model in which this will suffice. As expected, the security of the construction will depend on the min-entropy in $(N,S)$. \tsnote{Standard-model instantiations, in which encapsulation uses a randomness extractor? I think you can publish the extractor key with the public key. Such constructions may be of limited use in practice, though.}
 
 
-\paragraph{Syntactic and security requirements on encapsulation. }  The first and last options require obvious syntatic changes to KEM-scheme syntax, as shown in Figure~\ref{fig:kem-dem options}. The deterministic option will also require new security notions for KEM schemes; in particular, a kind of nonce-based KEM security will be needed.  Informally, we will require that the output $(K,X)\gets\encap_{\pk}(A,N,S)$ be indistinguishable from $(R,X)$ where~$R$ is a uniform key for the underlying symmetric AEAD scheme.  This will be required only for adversaries that respect some min-entropy bound on the distribution of $(N,S)$. \tsnote{Not sure how the single-query vs.\ multiple-query issue plays out here.  Seems like you should be able to to have~$S$ be a single password that is used with multiple nonces~$N$ during a session.}
+\paragraph{Syntactic and security requirements on encapsulation. }  The first and last options require obvious syntatic changes to KEM-scheme syntax, as shown in Figure~\ref{fig:kem-dem options}. The deterministic option will also require new security notions for KEM schemes; in particular, a kind of nonce-based KEM security will be needed.  Informally, we will require that the output $(K,\wrap)\gets\encap_{\pk}(\header,\pubiv,\seciv)$ be indistinguishable from $(R,\wrap)$ where~$R$ is a uniform key for the underlying symmetric AEAD scheme.  This will be required only for adversaries that respect some min-entropy bound on the distribution of $(\pubiv,\seciv)$. \tsnote{Not sure how the single-query vs.\ multiple-query issue plays out here.  Seems like you should be able to to have~$\seciv$ be a single password that is used with multiple nonces~$\pubiv$ during a session.}
 
-\paragraph{Prior work on PKE with associated data. } \tsnote{Definitely some work to consider.  Start with Shoup's paper: \texttt{http://www.shoup.net/papers/kdm-cca2.pdf}.  What problems has labeled PKE been used to solve?}
+\paragraph{Prior work on PKE with associated data. } \tsnote{Definitely some work to consider.  Start with Shoup's paper: \texttt{http://www.shoup.net/papers/kdm-cca2.pdf}.  What problems has labeled PKE been used to solve?} \tsnote{Do labeled PKE schemes allow key generation to take the label as input?}
 
 \paragraph{Prior work on deterministic PKE. } \tsnote{Which prior deterministic PKE schemes can be seen as examples or special cases of this new primitive? Lots of work in this area over the past 5-7 years. Security notions will likely be different, as we can allow the adversary to have the public key throughout the experiment, and there are nonces.  Should check into hedged encryption, too.}
 
-\paragraph{Prior work on IV-based/deterministic KEM schemes. } \tsnote{I don't know if anyone has considered deterministic KEMs, but I'm guessing that this is a new primitive, too.  KEMs with associated data (``labels'') have been considered.  See H.\ Krawczyk, K.\ G.\ Paterson, and H.\ Wee, ``On the security of the TLS protocol: A systematic analysis'' and J.\ Jonsson and B.\ S.\ Kaliski. ``On the security of RSA encryption in TLS''}
+\paragraph{Prior work on IV-based/deterministic KEM schemes. } \tsnote{I don't know if anyone has considered deterministic KEMs, but I'm guessing that this is a new primitive, too.  KEMs with associated data (``labels'') have been considered.  See H.\ Krawczyk, K.\ G.\ Paterson, and H.\ Wee, ``On the security of the TLS protocol: A systematic analysis'' and J.\ Jonsson and B.\ S.\ Kaliski. ``On the security of RSA encryption in TLS''}\tsnote{Do labeled KEM schemes allow (KEM) key-generation to take the label as input? }
 
 \paragraph{Prior work on password-based encryption. } \tsnote{I don't know the password-based encryption literature very well.  Start with Bellare, Ristenpart, Tessaro and work backwards.}
 
-\paragraph{Applications. } \tsnote{This is a big question! Nonce could be used by server to prevent replay attacks, and password provides a way to do client authentication(?)}
+\paragraph{Applications. } \tsnote{This is a big question! Nonce could be used by server to prevent replay attacks, and password provides a way to do client authentication(?)  Support for reliability (e.g. stream reassembly, retransmission, etc.) above the transport layer? (A la, QUIC and other protocols that can use UDP and take care of reliable ``transport'' at within the protocol.)  Diminished reliance on certs due to secret nonce and the fact that public-keys can depend on AD? }

@@ -12,7 +12,7 @@ An \emph{adversary} is a randomized algorithm.
 \paragraph{Asymmetric (Public-key) AEAD Schemes. }
 Fix sets $\pubkeys, \seckeys, \adata, \pubivs, \secivs, \ptxts,
 \ctxts$, the first two of which are nonempty.  An public-key AEAD
-(PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen$ for the operation of key generation.
+(PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen\colon\adata\to\pubkeys\times\seckeys$ takes associated data $\header \in \adata$ as input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen$ for the operation of key generation. \tsnote{Letting $\Kgen$ take assocaitated data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.}\tsnote{May need to distinguish between ``long-term'' AD (like a user-ID) and per-encryption AD.}
 
 The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata \times \pubivs \times \secivs \times \ptxts \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$ and a plaintext~$M \in \ptxts$, and returns a ciphertext~$C \in \ctxts$. 
 When $\secivs$ is empty, then encryption is randomized.  Otherwise, it is \emph{IV-based} and deterministic.
@@ -20,7 +20,7 @@ To stress the differing semantics of the inputs, key and non-private/private dat
 
 The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
 
-For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckeys$, $\header\in\adata$, $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
+For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\header)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
 
 
 \paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}
@@ -69,6 +69,7 @@ In practice, security with respect to the first notion means that the PK-AEAD sc
 }
 \caption{Privacy notions for an IV-based PK-AEAD scheme~$\pkaead$ with public-IV and secret-IV sets $\pubivs,\secivs$ (resp.)}
 \label{fig:ind-cda}
+\tsnote{Doesn't match current syntax, where $\Kgen$ takes AD as input.  Need to think about how to handle this in the security notion(s).}
 \end{center}
 \end{figure}
 
