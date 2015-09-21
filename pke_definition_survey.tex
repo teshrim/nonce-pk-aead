@@ -1,0 +1,104 @@
+\documentclass[11pt, pdftex]{article}
+\usepackage{epsf}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage{ifthen}
+\usepackage{comment}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[margin=1in]{geometry}
+
+
+\title{Deterministic Public Key Encryption}
+\author{}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section{Definitions}
+
+\begin{enumerate}
+\item Deterministic and Efficiently Searchable Encryption (BBO, Crypto 2007)
+\begin{itemize}
+\item Priv security ensures that a static adversary cannot generate side information about an underlying plaintext.  RO model construction.
+\item requires high min-entropy in the plaintext space
+\item ESE application and construction
+\item CCA extension
+\end{itemize}
+
+\item Deterministic Encryption : Definitional Equivalences and Constructions without Random Oracles Relating the Security Notions (BeFiO, Crypto 2008)
+\begin{itemize}
+\item 7 security defs: (IND, 3 computational, 3 simulation based) against static adversaries.  All equivalent.  Standard model construction from TDP when plaintexts are UNIFORM/INDEPENDENT.  Extending this scheme requires stronger assumptions about the underlying TDP.
+\item requires high min-entropy in the plaintext space
+\item Build a randomized KEM from deterministic PK scheme
+\end{itemize}
+
+
+\item On notions of security for deterministic encryption, and efficient constructions without random oracles (BoFeO, Crypto 2008)
+\begin{itemize}
+\item PRIV-security for block sources, which assumes that for each message, the worst-case conditional min-entropy is at least some minimum value $t$
+\item Equivalence to PRIV1 (and a single message IND notion).
+\item Standard model constructions using ``lossy'' TDFs in both CPA and CCA settings
+\item DDH-based and Pallier-based instantiations of the general construction, secure in the standard model.
+\item KEM construction also provided
+\end{itemize}
+
+\item Hedged public-key encryption: How to protect against bad randomness (BBNRSSY, Asiacrypt 2009)
+\begin{itemize}
+\item IND-CDA security, where the joint distrib between the randomness and the message space has sufficiently high min-entropy
+\item Assumes conditional min-entropy (like block sources) to achieve security
+\item Adaptive source queries are allowed, but NOT after the PK has been revealed
+\item Two RO constructions from IND-CPA schemes, two standard schemes from IND-CPA and PRIV schemes for block sources (using LTDFs)
+\end{itemize}
+
+\item Deterministic public-key encryption for adaptively chosen plaintext distributions (RSV, Eurocrypt 13)
+\begin{itemize}
+\item Adaptive security definition that generalizes across both IND-security and Hedged definitions
+\item Adversary is GIVEN ACCESS to the public key and makes adaptive queries giving plaintext distributions rather than samples
+\item Real-or-random game selects messages according to either the queried distribution (real) or uniform (random)
+\item Two conditions on queries: each distribution has a min-entropy of $k$ (lower bounded) and the number of queried distributions are bounded by some polynomial w.r.t. the security parameter.
+\item Build on the technique of BoFeO (using LTDFs) to yield a new standard model scheme that meets this adaptive definition.
+\item CCA extension
+\end{itemize}
+\end{enumerate}
+
+\section{Primitives}
+
+\begin{enumerate}
+\item Lossy Trapdoor Functions and Their Applications (PW, STOC 2008)
+\begin{itemize}
+\item New LTDF primitive requires that a TDF family be able to operate in two modes: lossy and injective
+\item Security proven when both modes are indistinguishable
+\item Instantiated under many assumptions (DDH applied later to D-PKE)
+\end{itemize}
+
+\item Instantiating Random Oracles via UCEs (BHK, CRYPTO 2013)
+\begin{itemize}
+\item Develops a notion of second-degree assumptions, which prove security against multi-stage adversaries
+\item Capable of moving some random oracles into the standard model
+\end{itemize}
+\end{enumerate}
+
+\section{Constructions}
+
+\begin{enumerate}
+\item Resisting Randomness Subversion : Fast Deterministic and Hedged Public-key Encryption in the Standard Model (BH, Eurocrypt 15)
+\begin{itemize}
+\item No new definitions.
+\item Establishes the first standard model IND-secure D-PKE and H-PKE based on a combination of UCE for statistically uniform sources and LTDFs
+\item Develop fast alternatives that yield KEM-DEM like efficiency
+\item Generic U-PKE from D-PKE
+\end{itemize}
+\end{enumerate}
+
+
+\section{Questions}
+\begin{enumerate}
+\item What is the hierarchy of syntax?  Can we express H-PKE as IV-PKE? 
+\item Are there IV-PKE schemes that fall outside of H-PKE schemes?
+\item Hedged definition: what's the use of picking two messages?
+\item ACD security: how does limiting the number of distributions prohibit dependence?
+\end{enumerate}
+
+\end{document}
