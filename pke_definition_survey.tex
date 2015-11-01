@@ -92,6 +92,62 @@
 \end{itemize}
 \end{enumerate}
 
+\section{Nonce-based PKE Summary}
+
+This work introduces the concept of nonce-based public-key encryption as a means to defend against random number generator bugs or
+subversion.  A nonce-based PKE scheme is made up of four algorithms:
+\begin{align*}
+NPE.Kg &\rightarrow (ek,dk)\\
+NPE.sKg &\rightarrow (ak)\\
+NPE.Enc(ek, ak, m, n) &\rightarrow c\\
+NPE.Dec(dk, c) &\rightarrow m
+\end{align*}
+It is important to note that the seed $ak$ is not recoverable in decryption, and that the nonce is only used to help randomize the output
+of $NPE.Enc$.  It is NOT sent with the message and is NOT needed for decryption.  This allows for an easier requirement on the random
+number generator, that it simply return nonces instead of cryptographically random seeds.  However, the security maintained is equivalent to
+IND-CCA security.
+
+The main technique used to achieve this construction is a hedged extractor, an algorithm defined as $HE(ak, (m,n)) = r$.  An HE must specifically
+meet two requirements: it is a PRF if $ak$ is secret, and is a randomness extractor when $ak$ is revealed but $(m,n)$ is unpredictable.  They formalize
+the idea of unpredictability in nonces using a nonce generator, which can be manipulated indirectly by an adversary input, but is not directly controlled
+by the adversary.  They then define security for the HE using a ``real or random'' game where an adversary may choose input to the HE,
+but should not be able to distinguish HE output from a returned random string.  They also provide two unpredictability definitions for the underlying
+nonce generator, which has implications on the security of the PKE scheme defined later.  It is important to note that the adversary in the
+real or random game when $ak$ is revealed must be separated into two stages: one who accesses an RoR oracle and one who 
+is given the seed $ak$ and state from the oracle phase and must guess the challenge bit.  They conclude their discussion of HE with a random oracle
+construction and a standard model construction using a PRF and an ``almost-XOR-universal'' hash function.
+
+The authors define nonce-based PKE security in a similar way to CCA security.  In one game, the secret $ak$ is chosen and hidden, and the
+adversary is given $Enc$ and $Dec$ oracles and must distinguish real message ciphertexts from all-zero message ciphertexts when the nonce generator
+does not repeat values.  The second game
+is the same except that the secret $ak$ is revealed and the nonce generator is unpredictable.  
+They provide a construction for achieving both definitions simultaneously by substituting the
+random coins for a standard IND-CCA PKE scheme with the output of a hedged extractor.
+
+The work concludes with unforgeability definitions for nonce-based signatures.  These follow the patterns established by the encryption
+definitions, and the constructions function in the same way, requiring the underlying PKE signature scheme to be randomized so
+that the coins can be produced by a HE.\\
+
+\noindent PROS:
+\begin{enumerate}
+\item Provides a nice solution to randomness subversion
+\item Does not require $Dec()$ to be modified
+\item Demonstrates loosely how nonces can be applied more generally than just encryption
+\end{enumerate}
+
+\noindent CONS:
+\begin{enumerate}
+\item Does not allow nonce to be used for anything besides randomization since the receiver does not see it.
+\item Trivially meets CPA and CCA security based on the underlying scheme, but does not consider true authenticated encryption.
+This could seemingly be achieved by combining the signatures also developed in the work.
+\item Does not really address why deterministic signature schemes are not ``good enough''.  Why do we need nonce-based randomized schemes
+that require state to be maintained?
+\item The secret $ak$ is only useful (like the nonce) for generating randomness.  Some applications could use it as a password or
+authenticating value.
+\item Specifically motivated to solve randomness concerns.  Not designed to augment any specific applications.
+\end{enumerate}
+
+
 
 \section{Questions}
 \begin{enumerate}
