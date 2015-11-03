@@ -1,0 +1,56 @@
+\documentclass[11pt, pdftex]{article}
+\usepackage{epsf}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage{ifthen}
+\usepackage{comment}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[margin=1in]{geometry}
+
+
+\title{Applications for IV-PKE}
+\author{}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section{Application ideas}
+\begin{enumerate}
+\item PLUTUS  [Kallahalla et al., Proceedings of the Conference on File and Storage Technologies (FAST '03)]
+\item Network Protocols:
+\begin{itemize}
+\item QUIC (Google)
+\item TLS 1.3
+\item Simple Network Management Protocol (w.r.t. cyber physical or embedded systems)
+\item DNS
+\item DTN (store and forward networks)
+\end{itemize}
+
+\item IM protocols (w.r.t. application layer message counters)
+
+\item Lightweight botnet control
+
+\item Mobile money protocols (assign $s$ to be a pin or unguessable account number?  What is the associated data here?)
+
+\item Scenarios where we don't want or can't afford to establish a public key (no-handshake ``one-shot'' protocols)
+
+\item USB fingerprinting (set $s$ as the fingerprint?  Or the AD?)
+
+\item Intra-datacenter encryption
+
+\item  Preventing port-knocking
+
+\item EMV (chip and pin)
+\end{enumerate}
+
+
+\section{Questions for syntax}
+\begin{enumerate}
+\item Should associated data be tied to $pk$?  Tied to $s$?
+
+\item Does $s$ defend against the loss of $sk$?
+\end{enumerate}
+
+\end{document}
