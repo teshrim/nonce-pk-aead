@@ -10,21 +10,32 @@ When~$F$ is an randomized algorithm, we write $x \getsr F(y_1,y_2,\cdots)$ to me
 An \emph{adversary} is a randomized algorithm.
 
 \paragraph{Asymmetric (Public-key) AEAD Schemes. }
-Fix sets $\pubkeys, \seckeys, \adata, \pubivs, \secivs, \ptxts,
+Fix sets $\pubkeys, \seckeys, \keydata, \adata, \metadata, \pubivs, \ptxts,
 \ctxts$, the first two of which are nonempty.  An public-key AEAD
-(PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen\colon\adata\to\pubkeys\times\seckeys$ takes associated data $\header \in \adata$ as input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen$ for the operation of key generation. \tsnote{Letting $\Kgen$ take assocaitated data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.}\tsnote{May need to distinguish between ``long-term'' AD (like a user-ID) and per-encryption AD.}
+(PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen\colon\keydata\to\pubkeys\times\seckeys$ takes key-registration data $\kreg \in \keydata$ as input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen(\kreg)$ for the operation of key generation. \tsnote{Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.}
 
-The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata \times \pubivs \times \secivs \times \ptxts \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, secret-IV~$\seciv \in \secivs$ and a plaintext~$M \in \ptxts$, and returns a ciphertext~$C \in \ctxts$. 
-When $\secivs$ is empty, then encryption is randomized.  Otherwise, it is \emph{IV-based} and deterministic.
-To stress the differing semantics of the inputs, key and non-private/private data, we write $\Encprim{\pk}{\header,\pubiv}{S,M}$ instead of $\Enc(\pk,\header,\pubiv,\seciv,M)$ for the operation of encryption.  When encryption takes an oracle, we $\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\mathcal{O}}$ to clearly separate oracles from inputs.
+The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata \times \pubivs \times \metadata \times \ptxts \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, public AD~$\header \in \adata$, initialization vector~$\pubiv \in \pubivs$, secret AD~$\seciv \in \metadata$ and a plaintext~$M \in \ptxts$, and returns a ciphertext~$C \in \ctxts$. 
+%When $\metadata$ is empty, then encryption is randomized.  
+%Otherwise, it is \emph{IV-based} and deterministic.
+To stress the differing semantics of the inputs, key and non-private/private data, we write $\Encprim{\pk}{\header,\pubiv}{\seciv,M}$ instead of $\Enc(\pk,\header,\pubiv,\seciv,M)$ for the operation of encryption.  When encryption takes an oracle, we $\EncprimO{\pk}{\header,\pubiv}{\seciv,M}{\mathcal{O}}$ to clearly separate oracles from inputs.
 
-The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$ takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
-
+We consider two kinds of deterministic decryption algorithms.  \emph{Decryption with secret-AD recovery} is 
+a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\secivs \times \ptxts\right) \cup \{\bot\}$.  It takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, public-IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \secivs\times\ptxts$, or the distinguished symbol~$\bot \not\in \ptxts$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
 For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\header)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
+
+\emph{Decryption without secret-AD recovery} is 
+a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \ptxts \cup \{\bot\}$.  As before, we write $M \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion.  For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=M$.
+
+\paragraph{Discussion. }  We have made various syntactic choices that both scope the applications we envision, and provide useful delinations for implementors.  Let us first discuss the syntax of decryption.  We formalize both decryption that must recover the secret AD, and decryption that does not.  The former is interesting for applications in which the sender wants to bind non-message data to the plaintext that should be hidden from all but the receiver.  For example, the secret-AD~$\seciv$ might be the salted hash of a user password $H(\mathrm{salt} \concat \mathrm{pwd})$.  If this has been previously established, say by a user registering with a banking website, then allowing~$\seciv$ to be recovered admits authenticity checks of the form \emph{this plaintext was sent by this user}.  Secret-AD may also be sensitive plaintext \emph{metadata}, e.g.\ the ordinality of this particular plaintext within an application or protocol stream; the identity of the sender on whose behalf this ciphertext was produced, and the identity of the intended recipient; the provenance of the data; etc. \tsnote{other things?}
+
+When decryption is not permited by syntax to return the secret-AD, we envision that $\seciv$~may be something like an external (to encryption) source of variability.  For example, a counter or an entropic input provided by a layer ``above'' encrpytion in the network stack.  This is the viewpoint taken by~\cite{mihir} which views nonce-based PKE as a method for hedging against bad randomness generation.
+
 
 
 \paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paragraph{Security notions. } 
 Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ and a randomized algorithm~$\advD$ that samples from the secret-IV set~$\secivs$ (of $\pkaead$) according to some distibution.  Let~$\mu_\advD$ be the min-entropy of this distribution.  Let~$\advA$ be an adversary.  
