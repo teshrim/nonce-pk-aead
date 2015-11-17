@@ -1,0 +1,57 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Security notions for PK-AEAD} 
+Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ and a randomized algorithm~$\advD$ that samples from the secret-IV set~$\secivs$ (of $\pkaead$) according to some distibution.  Let~$\mu_\advD$ be the min-entropy of this distribution.  Let~$\advA$ be an adversary.  
+
+In Figure~\ref{fig:ind-cda} we give two notions of plaintext privacy.  In the first, the adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\seciv,M_b)$ where~$S$ was previously sampled by~$\advD$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query and that~$\advA$ is \emph{nonce-respecting}, meaning that it never repeats a value of~$\pubiv$ across its queries.  We refer to this as the Priv security notion.
+In the second notion, the adversary does not control the value of~$\pubiv$.  Instead, when~$\advA$ queries $(\header,M_0,M_1)$, a fresh public-IV~$\pubiv$ is sampled from the public-IV set~$\pubivs$.  The oracle returns~$\pubiv$ along with the encryption of $(S,M_b)$ using that particular public-IV.  We refer to this as Priv-IV security notion.
+
+In practice, security with respect to the first notion means that the PK-AEAD scheme will protect plaintexts so long as the calling environment provides nonces for the IVs, e.g. a reliable counter value.  Security with respect to the second notion means that the PK-AEAD scheme guarantees privacy only when the calling environment provides IVs that are random and independent across calls.
+
+\tsnote{There are other verions, too, that might make sense.  In one, $S\getsr\advD$ not once, but each time the oracle is queried.  There's no need for nonce respecting behavior then.  In another, the adversary can decide whether or not a new~$\seciv$ is sampled on a query, and it must be nonce-respecting for a given~$\seciv$.  An ``$\seciv$-adaptive version of this would allow~$\advA$ to refer to sampled values of~$\seciv$ by handles and arbitrarly interleave queries to handles.}
+\begin{figure}
+\begin{center}
+\fpage{.5}{
+ \hpagess{.425}{.55}{
+ \underline{$\ExpINDCDA{\pkaead}{\advD,\advA}$}:\\[2pt]
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b\getsr\bits$\\
+ $S\getsr\advD$\\
+ $b'\getsr\advA^{\encOracle(\cdot,\cdot,\cdot,\cdot)}(\pk)$\\
+ Return $[b'=b]$\\
+
+\medskip
+ \underline{$\ExpINDCDAR{\pkaead}{\advD,\advA}$}:\\[2pt]
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b\getsr\bits$\\
+ $S\getsr\advD$\\
+ $b'\getsr\advA^{\encOracle(\cdot,\cdot,\cdot)}(\pk)$\\
+ Return $[b'=b]$
+
+ }
+ {
+ \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+ Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\[51pt]
+
+\medskip
+ \Oracle{$\encOracle(\header,M_0,M_1)$}:\\[2pt]
+ $N \getsr \pubivs$\\
+ $C \gets  \Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
+ Return $(N,C)$
+
+ }
+}
+\caption{Privacy notions for an IV-based PK-AEAD scheme~$\pkaead$ with public-IV and secret-IV sets $\pubivs,\secivs$ (resp.)}
+\label{fig:ind-cda}
+\tsnote{Doesn't match current syntax, where $\Kgen$ takes AD as input.  Need to think about how to handle this in the security notion(s).}
+\end{center}
+\end{figure}
+
+For these two notions, we define corresponding advantage measures for a given adversary~$\advA$, sampler~$\advD$, and scheme $\pkaead$ as
+\begin{align*}
+\AdvINDCDA{\pkaead}{\advD,\advA}&=2\Prob{\ExpINDCDA{\pkaead}{\advD,\advA}=1}-1\\ \AdvINDCDAR{\pkaead}{\advD,\advA}&=2\Prob{\ExpINDCDAR{\pkaead}{\advD,\advA}=1}-1
+\end{align*}
+respectively.  In both experiments, we track the following adversarial resources: (1) the time-complexity~$t$ of~$\advA$, relative to some understood model of computation; (2) the query-complexity~$q$, measured as the number of queries made by~$\advA$ to its oracle; (3) the total query-length~$\sigma$, defined the be the sum over all query lengths, where $|(\header,\pubiv,M_0,M_1)|=|\header|+|\pubiv|+|M_0|$.
+
+
+\tsnote{Need authenticity notions.}
