@@ -39,6 +39,10 @@ This is the viewpoint taken by~\cite{mihir} which views nonce-based PKE as a met
 \item\emph{What's this key-registration data all about?} \tsnote{Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.}
 \end{itemize}
  
+
+\paragraph{Secret-AD production. } To capture the notion that plaintexts (or the applications that produce them) may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$\seciv$ along with an updated state.  We write $(\st,S) \getsr \mdalg(\st,M)$. \tsnote{Flesh this out.} 
+
+
 \paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}
 
 
