@@ -40,7 +40,9 @@ This is the viewpoint taken by~\cite{mihir} which views nonce-based PKE as a met
 \end{itemize}
  
 
-\paragraph{Secret-AD production. } To capture the notion that plaintexts (or the applications that produce them) may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$\seciv$ along with an updated state.  We write $(\st,S) \getsr \mdalg(\st,M)$.  Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as \tsnote{...Need to flesh this out more.} 
+\paragraph{Secret-AD production. } To capture the notion that plaintexts (or the applications that produce them) may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$\seciv$ along with an updated state.  We write $(\st,S) \getsr \mdalg(\st,M)$.  For notational convenience, we assume that on input $\mdalg(\emptystring,\bot)$ the algorithm simply initializes its state.
+
+Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as \tsnote{...Need to flesh this out more.} \tsnote{State also allows for stateful distributions.  Note that the distribution might not depend on $M_b$ at all, e.g. when~$S$ contains a password.}
 
 
 %\paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}
