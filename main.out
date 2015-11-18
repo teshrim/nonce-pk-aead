@@ -1,5 +1,7 @@
 \BOOKMARK [1][-]{section.1}{Old Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Encryption Schemes}{}% 2
 \BOOKMARK [1][-]{section.3}{Security notions for PK-AEAD}{}% 3
-\BOOKMARK [1][-]{appendix.A}{Encapsulation Schemes}{}% 4
-\BOOKMARK [1][-]{appendix.B}{Constructions}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Current notions}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Older notions}{section.3}% 5
+\BOOKMARK [1][-]{appendix.A}{Encapsulation Schemes}{}% 6
+\BOOKMARK [1][-]{appendix.B}{Constructions}{}% 7
