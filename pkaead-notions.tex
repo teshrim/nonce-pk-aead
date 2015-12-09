@@ -6,6 +6,10 @@ Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix
 
 In Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\seciv,M_b)$ where~$S$ is produced by executing $\mdalg(\st,M_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query.
 
+As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$\seciv$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  In this security experiment, the adversary sends plaintext strings~$X$ to an oracle~$\predOracle$ that executes $\mdalg(\st,X)$ on the current state~$\st$ and adds the resulting secret-AD~$\seciv$ to a set~$Q$.  After the adversary has finished loading~$Q$ via these queries, it attempts to guess an element of~$Q$. \tsnote{This formalism of unpredictable~$S$ may not be sufficient. Intuitively you want to say somthing like, if you can't predict~$S$ then ciphertexts should be secure when the adversary is nonce-respecting.  It isn't clear how you use this PRED-notion in a reduction, because the privacy game PRIV provides ciphertexts that depend on~$S$, whereas the PRED game provides no information about~$S$. (Maybe if you let the adversary specify the state in its queries, you could do the reduction... but that seems really strong, since $\mdalg$ is the abstract process by which metadata is created, which might include the operating system, other applications, hardware, etc.) It also isn't clear that PRED is strong enough.  You lose the PRED game if even one bit of every element of~$Q$ is unpredictable.  Is one bit of unpredictability going to suffice?  }
+
+
+
 
 \begin{figure}
 \begin{center}
@@ -43,7 +47,33 @@ In Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary q
 \end{center}
 \end{figure}
 
-\tsnote{The idea I have in mind ---~although I'm not sure it is the correct one~--- is that either you can guess the secret-AD, or the encryption scheme remains secure.  It's not entirely clear this will work as I've defined it.  In the ROM it might be okay.  But in the standard model it is less clear.  The current PRED notion says the adversary loses if~$S'$ is off by one bit from all elements in~$Q$.  One bit of computational entropy seems unlikely to cut it.}
+\begin{figure}
+\begin{center}
+\fpage{.5}{
+ \hpagess{.425}{.55}{
+ \underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA,\simulator}$}:\\[2pt]
+ $(\pk,\sk)\getsr\Kgen(\kreg)$\\
+ $\st \getsr \mdalg(\emptystring,\bot)$\\
+ $\st' \gets \st$\\
+ $b\getsr\bits$\\
+ $b'\getsr\advA^{\encOracle}(\pk)$\\
+ Return $[b'=b]$\\
+ }
+ {
+ \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+ if $b=1$\\
+ \nudge $(\st,\seciv) \getsr \mdalg(\st,M_b)$\\
+ \nudge Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
+ else \\
+ \nudge $(\st', S) \getsr\simulator(\st', |M_0|)$\\
+ \nudge Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
+ }
+}
+\caption{Another potential notion, this one simulation-based.}
+\label{fig:pkaead-notions-2}
+\end{center}
+\end{figure}
+
 
 \subsection{Older notions}
 Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ and a randomized algorithm~$\advD$ that samples from the secret-IV set~$\secivs$ (of $\pkaead$) according to some distibution.  Let~$\mu_\advD$ be the min-entropy of this distribution.  Let~$\advA$ be an adversary.  

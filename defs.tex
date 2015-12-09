@@ -356,6 +356,7 @@ full version\fi}
 \newcommand{\Cipher}{\pi}
 \newcommand{\CipherInv}{\pi^{-1}}
 \newcommand{\simu}{{\mathcal S}}
+\newcommand{\simulator}{\simu}
 \newcommand{\prim}{P}
 \newcommand{\maxguess}{\gamma}
 
@@ -474,6 +475,9 @@ full version\fi}
 \newcommand{\mythenote}{\thesection.\arabic{mynote}}
 \newcommand{\tsnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\bf
     \textcolor{cyan}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}\fi}
+\newcommand{\tsfnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\footnote{\bf
+    \textcolor{cyan}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}}\fi} 
+
 \newcommand{\fixme}[1]{\ifnum\authnotes=1{\textcolor{red}{[[FIXME: #1]]}}\fi}
 
 \newcommand{\task}[1]{\ifnum\authnotes=1{\textcolor{red}{[TASK: #1] }}\fi}
