@@ -1,0 +1,27 @@
+\subsection{Related Work}
+\label{rel_wk}
+
+\subsubsection{Deterministic PKE}
+
+The first attempt to define public key security for fully deterministic schemes was by Bellare, Boldyreva, and O'Neill~\cite{BBO07}.
+This work formalized a new definition of security that was achievable in the random oracle model as long as the min-entropy
+of the plaintext space remained above a certain threshold.  Several other related definitions were proposed shortly after~\cite{BFOR08,BSO08},
+producing instantiations in both the random oracle and the standard model, as well as constructions for semantically secure randomized schemes
+and randomized key encapsulation mechanisms based on deterministic public key encryption.
+Among all of these definitions, two major requirements persist: some restriction on the min-entropy of the plaintexts is always necessary, and
+adversary access to the public key must be restricted through multi-phase adversaries. Raghunathan et al.~\cite{RSV13} proposed
+a definition that relaxes this second restriction, but changes the adversary's goal to distinguishing between plaintext distributions
+rather than individual plaintext queries.  While these deterministic definitions of security provide some insight into what is
+required to maintain security in the presence of no randomness, they fail to demonstrate the potential for maintaining some
+security when the randomness provided to the scheme is somewhere in between uniform and deterministic.  To answer
+this question, hedged encryption schemes present definitions of security and encryption schemes that maintain some
+amount of security even in the face of degrading quality randomness.  This is commonly achieved through harvesting randomness
+from both the random coins provided to the encryption scheme and the plaintext distribution itself~\cite{BBNRTSSHY2009}.  
+Recent work by Bellare and Hoang~\cite{BH15}
+has produced standard model constructions for both deterministic and hedged encryption schemes by applying Universal Computational Extractors,
+or UCEs~\cite{BHK13}.  This work also demonstrates the continuing utility of lossy trapdoor functions~\cite{PW11}, first applied to deterministic encryption
+schemes by Boldyreva et al.~\cite{BSO08}.  Unfortunately, none of these definitions consider the potential for achieving equivalent security to 
+semantic security given limited access to randomness, and can be viewed as special cases of nonce-based encryption by varying the
+properties of the nonce.
+
+\subsubsection{Password based encryption}
