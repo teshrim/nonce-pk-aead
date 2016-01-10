@@ -25,3 +25,18 @@ semantic security given limited access to randomness, and can be viewed as speci
 properties of the nonce.
 
 \subsubsection{Password based encryption}
+
+Password-based encryption has been in use for decades, but unfortunately the theoretical underpinnings that demonstrate the
+security of common practices have lagged behind.  Several studies of specific password hashing protocols have been produced~\cite{LR88,WG00,Boyen07},
+but unfortunately the low entropy of most passwords chosen in practice does not match the assumptions made by these
+theoretical analyses in demonstrating security.  More recently, significant effort has been put into developing more general definitions
+of security by concretely defining security for key derivation functions.  While the security of general KDFs using common hashing techniques have been
+analyzed~\cite{DGHKR04}, the password-based KDF presents particular challenges due to the significantly lower entropy available from
+passwords that can be memorized~\cite{Kraw10}.  Password-specific KDF security definitions have focused on defining indistinguishability from
+a randomly chosen key~\cite{YY05}, while others have defined security against recovery of the password~\cite{KSHW98,AW05}.  Bellare et al.~\cite{BRT12}
+expand on these definitions by developing a multi-instance definition of security for a KDF, which ensures that breaking the
+security of a single password does not significantly improve an attacker's ability to learn additional passwords.
+Beyond password-based KDFs, password authenticated key exchange (PAKE) protocols allow for two parties in possession of a password
+to negotiate a cryptographic session key~\cite{BPR00,GL03,CHKLM05}.  However, the combination of added randomness being locally generated and the interactive
+nature of these protocols eliminates many of the security issues associated with the offline dictionary attacks that are the primary concern for
+password-based encryption.
