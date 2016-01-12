@@ -1,7 +1,10 @@
 \BOOKMARK [1][-]{section.1}{Old Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Encryption Schemes}{}% 2
-\BOOKMARK [1][-]{section.3}{Security notions for PK-AEAD}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{Current notions}{section.3}% 4
-\BOOKMARK [2][-]{subsection.3.2}{Older notions}{section.3}% 5
-\BOOKMARK [1][-]{appendix.A}{Encapsulation Schemes}{}% 6
-\BOOKMARK [1][-]{appendix.B}{Constructions}{}% 7
+\BOOKMARK [2][-]{subsection.1.1}{Related Work}{section.1}% 2
+\BOOKMARK [3][-]{subsubsection.1.1.1}{Deterministic PKE}{subsection.1.1}% 3
+\BOOKMARK [3][-]{subsubsection.1.1.2}{Password based encryption}{subsection.1.1}% 4
+\BOOKMARK [1][-]{section.2}{Encryption Schemes}{}% 5
+\BOOKMARK [1][-]{section.3}{Security notions for PK-AEAD}{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{Current notions}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Older notions}{section.3}% 8
+\BOOKMARK [1][-]{appendix.A}{Encapsulation Schemes}{}% 9
+\BOOKMARK [1][-]{appendix.B}{Constructions}{}% 10
