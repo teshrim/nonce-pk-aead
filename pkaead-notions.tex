@@ -42,11 +42,17 @@ As previously noted, if the adversary controls~$\header, \pubiv$ and the plainte
 
  }
 }
-\caption{{\bf Top:} Privacy notion for an IV-based PK-AEAD scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair is produced using registration-data~$\kreg$. {\bf Bottom:} Unpredictability notion for secret-AD algorithm~$\mdalg$.}
+\caption{{\bf Top:} Privacy notion for an IV-based PK-AEAD
+  scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
+  is produced using registration-data~$\kreg$. {\bf Bottom:}
+  Unpredictability notion for secret-AD algorithm~$\mdalg$.} \task{Our
+  PRED notion is essentially the same as Mihir's PRED notion.  How
+  does he use it in his proofs?}
 \label{fig:pkaead-notions}
 \end{center}
 \end{figure}
 
+\if{0}
 \begin{figure}
 \begin{center}
 \fpage{.5}{
@@ -73,7 +79,7 @@ As previously noted, if the adversary controls~$\header, \pubiv$ and the plainte
 \label{fig:pkaead-notions-2}
 \end{center}
 \end{figure}
-
+\fi
 
 \subsection{Older notions}
 Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ and a randomized algorithm~$\advD$ that samples from the secret-IV set~$\secivs$ (of $\pkaead$) according to some distibution.  Let~$\mu_\advD$ be the min-entropy of this distribution.  Let~$\advA$ be an adversary.  
