@@ -6,7 +6,7 @@ Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix
 
 In Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\seciv,M_b)$ where~$S$ is produced by executing $\mdalg(\st,M_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query.
 
-As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$\seciv$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  In this security experiment, the adversary sends plaintext strings~$X$ to an oracle~$\predOracle$ that executes $\mdalg(\st,X)$ on the current state~$\st$ and adds the resulting secret-AD~$\seciv$ to a set~$Q$.  After the adversary has finished loading~$Q$ via these queries, it attempts to guess an element of~$Q$. \tsnote{This formalism of unpredictable~$S$ may not be sufficient. Intuitively you want to say somthing like, if you can't predict~$S$ then ciphertexts should be secure when the adversary is nonce-respecting.  It isn't clear how you use this PRED-notion in a reduction, because the privacy game PRIV provides ciphertexts that depend on~$S$, whereas the PRED game provides no information about~$S$. (Maybe if you let the adversary specify the state in its queries, you could do the reduction... but that seems really strong, since $\mdalg$ is the abstract process by which metadata is created, which might include the operating system, other applications, hardware, etc.) It also isn't clear that PRED is strong enough.  You lose the PRED game if even one bit of every element of~$Q$ is unpredictable.  Is one bit of unpredictability going to suffice?  }
+As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$\seciv$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  Figure~\ref{fig:pred-notions} gives two possible formalizations.  On the left,, the adversary sends plaintext strings~$X$ to an oracle~$\predOracle$ that executes $\mdalg(\st,X)$ on the current state~$\st$ and returns the resulting secret-AD~$\seciv$.  At the end of its execution, the adversary returns a state-message pair~$(T,M)$ and wins if the value $\mdalg(\st,M)$, executed with the current state, is the same as~$T$.  Essentially, for any sequence of adversarially chosen messages and the corresponding secret-AD strings, it should be hard to guess the next secret-AD value.\tsnote{The captures adversaries that can nudge applications into producing particular plaintexts, and can observe (but not corrupt) whatever is producing the secret-AD. } \tsnote{Unfortunately, I don't see how to align this with the setting where~$S$ is (say) a user's password.}  On the right, we give a formalization that is simulation-based.  The function~$\phi\colon\ptxts\to\bits^*$ determines how plaintext information is leaked to the simulator.  In other words, how much one needs to know about plaintexts in order to properly simulate secret-AD production.  This captures what about the plaintext is actually used to determine the secret-AD. For example, if $\phi(X)=X$ is required for an efficient simulator to fool the adversary, then secret-AD production must depend on all of the bits of each plaintext.  If $\phi(X)=|X|$ suffices, then only the length matters.  When $\phi(X)=\emptystring$ suffices, we capture settings where the secret-AD is independent of plaintext bits, e.g.\ when~$\seciv = H(\mathrm{salt} \concat \mathrm{pwd})$, or when~$\seciv$ is a message counter.
 
 
 
@@ -14,72 +14,66 @@ As previously noted, if the adversary controls~$\header, \pubiv$ and the plainte
 \begin{figure}
 \begin{center}
 \fpage{.5}{
- \hpagess{.425}{.55}{
+\hpagess{.425}{.55}{
  \underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
  $(\pk,\sk)\getsr\Kgen(\kreg)$\\
  $\st \getsr \mdalg(\emptystring,\bot)$\\
  $b\getsr\bits$\\
  $b'\getsr\advA^{\encOracle}(\pk)$\\
  Return $[b'=b]$\\
-
-\medskip
- \underline{$\ExpPred{\mdalg}{\advP}$}:\\[2pt]
- $\st \getsr \mdalg(\emptystring,\bot)$\\
- $ Q \gets \emptyset$\\ 
- $ S'\getsr\advP^{\predOracle}$\\
- Return $[S' \in Q ]$
-
- }
- {
- \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+}
+{ 
+\Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
  $(\st,\seciv) \getsr \mdalg(\st,M_b)$\\
  Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\[40pt]
-
-\medskip
- \Oracle{$\predOracle(X)$}:\\[2pt]
- $(\st,\seciv) \getsr \mdalg(\st,X)$\\
- $Q \gets Q \cup \{\seciv\}$\\
-
- }
 }
-\caption{{\bf Top:} Privacy notion for an IV-based PK-AEAD
+}
+\caption{Privacy notion for an IV-based PK-AEAD
   scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
-  is produced using registration-data~$\kreg$. {\bf Bottom:}
-  Unpredictability notion for secret-AD algorithm~$\mdalg$.} \task{Our
-  PRED notion is essentially the same as Mihir's PRED notion.  How
-  does he use it in his proofs?}
+  is produced using registration-data~$\kreg$.} 
+%\task{Our PRED notion is essentially the same as Mihir's PRED notion.  How
+%  does he use it in his proofs?}\tsnote{He uses it in the ROM to show how to build a hedged extractor with RoR-security.  This allows the PRED adversary in the RoR-reduction to simply return random strings and to ``guess'' which of the RO-queries is the one containing the output needed to win the PRED game.  We can't do that here, even in the ROM, as far as I can see.}
 \label{fig:pkaead-notions}
 \end{center}
 \end{figure}
 
-\if{0}
 \begin{figure}
 \begin{center}
-\fpage{.5}{
- \hpagess{.425}{.55}{
- \underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA,\simulator}$}:\\[2pt]
- $(\pk,\sk)\getsr\Kgen(\kreg)$\\
+\hfpagess{.25}{.25}
+{
+ \underline{$\ExpPred{\mdalg}{\advP}$}:\\[2pt]
  $\st \getsr \mdalg(\emptystring,\bot)$\\
- $\st' \gets \st$\\
- $b\getsr\bits$\\
- $b'\getsr\advA^{\encOracle}(\pk)$\\
- Return $[b'=b]$\\
- }
- {
- \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
- if $b=1$\\
- \nudge $(\st,\seciv) \getsr \mdalg(\st,M_b)$\\
- \nudge Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
- else \\
- \nudge $(\st', S) \getsr\simulator(\st', |M_0|)$\\
- \nudge Return $\Encprim{\pk}{\header,\pubiv}{S,M_b}$\\
- }
+ %$ Q \gets \emptyset$\\ 
+ $ (T,M)\getsr\advP^{\predOracle}$\\
+ %Return $[S' \in Q ]$
+ $ (\st,\seciv) \getsr \mdalg(\st,M)$\\
+ Return $[S=T]$
+
+\medskip
+ \Oracle{$\predOracle(X)$}:\\[2pt]
+ $(\st,\seciv) \getsr \mdalg(\st,X)$\\
+ Return~$S$
+ %$Q \gets Q \cup \{\seciv\}$\\
 }
-\caption{Another potential notion, this one simulation-based.}
-\label{fig:pkaead-notions-2}
+{
+\underline{$\ExpPred{\mdalg,\simulator,\phi}{\advP}$}:\\[2pt]
+$b \getsr \bits$\\ 
+$\st \getsr \mdalg(\emptystring,\bot)$\\
+$\st' \gets \st$ (or maybe $\st'\gets\emptystring$?)\\
+$ b'\getsr\advP^{\predOracle}$\\
+ Return $[b'=b]$ 
+
+\medskip
+ \Oracle{$\predOracle(X)$}:\\[2pt]
+ if $b=1$ then\\$(\st,\seciv) \getsr \mdalg(\st,X)$\\
+ else $(\st',\seciv) \getsr \simulator(\st',\phi(X))$\\
+ Return~$S$
+ %$Q \gets Q \cup \{\seciv\}$\\
+ }
+\caption{ {\bf Left:} Unpredictability notion for secret-AD algorithm~$\mdalg$. {\bf Right:} Another potential predictability notion, this one simulation-based. The mapping $\phi$ is information about~$X$ that is sufficient to simulate secret-AD production (when giving positive results).  When $\phi$ is the identity map, then the simulator can perfectly mimic secret-AD production.}\tsnote{Too strong?  Really depends on application.  But at least here we can support things like $\seciv$ being a sampled-once string like a user password.}
+\label{fig:pred-notions}
 \end{center}
 \end{figure}
-\fi
 
 \subsection{Older notions}
 Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ and a randomized algorithm~$\advD$ that samples from the secret-IV set~$\secivs$ (of $\pkaead$) according to some distibution.  Let~$\mu_\advD$ be the min-entropy of this distribution.  Let~$\advA$ be an adversary.  
