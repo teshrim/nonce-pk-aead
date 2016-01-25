@@ -40,3 +40,20 @@ Beyond password-based KDFs, password authenticated key exchange (PAKE) protocols
 to negotiate a cryptographic session key~\cite{BPR00,GL03,CHKLM05}.  However, the combination of added randomness being locally generated and the interactive
 nature of these protocols eliminates many of the security issues associated with the offline dictionary attacks that are the primary concern for
 password-based encryption.
+
+\subsubsection{Labeled PKE}
+
+The labeled public key encryption scheme~\cite{Shoup2001} was developed to allow for formal analysis of the authenticated metadata that often accompanies ciphertexts in practice.
+Syntactically similar to the symmetric key extension called associated data~\cite{Rog02}, a label is essentially public information that is integrity
+verified and bound to the ciphertext as an added input to the encryption operation.  The integrity check occurs at decryption, which returns $\perp$ if
+the integrity check on the labels fails.  This technique has been applied to several cryptographic applications under different names~\cite{Lim1993,Camenisch2003}, but has more
+recently been used to boost the security of other schemes to be secure against chosen ciphertext attacks~\cite{Shoup2002,Camenisch2009,Hofheinz2013,Libert2014}.  
+For example, the combination of a labeled PKE scheme with an IND-CCA secure PKE scheme can achieve CCA security with key-dependent messages.  
+by including an additional one-time public key signature, where the verification key is attached as a label to ensure that it remains unmodified.  Another application for PLE labels is
+in tagged signatures~\cite{Abe2013} and key encapsulation mechanisms~\cite{AGK08}.  In particular, the TKEM has been widely applied to allow for stronger security guarantees
+in hybrid encryption schemes even when the security guarantees of the data encapsulation mechanism (DEM) are reduced.  In real-world protocol analysis, the
+tags are frequently used to represent additional integrity verified public messages, such as the handshake messages in TLS~\cite{Jonsson2002}.  
+More recently, Shibuya and Shikata~\cite{Shibuya2011}
+developed a generalized definition called authenticated key encapsulation mechanism (AKEM), which captures the definition of TKEM as well as some related
+constructions that do not clearly fit the TKEM definition.  However, because AKEM schemes allow the decryption to verify tags that are not public (e.g., the message
+encrypted under the DEM), they do not technically fall under the standard definition of a labeled PKE scheme.

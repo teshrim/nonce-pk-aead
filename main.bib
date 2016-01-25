@@ -21,14 +21,14 @@ title = {{On notions of security for deterministic encryption, and efficient con
 year = {2008}
 }
 
-@article{BBNRTSSHY2009,
+@inproceedings{BBNRTSSHY2009,
 author = {Bellare, Mihir and Brakerski, Zvika and Naor, Moni and Ristenpart, Thomas and Segev, Gil and Shacham, Hovav and Yilek, Scott},
 booktitle = {ASIACRYPT},
 title = {{Hedged public-key encryption: How to protect against bad randomness}},
 year = {2009}
 }
 
-@article{RSV13,
+@inproceedings{RSV13,
 author = {Raghunathan, Ananth and Segev, Gil and Vadhan, Salil},
 booktitle = {EUROCRYPT},
 title = {{Deterministic public-key encryption for adaptively chosen plaintext distributions}},
@@ -153,28 +153,29 @@ year = {2003}
 }
 
 %Labeled PKE-----------------------------------------------------------------------
-@inproceedings{Abe2013,
-author = {Abe, Masayuki and David, Bernardo and Kohlweiss, Markulf and Nishimaki, Ryo and Ohkubo, Miyako},
-booktitle = {Public Key Cryptography},
-title = {Tagged One-Time Signatures: Tight Security and Optimal Tag Size},
-year = {2013}
+@inproceedings{Rog02,
+author = {P. Rogaway},
+title = {Authenticated-encryption with associated-data},
+booktitle = {Proceedings of the ACM Conference on Computer and Communications Security (CCS)},
+year = {2002}
 }
 
-@article{AGK08,
-author = {Abe, M. and Gennaro, R. and Kurosawa, K}
-title = {Tag-{KEM/DEM}: A New Framework for Hybrid Encryption},
+%Examples
+@inproceedings{Lim1993,
+author = {Lim, Chae Hoon and Lee, Pil Joong},
+booktitle = {CRYPTO},
+title = {Another Method for Attaining Security against Adaptively Chosen Ciphertext Attacks},
+year = {1993}
+}
+
+@article{Shoup2002,
+author = {Shoup, Victor and Gennaro, Rosario},
 journal = {Journal of Cryptology},
-volume = {21},
-number = {1}, 
-pages = {97Ð130},
-year = {2008}
-}
-
-@inproceedings{Camenisch2009,
-author = {Camenisch, Jan and Chandran, Nishanth and Shoup, Victor},
-booktitle = {EUROCRYPT},
-title = {A public key encryption scheme secure against key dependent chosen plaintext and adaptive chosen ciphertext attacks},
-year = {2009}
+number = {2},
+pages = {75--96},
+title = {Securing Threshold Cryptosystems against Chosen Ciphertext Attack},
+volume = {15},
+year = {2002}
 }
 
 @inproceedings{Camenisch2003,
@@ -184,6 +185,20 @@ title = {Practical Verifiable Encryption and Decryption of Discrete Logarithms},
 year = {2003}
 }
 
+@inproceedings{Camenisch2009,
+author = {Camenisch, Jan and Chandran, Nishanth and Shoup, Victor},
+booktitle = {EUROCRYPT},
+title = {A public key encryption scheme secure against key dependent chosen plaintext and adaptive chosen ciphertext attacks},
+year = {2009}
+}
+
+@inproceedings{Libert2014,
+author = {Libert, Benoöõt and Peters, Thomas and Joye, Marc and Yung, Moti},
+booktitle = {EUROCRYPT},
+title = {Non-Malleability from Malleability : Simulation-Sound Quasi-Adaptive {NIZK} Proofs and {CCA2}-Secure Encryption from Homomorphic Signatures},
+year = {2014}
+}
+
 @inproceedings{Hofheinz2013,
 author = {Hofheinz, Dennis},
 booktitle = {EUROCRYPT},
@@ -191,6 +206,33 @@ title = {Circular chosen-ciphertext security with compact ciphertexts},
 year = {2013}
 }
 
+%Tagged schemes
+@inproceedings{Abe2013,
+author = {Abe, Masayuki and David, Bernardo and Kohlweiss, Markulf and Nishimaki, Ryo and Ohkubo, Miyako},
+booktitle = {Public Key Cryptography},
+title = {Tagged One-Time Signatures: Tight Security and Optimal Tag Size},
+year = {2013}
+}
+
+@article{AGK08,
+author = {Abe, M. and Gennaro, R. and Kurosawa, K},
+title = {Tag-{KEM/DEM}: A New Framework for Hybrid Encryption},
+journal = {Journal of Cryptology},
+volume = {21},
+number = {1}, 
+pages = {97--130},
+year = {2008}
+}
+
+@inproceedings{Shibuya2011,
+author = {Shibuya, Yuki and Shikata, Junji},
+title = {Constructing Secure Hybrid Encryption from Key Encapsulation Mechanism with Authenticity},
+booktitle = {Cryptography and Coding},
+year = {2011}
+}
+
+
+%tags in analyses
 @inproceedings{Jonsson2002,
 author = {Jonsson, Jakob and {Kaliski Jr.}, Burton S},
 booktitle = {CRYPTO},
@@ -206,48 +248,10 @@ year = {2002}
     note = {\url{http://eprint.iacr.org/}},
 }
 
-@inproceedings{Libert2014,
-author = {Libert, Benoöõt and Peters, Thomas and Joye, Marc and Yung, Moti},
-booktitle = {EUROCRYPT},
-title = {Non-Malleability from Malleability : Simulation-Sound Quasi-Adaptive {NIZK} Proofs and {CCA2}-Secure Encryption from Homomorphic Signatures},
-year = {2014}
-}
-
-@inproceedings{Lim1993,
-author = {Lim, Chae Hoon and Lee, Pil Joong},
-booktitle = {CRYPTO},
-title = {Another Method for Attaining Security against Adaptively Chosen Ciphertext Attacks},
-year = {1993}
-}
-
-@inproceedings{Shibuya2011,
-author = {Shibuya, Yuki and Shikata, Junji},
-title = {Constructing Secure Hybrid Encryption from Key Encapsulation Mechanism with Authenticity},
-booktitle = {Cryptography and Coding},
-year = {2011}
-}
-
 @misc{Shoup2001,
     author = {Victor Shoup},
     title = {A Proposal for an ISO Standard for Public Key Encryption},
     howpublished = {Cryptology ePrint Archive, Report 2001/112},
     year = {2001},
     note = {\url{http://eprint.iacr.org/}},
-}
-
-@article{Shoup2002,
-author = {Shoup, Victor and Gennaro, Rosario},
-journal = {Journal of Cryptology},
-number = {2},
-pages = {75--96},
-title = {Securing Threshold Cryptosystems against Chosen Ciphertext Attack},
-volume = {15},
-year = {2002}
-}
-
-@inproceedings{Rog02,
-author = {P. Rogaway},
-title = {Authenticated-encryption with associated-data},
-booktitle = {Proceedings of the ACM Conference on Computer and Communications Security (CCS)},
-year = {2002}
 }
