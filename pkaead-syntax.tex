@@ -22,7 +22,7 @@ To stress the differing semantics of the inputs, key and non-private/private dat
 
 We consider two kinds of deterministic decryption algorithms.  \emph{Decryption with secret-AD recovery} is 
 a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\metadata \times \ptxts\right) \cup \{\bot\}$.  It takes a secret-key~$\sk\in\seckeys$, associated data~$\header \in \adata$, IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \metadata\times\ptxts$, or the distinguished symbol~$\bot$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
-For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=M$.
+For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
 
 \emph{Decryption without secret-AD recovery} is 
 a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \times \bits^*\to \ptxts \cup \{\bot\}$.  As before, we write $M \gets \Decprim{\sk}{\header,\pubiv}{C,\auxinput}$ for the operation of decryption.    For each~$\seciv\in\secivs$ we assume there exists a non-empty set $\mathcal{Z}_\seciv \subseteq \bits^*$ such that: 
