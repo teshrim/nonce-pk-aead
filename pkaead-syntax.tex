@@ -25,9 +25,10 @@ a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \
 For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=M$.
 
 \emph{Decryption without secret-AD recovery} is 
-a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \times \bits^*\to \ptxts \cup \{\bot\}$.  As before, we write $M \gets \Decprim{\sk}{\header,\pubiv}{C,\auxinput}$ for the operation of decryption.   
-%For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\header)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, $\auxinput\in\bits^*$ and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M},\auxinput}=(S,M)$. 
-\tsnote{The auxilary input~$\auxinput$ is meant to support authentication \textit{within} the decryption boundary.  For example, when~$\auxinput$ is something like the receiver-side stored version of~$S$.  Not sure how~$\auxinput$ should affect proper operation.  Should there be only one~$\auxinput$ for each~$\seciv$?  A class $\mathcal{Z_\seciv}\subseteq\bits^*$ of valid~$\auxinput$?}
+a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \times \bits^*\to \ptxts \cup \{\bot\}$.  As before, we write $M \gets \Decprim{\sk}{\header,\pubiv}{C,\auxinput}$ for the operation of decryption.    For each~$\seciv\in\secivs$ we assume there exists a non-empty set $\mathcal{Z}_\seciv \subseteq \bits^*$ such that: 
+%For proper operation, we require that 
+for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\header)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, $\auxinput\in\mathcal{Z}_\seciv$,  and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M},\auxinput}=M$. 
+\tsnote{The auxilary input~$\auxinput$ is meant to support authentication \textit{within} the decryption boundary.  For example, when~$\auxinput$ is something like the receiver-side stored version of~$S$. }
 
 \paragraph{Discussion. }  We have made various syntactic choices that both scope the applications we envision, and provide useful delinations for implementors.  Let us first explore them a bit.  
 
