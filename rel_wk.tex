@@ -1,8 +1,7 @@
-\subsection{Related Work}
+\section{Related Work}
 \label{rel_wk}
 
-\subsubsection{Deterministic PKE}
-
+\paragraph{Deterministic PKE. }
 The first attempt to define public key security for fully deterministic schemes was by Bellare, Boldyreva, and O'Neill~\cite{BBO07}.
 This work formalized a new definition of security that was achievable in the random oracle model as long as the min-entropy
 of the plaintext space remained above a certain threshold.  Several other related definitions were proposed shortly after~\cite{BFOR08,BSO08},
@@ -24,8 +23,7 @@ schemes by Boldyreva et al.~\cite{BSO08}.  Unfortunately, none of these definiti
 semantic security given limited access to randomness, and can be viewed as special cases of nonce-based encryption by varying the
 properties of the nonce.
 
-\subsubsection{Password based encryption}
-
+\paragraph{Password based encryption. }
 Password-based encryption has been in use for decades, but unfortunately the theoretical underpinnings that demonstrate the
 security of common practices have lagged behind.  Several studies of specific password hashing protocols have been produced~\cite{LR88,WG00,Boyen07},
 but unfortunately the low entropy of most passwords chosen in practice does not match the assumptions made by these
@@ -41,8 +39,7 @@ to negotiate a cryptographic session key~\cite{BPR00,GL03,CHKLM05}.  However, th
 nature of these protocols eliminates many of the security issues associated with the offline dictionary attacks that are the primary concern for
 password-based encryption.
 
-\subsubsection{Labeled PKE}
-
+\paragraph{Labeled PKE. }
 The labeled public key encryption scheme~\cite{Shoup2001} was developed to allow for formal analysis of the authenticated metadata that often accompanies ciphertexts in practice.
 Syntactically similar to the symmetric key extension called associated data~\cite{Rog02}, a label is essentially public information that is integrity
 verified and bound to the ciphertext as an added input to the encryption operation.  The integrity check occurs at decryption, which returns $\perp$ if

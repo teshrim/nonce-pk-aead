@@ -58,7 +58,7 @@ breaklines=true
 \author{
 }
 
-\date{\small \today} % \;\; \\ Version 1.0 }
+\date{\small \today \;\; \\ Version 2.0 }
 \else
 \author{
 Thomas Shrimpton\inst{3}
@@ -78,20 +78,20 @@ University of Florida, \email{teshrim@cise.ufl.edu}
 \begin{abstract} 
 \end{abstract}
 \input{pkaead-syntax}
-\input{pkaead-notions}
-\input{intro}
+%\input{pkaead-notions}
 \input{rel_wk}
 
 
 \bibliography{main}
 
-\ifnum\camready=0
+%\ifnum\camready=0
 \appendix
 %\input{intro-old}
+\input{intro}
 \input{kem}
 \input{constructions}
 \input{discussion-archive}
-\fi
+%\fi
 
 
 
