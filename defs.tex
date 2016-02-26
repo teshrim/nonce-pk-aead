@@ -474,8 +474,10 @@ full version\fi}
 \newcommand{\noteari}[1]{\mynote{Ari}{#1}}
 
 \newcounter{mynote}[section]
+\newcounter{mytask}
 \newcommand{\notecolor}{blue}
 \newcommand{\mythenote}{\thesection.\arabic{mynote}}
+\newcommand{\mythetask}{\arabic{mytask}}
 \newcommand{\tsnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\bf
     \textcolor{black}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}\fi}
 \newcommand{\tsfnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\footnote{\bf
@@ -483,7 +485,7 @@ full version\fi}
 
 \newcommand{\fixme}[1]{\ifnum\authnotes=1{\textcolor{red}{[[FIXME: #1]]}}\fi}
 
-\newcommand{\task}[1]{\ifnum\authnotes=1{\textcolor{red}{[TASK: #1] }}\fi}
+\newcommand{\task}[1]{\ifnum\authnotes=1 \refstepcounter{mytask}{\textcolor{red}{[TASK~\mythetask: #1] }}\fi}
 
 
 %Variable names:
