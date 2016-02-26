@@ -1,6 +1,7 @@
 \section{Constructions}
 \label{sec:constructions}
-In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an IV-based PK-AEAD scheme that is secure  in the random-oracle model. \task{Prove, and nail down assumptions.}  It works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
+\paragraph{IV-based PK-AEAD in the ROM. }
+In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an IV-based PK-AEAD scheme that is secure  in the random-oracle model. \task{Prove! Actually, you can't until you specify what $\mdalg$ is, or at least some security-relevant assumptions on it.  Also going to need to sort out what security notion(s) the KEM scheme needs to meet.}  Operationally, it works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
 
 
 \begin{figure}[tbhp]
@@ -44,10 +45,6 @@ In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an 
 \end{center}
 \end{figure}
 
+\paragraph{Constructions from standard-model assumptions. }
 
-
-%This particular construction allows for recovery of~$\overline{S}$ upon decryption.  In turn, this allows a re-encryption authenticty check on the decapsulated key~$K$, in addition to any authenticity checks on the ciphertext~$C$ that the AEAD scheme imposes.  \tsnote{The auth check on~$K$ is indirect, and we'll need to nail down what properties of the AEAD scheme are needed.}  
-%By having decryption return $M \concat \overline{S}$, we might enable higher-level checks.  For example, if the senders secret IV~$S$ has been previously stored receiver-side, or transmitted out-of-band.  
-%Note that the secret IV is not required to change across encryption calls, so $S=\mbox{password}$ and $M=\mbox{ptxt}\concat \mbox{hash}(\mbox{password}\concat\mbox{salt})$ may provide a way for higher-level applications to check authenticity of the user, assuming $\mbox{hash}(\mbox{password}\concat\mbox{salt})$ is already known receiver-side.
-%\tsnote{Need to patch up PKE syntax and proper operation requirement, if decryption returns something other than the plaintext that was encrypted (or $\bot$)} 
 
