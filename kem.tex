@@ -1,7 +1,8 @@
 \section{Encapsulation Schemes}
 \label{sec:kem}
+ \task{2/26: revisit everything here in light of current encryption scheme syntax.} 
 
-\paragraph{Encapsulation schemes. }
+\paragraph{Encapsulation schemes. } 
 Let $\pubkeys, \seckeys, \adata, \pubivs, \secivs$ be the sets of public keys, secret keys, associated data, public-IVs and secret-IVs (resp.), as before, and let $\keys,\wraps$ be a nonempty sets.
 %
 An encapsulation scheme is a triple$\encapscheme=(\pkgen,\encap,\decap)$.   The randomized \emph{key generation} algorithm~$\pkgen$ takes no input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\pkgen$ for the operation of key generation. \tsnote{Should $\pkgen$ take AD as input?  What have labeled KEM schemes done in the past?}
@@ -15,7 +16,7 @@ For proper operation, we require that for all $(\pk,\sk)\in\pubkeys\times\seckey
 
 Our formalization of encapsulation schemes is a bit non-standard, as it allows encapsulation to take IVs and associated data.
 
-\paragraph{Security notions. }  In Figure~\ref{fig:kem-notions} we give the standard security experiment for a randomized KEM scheme.  On the right, we give an experiment for an IV-based KEM scheme.  It allows multiple oracle queries to an encapsulation oracle, each using a secret-IV~$\seciv$ that was sampled by algorithm~$\advD$.  Note that adversary~$\advA$ must be nonce-respecting over public-IV values in this experiment.
+\paragraph{Security notions. } In Figure~\ref{fig:kem-notions} we give the standard security experiment for a randomized KEM scheme.  On the right, we give an experiment for an IV-based KEM scheme.  It allows multiple oracle queries to an encapsulation oracle, each using a secret-IV~$\seciv$ that was sampled by algorithm~$\advD$.  Note that adversary~$\advA$ must be nonce-respecting over public-IV values in this experiment.
 As before we define corresponding advantage measures for a given adversary~$\advA$, sampler~$\advD$, and scheme $\encapscheme$ as
 \begin{align*}
 \AdvKEM{\encapscheme}{\advA}&=2\Prob{\ExpKEM{\encapscheme}{\advD,\advA}=1}-1\\ \AdvKEMd{\encapscheme}{\advD,\advA}&=2\Prob{\ExpKEMd{\encapscheme}{\advD,\advA}=1}-1
