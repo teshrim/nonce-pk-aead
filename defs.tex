@@ -75,6 +75,9 @@
 \newcommand{\AdvINDCDAR}[2]{\Adv^{\mathrm{priv\textnormal{-}iv}}_{#1}{(#2)}}
 \newcommand{\ExpINDCDAR}[2]{\Exp^{\mathrm{priv\textnormal{-}iv}}_{#1}{(#2)}}
 
+\newcommand{\AdvAuth}[2]{\Adv^{\mathrm{auth}}_{#1}{(#2)}}
+\newcommand{\ExpAuth}[2]{\Exp^{\mathrm{auth}}_{#1}{(#2)}}
+
 \newcommand{\AdvKEM}[2]{\Adv^{\mathrm{kem}}_{#1}{(#2)}}
 \newcommand{\ExpKEM}[2]{\Exp^{\mathrm{kem}}_{#1}{(#2)}}
 \newcommand{\AdvKEMd}[2]{\Adv^{\mathrm{kem}}_{#1}{(#2)}}
@@ -474,9 +477,9 @@ full version\fi}
 \newcommand{\notecolor}{blue}
 \newcommand{\mythenote}{\thesection.\arabic{mynote}}
 \newcommand{\tsnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\bf
-    \textcolor{cyan}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}\fi}
+    \textcolor{black}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}\fi}
 \newcommand{\tsfnote}[1]{\ifnum\authnotes=1\refstepcounter{mynote}{\footnote{\bf
-    \textcolor{cyan}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}}\fi} 
+    \textcolor{black}{$\ll$TomS~\mythenote: {\rm #1}$\gg$}}}\fi} 
 
 \newcommand{\fixme}[1]{\ifnum\authnotes=1{\textcolor{red}{[[FIXME: #1]]}}\fi}
 
