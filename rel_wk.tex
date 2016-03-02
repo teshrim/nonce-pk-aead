@@ -1,6 +1,43 @@
 \section{Related Work}
 \label{rel_wk}
-\paragraph{Summary of BT~\cite{BellareTackmann}. }\task{Write!}
+\paragraph{Summary of BT~\cite{BellareTackmann}. }
+
+Bellare and Tackmann developed the first definition for nonce-based public key encryption~\cite{BellareTackmann}.
+Their syntax and security definitions are designed to provide stronger security in the face of compromised random number generators
+which would cause standard PKE and hedged PKE to fail.  They define nonce-based public key encryption (NPE) as a tuple
+of four algorithms: key generation $NPE.Kg \rightarrow (ek,dk)$ produces a public and private key pair; seed generation
+$NPE.sKg \rightarrow (xk)$ produces a uniformly random seed that is used across many encryptions and is known only to
+the sender; encryption $NPE.Enc(ek, xk, m, n) \rightarrow c$ takes a public key, seed, message, and nonce, and outputs
+a ciphertext; and decryption $NPE.Dec(dk, c) \rightarrow m$ takes a private key and ciphertext and returns the underlying
+encrypted message.  Within this definition, two key points must be observed.  First, the seed $xk$ used in the encryption
+process is not recoverable during decryption, and must remain secret to the sender alone.  Second, unlike symmetric key 
+nonces, the nonce is not transmitted with the message and is not needed to decrypt the ciphertext.  This stems from a distinction
+identified by the authors between nonces in the public and symmetric key settings, specifically, that some amount of hidden
+randomness is required in either the seed or the nonce, or an adversary may trivially break the security of the scheme under 
+any reasonable definition.
+
+The authors propose two definitions for security, both of which must be met to be considered a secure NPE scheme.  The first
+(NBP1) requires that IND-CCA security be achieved when the seed $xk$ is secret and the nonce $n$ is non-repeating across
+all queries.  The second definition (NBP2) requires that IND-CCA security be achieved when the seed $xk$ is known by the
+adversary and each nonce $n$ is unguessable.  This unguessable nonce requirement is formalized using a nonce generator
+$NG$, which can be influenced by the adversary and must produce nonces that cannot be predicted based on knowledge of
+initial state or prior output from the $NG$.  The authors then instantiate an NPE meeting these security definitions using a novel 
+hedged extractor construction, which essentially functions as both a PRF (when the seed is hidden) and a randomness
+extractor (when the seed is known).  Combining the random coins produced by this primitive with a randomized IND-CCA
+secure PKE scheme produces an NPE scheme that meets both NBP1 and NBP2 security.  The authors conclude the work by
+developing similar definitions and constructions for nonce-based signatures.  While not explicitly considered in the work,
+these signatures could presumably be combined with NPE schemes to achieve authenticated encryption using nonces.
+
+While this construction provides resilience against subverted randomness and a foundational definition for nonce-based PKE,
+it leaves several nuanced applications to be considered in future work, and does not provide a truly general definition for nonce-based PKE.
+The authors analyze security for IND-CCA secure encryption schemes, but do not consider authenticated encryption, even
+with the development of nonce-based signatures.  Their NPE syntax requires that the nonce remain hidden for all messages,
+and incorporates nonce generation security assumptions within the definition of the NPE.  In network applications such as 
+the I2P anonymity network~\cite{zantout2011}, it may be possible to re-use packet counters or sequence numbers as nonces, which would
+require a definition that includes public nonce values.  Furthermore, keeping the seed $xk$ secret to the sender alone and
+making it non-recoverable precludes a variety of applications that could use a recoverable secret
+seed as hidden application metadata or as an authenticating token such as a hashed password.  Our work seeks to develop a more general
+definition for nonce-based PKE which augments the security of real networked applications.
 
 \paragraph{Deterministic PKE. }
 The first attempt to define public key security for fully deterministic schemes was by Bellare, Boldyreva, and O'Neill~\cite{BBO07}.
