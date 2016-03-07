@@ -42,16 +42,8 @@ The \emph{recoverable} secret-AD~$\rmd$ is meant to capture sensitive plaintext 
 
 The choice of what secret-AD belongs to~$\umd$, what belongs to~$\rmd$, and what belongs to both, depends on the application context.  The syntax does not insist upon an particular semantic deliniations, although our security notions will suggest some.
 
-\paragraph{Comparison with BT.}
-\tsnote{This should be revisited once we get a full and current version from Mihir.}
-\emph{Why does decryption take $\pubiv,\header$ as input?} For applications like public-key-based keywrapping (and key transport?) the public-AD~$\header$ provides context to the receiver about the decrypted data. (See comments above)  Providing $\pubiv$ enables mechanisms for preventing replay.  \task{Example, other things?}  The downside is that, in some settings, exisiting decryption APIs may need to be updated.  BT explicitly did not require decryption to take $\pubiv,\header$ for just this reason.
 
-\emph{In BT the ``seed'' seems to play the same role as the secret AD.}  To a point, yes, although our separation of the secret-AD into recoverable and unrecoverable components (one or both of which may be empty) allows for things like private metadata.  BT encapulates the seed-production algorithm as part of the syntax of an encryption scheme.  We externalize this (see below), although it isn't clear there's a big difference here.
-
-Looking ahead, our security notions are pretty different. The BT definitions treat the seed as a generated-once (per lifetime of public-secret key pair) client-side secret.  This seed is used for every encryption, hence is independent of the message or any per-message context.  Thus our definitions treat the ``seed'' differently, and this motivates a different semantic (server-side secret vs.\ per-message metadata), even though the encryption algorithm syntax is essentially the same.  Note that our two-part secret-AD is a strict generalization of BT, since (as we will see in a moment) the production of~$(\umd,\rmd)$ is stateful; this allows for a fixed value after the initial state. \tsnote{BT's nonce-generator and our secret-AD production algorithm have very similar APIs too.  But he gives no motivation for motivation his input~$X$, which he calls the ``nonce selector'' ($\nu$ in his notation).}
-
-\emph{What's this key-registration data all about?} \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.  (Note that this seems related to so-called ``predicate encryption''.)
-
+\paragraph{Key-registration data. } \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.  (Note that this seems related to so-called ``predicate encryption''.)
 
 
 \paragraph{Secret-AD production. } To capture the notion that plaintexts (or the applications that produce them) may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$(\umd,\rmd)$ along with an updated state.  We write $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$.  
@@ -62,8 +54,6 @@ To prevent the secret-AD from leaking information about the plaintext, we insist
 We note that $\mdalg$ is not necessarily something that a pkAEAD-scheme designer would actually specify and implement.  We use $\mdalg$ to abstract away the process by which secret-AD (e.g. plaintext metadata) is produced by the application that also produces the plaintext~$M$. \task{Give a couple of examples.}
 
 Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as entropic strings produced by applications or operating systems(?) and associated to the plaintext.\task{Real examples?}  It also allows for sampling of things like passwords or other user input, this sampling possibly controlled by the current state.  (For example, sampling a password only on the first encryption call.)
-
-
 
 \if{0}
 % We consider two kinds of deterministic decryption algorithms.  \emph{Decryption with secret-AD recovery} is 
