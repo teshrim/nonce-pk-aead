@@ -1,12 +1,15 @@
 \section{Constructions}
 \label{sec:constructions}
 \paragraph{IV-based PK-AEAD in the ROM. }
-In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an IV-based PK-AEAD scheme that is secure  in the random-oracle model. \task{Prove! Actually, you can't until you specify what $\mdalg$ is, or at least some security-relevant assumptions on it.  Also going to need to sort out what security notion(s) the KEM scheme needs to meet.}  Operationally, it works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
+In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an IV-based PK-AEAD scheme that is secure  in the random-oracle model. \task{Prove! Actually, you can't until you specify what $\mdalg$ is, or at least some security-relevant assumptions on it.  Also going to need to sort out what security notion(s) the KEM scheme needs to meet.}  
 
+%Operationally, it works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
+
+\task{Formalize IV-based KEMs that take associated data. (See also labeled KEMs in the literature.)  They are called for in the following scheme, even though it isn't clear exactly what role $\header,\pubiv$ play in encapsulation, beyond what they already contribute by being part of the ``randomness'' creation.  Binding the ciphertext component~$\wrap$ to~$\header,\pubiv$? }
 
 \begin{figure}[tbhp]
 \begin{center}
-\fpage{.5}{
+\fpage{.6}{
  \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$}:\\[2pt]
  $R \gets H(\pk \concat \header \concat \pubiv \concat \umd \concat \rmd )$\\ 
@@ -16,7 +19,8 @@ In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an 
  }
  {
  \underline{$\Decprim{\sk}{\header,\pubiv}{\wrap,C,\auxinput}$}:\\[2pt]
- $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
+$K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
+if $K = \bot$ then Return $\bot$\\
 $P \gets \decprim{K}{\header,\pubiv}{C}$\\ 
 if $ P = \bot$ then Return $\bot$\\
 $\umd,\rmd,M \gets P$\\
@@ -26,16 +30,18 @@ if $\auxinput \in \mathcal{Z}_\umd$ then Return $(\rmd, M)$\\
 }
 
 \medskip
-\hspace*{.5ex}\fpage{.5}{
+\hspace*{.5ex}\fpage{.6}{
  \hpagess{.45}{.55}{
  \underline{$\encapprim{\pk}{\header,\pubiv}{R}$}:\\[2pt]
- $(K,X) \gets \OLencapprim{\pk}{}{R}$\\
+ $(K,X) \gets \OLencapprim{\pk}{}{\langle \header,\pubiv,R}\rangle$\\
  Return $(K,X)$
  }
  {
  \underline{$\decapprim{\sk}{\header,\pubiv}{X}$}:\\[2pt]
- $K \gets \OLdecapprim{\sk}{}{X}$\\
- Return $K$
+ $\langle K,\header',\pubiv'\rangle \gets \OLdecapprim{\sk}{}{X}$\\
+ if $(\header',\pubiv')=(\header,\pubiv)$ then \\
+\nudge Return $K$ \\
+Return $\bot$
  } 
 } 
 \caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style,  that is secure in the random-oracle model for hash function~$H$. (To be proved.)  The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{\seciv}$.  We assume there is an efficient test for membership in the set $\mathcal{Z}_\umd$.
