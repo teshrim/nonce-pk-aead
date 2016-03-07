@@ -19,8 +19,8 @@ In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an 
  $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
 $P \gets \decprim{K}{\header,\pubiv}{C}$\\ 
 if $ P = \bot$ then Return $\bot$\\
- if $\auxinput \in \mathcal{Z}_\umd$ then \\
- \nudge $\umd,\rmd,M \gets P$\\
+$\umd,\rmd,M \gets P$\\
+if $\auxinput \in \mathcal{Z}_\umd$ then \\
  \nudge Return $(\rmd, M)$\\
  Return $\bot$
  }
