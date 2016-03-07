@@ -36,19 +36,19 @@ As previously noted, if the adversary controls~$\header, \pubiv$ and the plainte
 {
  \underline{$\ExpPred{\mdalg}{\advP}$}:\\[2pt]
  $\st \getsr \mdalg(\emptystring,\bot)$\\
- %$ Q \gets \emptyset$\\ 
- $ (\umd',\rmd',M)\getsr\advP^{\predOracle}$\\
- %Return $[S' \in Q ]$
- $ (\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
- Return $[(\umd,\rmd)=(\umd',\rmd')]$\\
+ $ Q \gets \emptyset$\\ 
+ %$ (\umd',\rmd',M)\getsr\advP^{\predOracle}$\\
+ $ (\umd',\rmd')\getsr\advP^{\predOracle}$\\
+ Return $[(\umd',\rmd') \in Q ]$ \\
+ %$ (\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
+ %Return $[(\umd,\rmd)=(\umd',\rmd')]$\\
 
 \medskip
  \Oracle{$\predOracle(X)$}:\\[2pt]
  $(\st,\umd,\rmd) \getsr \mdalg(\st,X)$\\
+ $ Q \gets Q \cup \{(\umd,\rmd)\}$\\
  Return~$\rmd$
 \smallskip
-
- %$Q \gets Q \cup \{\seciv\}$\\
 }
 \caption{Privacy notion for an IV-based PK-AEAD
   scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
