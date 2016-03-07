@@ -17,10 +17,10 @@ In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an 
  {
  \underline{$\Decprim{\sk}{\header,\pubiv}{\wrap,C,\auxinput}$}:\\[2pt]
  $K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
- if $\decprim{K}{\header,\pubiv}{C} = \bot$ then\\
- \hspace*{3ex} Return $\bot$\\
- $\langle \umd,\rmd,M \rangle \gets \decprim{K}{\header,\pubiv}{C}$\\
+$P \gets \decprim{K}{\header,\pubiv}{C}$\\ 
+if $ P = \bot$ then Return $\bot$\\
  if $\auxinput \in \mathcal{Z}_\umd$ then \\
+ \nudge $\umd,\rmd,M \gets P$\\
  \nudge Return $(\rmd, M)$\\
  Return $\bot$
  }
