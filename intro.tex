@@ -19,6 +19,15 @@ Let us give some potential applications of this primitive, and motivate the vari
 %
 \item Provenance: $\rmd$ as secret metadata about the plaintext, the application that produced it, a snapshot of the operating system at the time that the plaintext was produced, etc. \tsnote{Talk to Kevin, Adam}
 %
-\item Onion/Garlic-routing schemes: ... ? \tsnote{I2P uses a ``garlic-routing'' scheme whose route establishment seems to be supported by our syntax.  Don't know about others.}
+\item Onion/Garlic-routing schemes: The I2P anonymity network uses public key encryption to initiate all communication between parties, as well
+as for establishing the tunnels that conceal traffic patterns.  These initialization messages contain additional metadata about the
+new connection that conforms to the secret-AD component of our construction.  For example, each setup message contains a message, 
+symmetric session keys and ID tags for the following session, and validation information about each component (including cryptographic
+hashes and payload sizes).  In our construction, the session keys and tags are specified as $\rmd$ since they must be recovered for
+use in the remaining session messages. The validating hashes, payload size verification, and time stamp are specified as $\umd$, since they
+are only needed to validate the incoming session establishment message.  Finally, the payload is specified as $M$.  The same division
+of elements applies to tunnel establishment, where we would designate information related to the persistent tunnel as $M$ (tunnel IDs,
+layer keys, and router IDs), information related to the tunnel establishment process as $\rmd$ (reply keys and flags), and
+message validation information as $\umd$ (router ID hashes and time stamps).  \tsnote{I2P uses a ``garlic-routing'' scheme whose route establishment seems to be supported by our syntax.  Don't know about others.}
 
 \end{itemize}
