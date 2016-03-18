@@ -19,7 +19,7 @@ Input  & Privacy & Authenticity & Recoverability \\
 %$\pubiv$   & No    & No         &  No \\
 $\vad$      & No    & Yes        &  No \\
 $\vmsg$   & Yes   & Yes         & Yes \\ 
-$\umd$    & Yes    & ?  &  No \\ [0.5ex]
+$\umd$    & Yes    & Potentially  &  No \\ [0.5ex]
 \hline
 \end{tabular}
 \caption{Requirements of encryption inputs}
@@ -29,16 +29,18 @@ $\umd$    & Yes    & ?  &  No \\ [0.5ex]
 Fix sets $\pubkeys, \seckeys, \keydata, \adata, \ptxts,\ctxts$, the first two of which are nonempty.  An public-key AEAD
 (PK-AEAD) scheme $\pkaead=(\Kgen,\Enc,\Dec)$ is a triple of algorithms.  The randomized \emph{key generation} algorithm~$\Kgen\colon\keydata\to\pubkeys\times\seckeys$ takes key-registration data $\kreg \in \keydata$ as input and returns a public-key, secret-key pair $(\pk,\sk)$.  We write $(\pk,\sk)\getsr\Kgen(\kreg)$ for the operation of key generation. 
 
-The deterministic \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata^* \times \ptxts^* \times \umetadata \to \ctxts$ takes a public-key~$\pk\in\pubkeys$, vector-valued associated data~$\vad \in \adata^*$,  a vector-valued message~$\vmsg \in \ptxts^*$ and auxiliary data~$\umd \in \umetadata$, and returns a ciphertext~$C \in \ctxts$. 
+The \emph{encryption} algorithm $\Enc \colon \pubkeys \times \adata^* \times \ptxts^* \times \umetadata \to \ctxts$ is a deterministic mapping.  It takes a public-key~$\pk\in\pubkeys$, vector-valued associated data~$\vad \in \adata^*$,  a vector-valued message~$\vmsg \in \ptxts^*$ and auxiliary data~$\umd \in \umetadata$, and returns a ciphertext~$C \in \ctxts$. 
 To stress the differing semantics of the inputs, key and non-private/private data, we write $C\gets\Encprim{\pk}{\vad}{\vmsg,\umd} =\Enc(\pk,\vad, \vmsg,\umd)$ for the operation of encryption. 
 \task{Assumptions on ciphertext lengths?} 
 
 
-The deterministic \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata^* \times \ctxts \times \bits^* \to \ptxts^* \cup \{\bot\}$.  It takes a secret-key~$\sk\in\seckeys$, vector-valued AD~$\vad \in \adata$, ciphertext~$C \in \ctxts$ and auxiliary input~$\auxinput\in\bits^*$, and returns a vector $\vmsg \in \ptxts^*$ or the distinguished symbol~$\bot$.  We write $\vmsg \gets \Decprim{\sk}{\vad}{C,\auxinput}$ for the operation of decryption.   
+The \emph{decryption} algorithm $\Dec \colon \seckeys \times \adata^* \times \ctxts \times \bits^* \to \ptxts^* \cup \{\bot\}$ is a deterministic mapping.  It takes a secret-key~$\sk\in\seckeys$, vector-valued AD~$\vad \in \adata$, ciphertext~$C \in \ctxts$ and auxiliary input~$\auxinput\in\bits^*$, and returns a vector $\vmsg \in \ptxts^*$ or the distinguished symbol~$\bot$.  We write $\vmsg \gets \Decprim{\sk}{\vad}{C,\auxinput}$ for the operation of decryption.   
 
-For each~$\umd\in\umetadata$ we assume there exists a non-empty set $\mathcal{Z}_\umd \subseteq \bits^*$ such that:  for all $\vad\in\adata^*$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\auxinput\in\mathcal{Z}_\umd$,  and $M\in\ptxts$, we have $\Decprim{\sk}{\vad}{\Encprim{\pk}{\vad}{\vmsg,\umd},\auxinput}=\vmsg$. 
+To define correctness, we demand that for each~$\umd\in\umetadata$ there exists a non-empty set $\mathcal{Z}_\umd \subseteq \bits^*$ such that:  for all $\vad\in\adata^*$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\auxinput\in\mathcal{Z}_\umd$,  and $M\in\ptxts$, we have $\Decprim{\sk}{\vad}{\Encprim{\pk}{\vad}{\vmsg,\umd},\auxinput}=\vmsg$. 
 
-\paragraph{Discussion. } 
+\paragraph{Discussion. } We formalize encryption to be deterministic.  As such, our security notions will demand that a secure instantiation harvests sufficient randomness from it inputs.  A line of results \cite{xxx,yyy,zzz} results suggest that this requires a sufficient amount of min-entropy in $(\pk,\vad,\vmsg,\umd)$ in each call to encryption.  Providing encryption with a vector of associated data allows for ``stealing'' a component to use as an IV or nonce.  We also consider vector-valued messages.  Among other things, this supports the bundling together of data that is related but not necessarily processed in the same way.  For example, traditional private data (i.e., plaintext) and private metadata.  
+
+Perhaps the most significant syntactic addition to standard deterministic PKE is the auxilary data, $\umd$ for encryption and $\auxinput$ for decryption.  We envision multiple uses for~$\umd$, and give two examples here.  First, $\umd$~can be used to provide authenticity, say when~$\umd=\mathrm{pwd}$ is a user password, and $\mathcal{Z}_T$ consists of the single string $\auxinput=\langle \mathrm{salt},H(\mathrm{salt} \concat \mathrm{pwd} \rangle$.  Relatedly, $\umd$ may be a pre-shared secret\tsfnote{Here I'm thinking about PSK for session resumption, 0-RTT applications.}, in which case $\auxinput=\umd$.  Second, $\umd$~can be used to inject sender-side entropy.  For example, when the application that produces~$\vmsg$ wants to protect itself against bad randomness at the point in the stack where encryption is actually performed.  In this case the set $\mathcal{Z}_T=\bits^*$ suffices. 
 
 
 
