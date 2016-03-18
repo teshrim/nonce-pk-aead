@@ -1,0 +1,62 @@
+\paragraph{Public and Secret AD. }  
+The encryption algorithm takes public-AD~$\header \in \adata$, and secret-AD~$(\umd,\rmd)\in\umetadata\times\rmetadata$.  In general, the public-AD is data that whose privacy isn't a concern, but that should be cryptographically bound to the ciphertext.  Prior works~\cite{XXX} have called this a ``label''.  
+
+The secret-AD is new to this setting, and is intended to be non-message data whose privacy is a concern.  
+We split this into two semantically distinct pieces.
+The \emph{unrecoverable} secret-AD~$\umd$ provides an opportunity for authentication within the abstraction boundary of decryption, in concert with the auxilary input~$\auxinput$.  
+For example, $\umd$ might be a ``lightweight'' secret~$s$ (e.g. a password, a unique device ID), and $\auxinput=\langle \mathrm{salt},H(\mathrm{salt} \concat s) \rangle$, allowing authenticity checks of the form \emph{this plaintext was sent by this user/device}.\tsfnote{How does the receiver know which $\langle\mathrm{salt},H(\mathrm{salt}\concat\mathrm{pwd})\rangle$ to pass in?  The user/device name could be part of the public-AD.  In some settings this might not be acceptable.} \task{List other examples here, e.g., I2P garlic routing checks, QUIC-like protocols that bind a server secret to an IP-address, etc.}
+%
+The unrecoverable secret-AD has other potential uses.  For example, $\umd$ might be an externally provided source of variability for encryption, such as a counter or an entropic input provided by a layer ``above'' encryption in the network stack.  In combination with the public-IV~$\pubiv$ this allows a party at the application layer to protect itself against a badly implemented nonce generation wherever encryption is actually performed.  %(In this example, one likely sets~$\auxinput=\emptystring$.)
+The latter viewpoint is the one taken by Bellare and Tackmann (BT)~\cite{BellareTackmann}, where nonce-based PKE is viewed as a method for hedging against bad randomness generation.
+
+The \emph{recoverable} secret-AD~$\rmd$ is meant to capture sensitive plaintext metadata, e.g.\ the ordinality of this particular plaintext within an application or protocol stream; the number of times this message has been sent; the identity of the sender on whose behalf this ciphertext was produced, and the identity of the intended recipient; the provenance of the data; etc.\tsfnote{Keywrap -- see the Camenish, Chandran, Shoup paper.  They describe the role of labels in keywrap, but it isn't clear why all of that information should be \textit{public}.  Indeed, based on their discussion I think one can reasonably argue that some of it should be private.  They even say that one can implement labelled PKE by prepending the label to the plaintext (prior to encryption).  This wouldn't implement AD in the sense we typicallly have, anyway.  But it would implement our syntax with AD ``inside'' of encryption.} 
+
+The choice of what secret-AD belongs to~$\umd$, what belongs to~$\rmd$, and what belongs to both, depends on the application context.  The syntax does not insist upon an particular semantic deliniations, although our security notions will suggest some.
+
+
+\paragraph{Key-registration data. } \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.  (Note that this seems related to so-called ``predicate encryption''.)
+
+
+\paragraph{Secret-AD production. } To capture the notion that plaintexts may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$(\umd,\rmd)$ along with an updated state.  We write $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$.  
+For notational convenience, we assume that on input $\mdalg(\emptystring,\bot)$ the algorithm simply initializes its state. 
+
+To prevent the secret-AD from leaking information about the plaintext, we insist that for any fixed state~$\st$ and any two plaintexts~$M,M'$ such that $|M|=|M'|$, when $(\umd,\rmd)$ and $(\umd',\rmd')$ are output by $\mdalg(\st,M)$ and $\mdalg(\st,M')$ respectively, we have $|\umd,\rmd|=|\umd',\rmd'|$. 
+
+We note that $\mdalg$ is not necessarily something that a pkAEAD-scheme designer would actually specify and implement.  We use $\mdalg$ to abstract away the process by which secret-AD is produced by the environment (e.g. application, operating system, device) that also produces the plaintext~$M$. \task{Give a couple of examples.}
+
+Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as entropic strings produced by applications or operating systems(?) and associated to the plaintext.\task{Real examples?}  It also allows for sampling of things like passwords or other user input, this sampling possibly controlled by the current state.  (For example, sampling a password only on the first encryption call.)
+
+\if{0}
+% We consider two kinds of deterministic decryption algorithms.  \emph{Decryption with secret-AD recovery} is 
+% a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \to \left(\metadata \times \ptxts\right) \cup \{\bot\}$.  It takes a secret-key~$\sk\in\seckeys$, public associated data~$\header \in \adata$, IV~$\pubiv \in \pubivs$, and a ciphertext~$C \in \ctxts$, and returns a pair $(S,M) \in \metadata\times\ptxts$, or the distinguished symbol~$\bot$.  We write $(S,M) \gets \Decprim{\sk}{\header,\pubiv}{C}$ for the operation of decrpytion. 
+% For proper operation, we require that for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\kreg)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M}}=(S,M)$.
+
+% \emph{Decryption without secret-AD recovery} is 
+% a mapping $\Dec \colon \seckeys \times \adata \times \pubivs \times \ctxts \times \bits^*\to \ptxts \cup \{\bot\}$.  As before, we write $M \gets \Decprim{\sk}{\header,\pubiv}{C,\auxinput}$ for the operation of decryption.    For each~$\seciv\in\secivs$ we assume there exists a non-empty set $\mathcal{Z}_\seciv \subseteq \bits^*$ such that: 
+% %For proper operation, we require that 
+% for all $\header\in\adata$, all $(\pk,\sk)\in\pubkeys\times\seckeys$ that may be output by $\Kgen(\header)$ with non-zero probability, and for all $\pubiv\in\pubivs$, $\seciv\in\secivs$, $\auxinput\in\mathcal{Z}_\seciv$,  and $M\in\ptxts$, we have $\Decprim{\sk}{\header,\pubiv}{\Encprim{\pk}{\header,\pubiv}{S,M},\auxinput}=M$. 
+% \tsnote{The auxilary input~$\auxinput$ is meant to support authentication \textit{within} the decryption boundary.  For example, when~$\auxinput$ is something like the receiver-side stored version of~$S$. }
+
+\paragraph{Discussion. }  We have made various syntactic choices that both scope the applications we envision, and provide useful delinations for implementors.  Let us first explore them a bit.  
+
+\begin{itemize}
+\item\emph{Why two versions of decryption?}  We formalize both decryption that must recover the secret AD, and decryption that does not.  The former is interesting for applications in which the sender wants to bind non-message data to the plaintext that should be hidden from all but the receiver.  For example, the secret-AD~$\seciv$ might be the salted hash of a user password $H(\mathrm{salt} \concat \mathrm{pwd})$.  If this has been previously established, say by a user registering with a banking website, then allowing~$\seciv$ to be recovered admits authenticity checks of the form \emph{this plaintext was sent by this user}.  Note that this check would be down outside of the decryption boundary.  Secret-AD may also be sensitive plaintext \emph{metadata}, e.g.\ the ordinality of this particular plaintext within an application or protocol stream; the number of times this message has been sent; the identity of the sender on whose behalf this ciphertext was produced, and the identity of the intended recipient; the provenance of the data; etc. \tsnote{other things?}\tsnote{Keywrap -- see the Camenish, Chandran, Shoup paper.  They describe the role of labels in keywrap, but it isn't clear why all of that information should be \textit{public}.  Indeed, based on their discussion I think one can reasonably argue that some of it should be private.  They even say that one can implement labelled PKE by prepending the label to the plaintext (prior to encryption).  This wouldn't implement AD in the sense we typicallly have, anyway.  But it would implement our syntax with AD ``inside'' of encryption.}
+
+When decryption is not permited by syntax to return the secret-AD, we provide decryption with an auxilary input~$\auxinput$ which is present to support authenticity checks within the decryption boundary.  However, one could set~$Z=\emptystring$ and instead envision that $\seciv$~may be something like an external (to encryption) source of variability.  For example, a counter or an entropic input provided by a layer ``above'' encryption in the network stack.  In combination with the public-IV~$\pubiv$ this allows a party at the application layer to protect itself against a badly implemented nonce generation wherever encryption is actually performed.  
+The latter viewpoint is the one taken by Mihir~\cite{mihir}, where nonce-based PKE is viewed as a method for hedging against bad randomness generation.
+
+
+\item\emph{Why does decryption take $\pubiv,\header$ as input?} For applications like public-key-based keywrapping (and key transport?) the public-AD~$\header$ provides context to the receiver about the decrypted data. (See comments above)  Providing $\pubiv$ enables mechanisms for preventing replay.  \task{Examples?}\task{other things?}  The downside is that, in some settings, exisiting decryption APIs may need to be updated. \tsnote{This is why Mihir did not require decryption to take $\pubiv,\header$.}
+
+\item\emph{In Mihir's paper the ``seed'' seems to play the same role as the secret AD...}  Mihir's paper encapulates the seed-production algorithm as part of the syntax of an encryption scheme.  We externalize this (see below), although it isn't clear there's a big difference here. Mihir's syntax for the encryption algorithm and ours are very simliar, essentially ours takes public-AD where his does not. \task{What application support does this provide that Mihir misses?  This is related to a task just above.}  
+
+Looking ahead, our security notions are pretty different.  His definitions treat the seed (our~$\seciv$) as a generated-once (per lifetime of public-secret key pair) client-side secret.  This seed is used for every encryption, hence is independent of the message or any per-message context.  Thus our definitions treat the ``seed'' differently, and this motivates a different semantic (server-side secret vs.\ per-message metadata), even though the encryption algorithm syntax is essentially the same.  Note that our treatment of~$\seciv$ is a strict generalization of his, since (as we will see in a moment) the production of~$\seciv$ is stateful; this allows for a fixed value of~$\seciv$ after the initial state. \task{Mihir's nonce-generator and our secret-AD production algorithm have very similar APIs too.  But he gives no motivation for motivation his input~$X$, which he calls the ``nonce selector'' ($\nu$ in his notation).}
+
+\item\emph{What's this key-registration data all about?} \tsnote{Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.} \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }
+\end{itemize}
+\fi
+ 
+
+%\paragraph{Symmetric AEAD Schemes. } \tsnote{Fill in similarly, may ultimately consolidate.}
+
+
