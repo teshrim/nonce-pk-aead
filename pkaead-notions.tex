@@ -7,23 +7,27 @@
 Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ with secret-AD space~$\umetadata \times \rmetadata$, and a secret-AD generation algorithm $\mdalg$.  Let~$\advA$ be an adversary.  
 
 \paragraph{Privacy. }
-On the left side of Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\umd,\rmd,M_b)$ where~$(\umd,\rmd)$ is produced by executing $\mdalg(\st,M_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query.  (Combined with our conventions on the secret-AD output by $\mdalg$, this implies that $|\umd,\rmd,M_b|$ does not depend on~$b$.)
+On the left side of Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\umd,\rmd,M_b)$ where~$(\umd,\rmd)$ is produced by executing $\mdalg(\st,M_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query.  (Combined with our conventions on the secret-AD output by $\mdalg$, this implies that $|\umd,\rmd,M_b|$ does not depend on~$b$.) \task{Give advantage measures $\AdvINDCDA{\kreg,\mdalg,\pkaead}{A}$.}
+
 
 \tsnote{Note that our privacy definition is different than Mihir's.  He has (potential) per-message nonce-generation, and a one-time secret nonce (``seed'').  The adversary does not get to see the nonce, but does got to influence it's choice though the ``nonce selector'', whatever that is.  Our definition givse control of the nonce to the adversary, and has (potential) per-message secret nonce (i.e. secret-AD).  I'm not sure how his and our definitions relate, formally.}
 
-As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$(\umd,\rmd)$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  The right side of Figure~\ref{fig:pkaead-notions} gives the notion.\task{Think about how this notion can be made useful}\tsfnote{Our PRED notion is essentially the same as Mihir's PRED notion. He uses it in the ROM to show how to build a hedged extractor with RoR-security.  This allows the PRED adversary in the RoR-reduction to simply return random strings and to ``guess'' which of the RO-queries is the one containing the output needed to win the PRED game. }
-\task{Give advantage measures $\AdvINDCDA{\kreg,\mdalg,\pkaead}{A}$ and $\AdvPred{\mdalg}{A}$, and assumptions on the adversary.}
+\paragraph{Authenticity. }  Figure~\ref{fig:pkaead-notions-2} describes a notion of authenticity for IV-based PK-AEAD schemes.  Adversary~$A$ is provided with two oracles.  Its leftmost oracle~$\encOracle$ on input $(\header,\pubiv,M)$ simply returns the ciphertext $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$ where the secret-AD $(\umd,\rmd)$ is produced by running $\mdalg(\st,M)$ with its current state.  The rightmost oracle $\decOracle$ on input $(\header,\pubiv,C,\auxinput)$ either returns $\Decprim{\sk}{\header,\pubiv}{C,Z}$ or $\bot$, depending on the value of the challenge bit~$b$.  The adversary must guess the value of~$b$.  Intuitively, this is possible (with probability significantly better than 1/2) only if the adversary manages to forge a $(\header,\pubiv,C,\auxinput)$ query such that $\Decprim{\sk}{\header,\pubiv}{C,Z} \neq \bot$.
+\task{Give advantage measure $\AdvAuth{\kreg,\mdalg,\pkaead}{A}$ and assumptions on the adversary.}
+
+%As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$(\umd,\rmd)$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  The right side of Figure~\ref{fig:pkaead-notions} gives the notion.\task{Think about how this notion can be made useful}\tsfnote{Our PRED notion is essentially the same as Mihir's PRED notion. He uses it in the ROM to show how to build a hedged extractor with RoR-security.  This allows the PRED adversary in the RoR-reduction to simply return random strings and to ``guess'' which of the RO-queries is the one containing the output needed to win the PRED game. }
 
 %On the left, the adversary sends plaintext strings~$X$ to an oracle~$\predOracle$ that executes $\mdalg(\st,X)$ on the current state~$\st$ and returns the resulting secret-AD~$\seciv$.  At the end of its execution, the adversary returns an AD-message tuple~$(\umd',\rmd',M)$ and wins if the value $\mdalg(\st,M)$, executed with the current state, is the same as~$\umd',\rmd'$.  Essentially, for any sequence of adversarially chosen messages and the corresponding secret-AD strings, it should be hard to guess the next secret-AD value. The captures adversaries that can nudge applications into producing particular plaintexts, and can observe (but not corrupt) whatever is producing the secret-AD. 
 %
 % \tsnote{Unfortunately, I don't see how to align the previous (un)predictability definition with the setting where~$(\umd,\rmd)$ is sampled once and then fixed across encryptions.  What follows is a rough attempt capture this with a simulation-based definition... but it isn't quite right yet.}  
 % On the right, we give a formalization that is simulation-based.  The function~$\phi\colon\ptxts\to\bits^*$ determines how plaintext information is leaked to the simulator.  In other words, how much one needs to know about plaintexts in order to properly simulate secret-AD production.  This captures what about the plaintext is actually used to determine the secret-AD. For example, if $\phi(X)=X$ is required for an efficient simulator to fool the adversary, then secret-AD production must depend on all of the bits of each plaintext.  If $\phi(X)=|X|$ suffices, then only the length matters.  When $\phi(X)=\emptystring$ suffices, we capture settings where the secret-AD is independent of plaintext bits, e.g.\ when~$\umd = H(\mathrm{salt} \concat \mathrm{pwd})$ and $\rmd$ is a message counter.
 
+
 \begin{figure}[tbhp]
 \begin{center}
 \hfpagess{.25}{.25}
 {
- \underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
+\underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
  $(\pk,\sk)\getsr\Kgen(\kreg)$\\
  $\st \getsr \mdalg(\emptystring,\bot)$\\
  $b\getsr\bits$\\
@@ -31,71 +35,108 @@ As previously noted, if the adversary controls~$\header, \pubiv$ and the plainte
  Return $[b'=b]$
 
 \medskip
-\Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
- $(\st,\umd,\rmd) \getsr \mdalg(\st,M_b)$\\
- Return $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M_b}$
+\Oracle{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}:\\[2pt]
+$(\st,\umd) \getsr \mdalg(\st,\vmsg_b)$\\
+ Return $\Encprim{\pk}{\vad}{\vmsg_b, \umd}$
+
 }
 {
- \underline{$\ExpPred{\mdalg}{\advP}$}:\\[2pt]
- $\st \getsr \mdalg(\emptystring,\bot)$\\
- $ Q \gets \emptyset$\\ 
- %$ (\umd',\rmd',M)\getsr\advP^{\predOracle}$\\
- $ (\umd',\rmd')\getsr\advP^{\predOracle}$\\
- Return $[(\umd',\rmd') \in Q ]$ \\
- %$ (\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
- %Return $[(\umd,\rmd)=(\umd',\rmd')]$\\
-
-\medskip
- \Oracle{$\predOracle(X)$}:\\[2pt]
- $(\st,\umd,\rmd) \getsr \mdalg(\st,X)$\\
- $ Q \gets Q \cup \{(\umd,\rmd)\}$\\
- Return~$\rmd$
-\smallskip
-}
-\caption{Privacy notion for an IV-based PK-AEAD
-  scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
-  is produced using registration-data~$\kreg$.} 
-
-\label{fig:pkaead-notions}
-\end{center}
-\end{figure}
-
-
-
-\paragraph{Authenticity. }  Figure~\ref{fig:pkaead-notions-2} describes a notion of authenticity for IV-based PK-AEAD schemes.  Adversary~$A$ is provided with two oracles.  Its leftmost oracle~$\encOracle$ on input $(\header,\pubiv,M)$ simply returns the ciphertext $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$ where the secret-AD $(\umd,\rmd)$ is produced by running $\mdalg(\st,M)$ with its current state.  The rightmost oracle $\decOracle$ on input $(\header,\pubiv,C,\auxinput)$ either returns $\Decprim{\sk}{\header,\pubiv}{C,Z}$ or $\bot$, depending on the value of the challenge bit~$b$.  The adversary must guess the value of~$b$.  Intuitively, this is possible (with probability significantly better than 1/2) only if the adversary manages to forge a $(\header,\pubiv,C,\auxinput)$ query such that $\Decprim{\sk}{\header,\pubiv}{C,Z} \neq \bot$.
-\task{Give advantage measure $\AdvAuth{\kreg,\mdalg,\pkaead}{A}$ and assumptions on the adversary.}
-
-\begin{figure}[tbhp]
-\begin{center}
-\fpage{.5}
-{
-\hpagess{.45}{.45}
-{
- \underline{$\ExpAuth{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
+\underline{$\ExpAuth{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
  $(\pk,\sk)\getsr\Kgen(\kreg)$\\
  $\st \getsr \mdalg(\emptystring,\bot)$\\
  $b\getsr\bits$\\
  $b'\getsr\advA^{\encOracle,\decOracle}(\pk)$\\
  Return $[b'=b]$
-}
-{
-\Oracle{$\encOracle(\header,\pubiv,M)$}:\\[2pt]
- $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
- Return $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$
 
 \medskip
-\Oracle{$\decOracle(\header,\pubiv, C,\auxinput)$}:\\[2pt]
+\Oracle{$\encOracle(\vad,\vmsg)$}:\\[2pt]
+ $(\st,\umd) \getsr \mdalg(\st,\vmsg)$\\
+ Return $\Encprim{\pk}{\vad}{\vmsg,\umd}$
+
+\medskip
+\Oracle{$\decOracle(\vad, C,\auxinput)$}:\\[2pt]
  if $b=1$ then\\
- \nudge Return $\Decprim{\sk}{\header,\pubiv}{C,\auxinput}$\\
+ \nudge Return $\Decprim{\sk}{\vad}{C,\auxinput}$\\
 Return $\bot$
 }
-}
-\caption{Authenticity notion for an IV-based PK-AEAD
-  scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
-  is produced using registration-data~$\kreg$.} 
-\label{fig:pkaead-notions-2}
+\caption{}
 \end{center}
 \end{figure}
+
+
+% \begin{figure}[tbhp]
+% \begin{center}
+% \hfpagess{.25}{.25}
+% {
+%  \underline{$\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
+%  $(\pk,\sk)\getsr\Kgen(\kreg)$\\
+%  $\st \getsr \mdalg(\emptystring,\bot)$\\
+%  $b\getsr\bits$\\
+%  $b'\getsr\advA^{\encOracle}(\pk)$\\
+%  Return $[b'=b]$
+
+% \medskip
+% \Oracle{$\encOracle(\header,\pubiv,M_0,M_1)$}:\\[2pt]
+%  $(\st,\umd,\rmd) \getsr \mdalg(\st,M_b)$\\
+%  Return $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M_b}$
+% }
+% {
+%  \underline{$\ExpPred{\mdalg}{\advP}$}:\\[2pt]
+%  $\st \getsr \mdalg(\emptystring,\bot)$\\
+%  $ Q \gets \emptyset$\\ 
+%  %$ (\umd',\rmd',M)\getsr\advP^{\predOracle}$\\
+%  $ (\umd',\rmd')\getsr\advP^{\predOracle}$\\
+%  Return $[(\umd',\rmd') \in Q ]$ \\
+%  %$ (\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
+%  %Return $[(\umd,\rmd)=(\umd',\rmd')]$\\
+
+% \medskip
+%  \Oracle{$\predOracle(X)$}:\\[2pt]
+%  $(\st,\umd,\rmd) \getsr \mdalg(\st,X)$\\
+%  $ Q \gets Q \cup \{(\umd,\rmd)\}$\\
+%  Return~$\rmd$
+% \smallskip
+% }
+% \caption{Privacy notion for an IV-based PK-AEAD
+%   scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
+%   is produced using registration-data~$\kreg$.} 
+
+% \label{fig:pkaead-notions}
+% \end{center}
+% \end{figure}
+
+
+% \begin{figure}[tbhp]
+% \begin{center}
+% \fpage{.5}
+% {
+% \hpagess{.45}{.45}
+% {
+%  \underline{$\ExpAuth{\kreg,\mdalg,\pkaead}{\advA}$}:\\[2pt]
+%  $(\pk,\sk)\getsr\Kgen(\kreg)$\\
+%  $\st \getsr \mdalg(\emptystring,\bot)$\\
+%  $b\getsr\bits$\\
+%  $b'\getsr\advA^{\encOracle,\decOracle}(\pk)$\\
+%  Return $[b'=b]$
+% }
+% {
+% \Oracle{$\encOracle(\header,\pubiv,M)$}:\\[2pt]
+%  $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$\\
+%  Return $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$
+
+% \medskip
+% \Oracle{$\decOracle(\header,\pubiv, C,\auxinput)$}:\\[2pt]
+%  if $b=1$ then\\
+%  \nudge Return $\Decprim{\sk}{\header,\pubiv}{C,\auxinput}$\\
+% Return $\bot$
+% }
+% }
+% \caption{Authenticity notion for an IV-based PK-AEAD
+%   scheme~$\pkaead$.  Secret-AD is produced by~$\mdalg$.  The key-pair
+%   is produced using registration-data~$\kreg$.} 
+% \label{fig:pkaead-notions-2}
+% \end{center}
+% \end{figure}
 
 %%%%%%%%%%%%%%%%%%% GRAVEYARD %%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -44,6 +44,17 @@ Perhaps the most significant syntactic addition to standard deterministic PKE is
 
 
 
+\paragraph{Secret-AD production. } \task{Reword to reflect current syntax.} To capture the notion that plaintexts may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$(\umd,\rmd)$ along with an updated state.  We write $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$.  
+For notational convenience, we assume that on input $\mdalg(\emptystring,\bot)$ the algorithm simply initializes its state. 
+
+To prevent the secret-AD from leaking information about the plaintext, we insist that for any fixed state~$\st$ and any two plaintexts~$M,M'$ such that $|M|=|M'|$, when $(\umd,\rmd)$ and $(\umd',\rmd')$ are output by $\mdalg(\st,M)$ and $\mdalg(\st,M')$ respectively, we have $|\umd,\rmd|=|\umd',\rmd'|$. 
+
+We note that $\mdalg$ is not necessarily something that a pkAEAD-scheme designer would actually specify and implement.  We use $\mdalg$ to abstract away the process by which secret-AD is produced by the environment (e.g. application, operating system, device) that also produces the plaintext~$M$. \task{Give a couple of examples.}
+
+Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as entropic strings produced by applications or operating systems(?) and associated to the plaintext.\task{Real examples?}  It also allows for sampling of things like passwords or other user input, this sampling possibly controlled by the current state.  (For example, sampling a password only on the first encryption call.)
+
+
+\paragraph{Key-registration data. } \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.  (Note that this seems related to so-called ``predicate encryption''.)
 
 
                %----------------------------------------- O L D  S Y N T A X  ---------------------------------------------%
