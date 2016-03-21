@@ -1,0 +1,92 @@
+\documentclass[11pt, pdftex]{article}
+\usepackage{epsf}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage{ifthen}
+\usepackage{comment}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{url}
+
+
+\title{KEM Styles}
+\author{}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section{Definitions}
+
+\begin{enumerate}
+\item Design and Analysis of Practical Public-Key Encryption Schemes Secure against Adaptive Chosen Ciphertext Attack (CS, SIAM JoC 2003)
+\begin{itemize}
+\item $KeyGen(\lambda) \$\rightarrow (PK, SK)$
+\item $Enc(\lambda, PK) \$\rightarrow (K, \psi)$
+\item $Dec(K, SK, \psi) \rightarrow K \text{ or } \perp$
+\end{itemize}
+
+\item Tag-KEM / DEM : A New Framework for Hybrid Encryption (AGKS, EUROCRYPT 2005)
+\begin{itemize}
+\item $KeyGen(\lambda) \$\rightarrow (PK, SK)$
+\item $Key(PK) \$\rightarrow (\omega, dk)$
+\item $Enc(\omega, \tau) \$\rightarrow (\psi)$
+\item $Dec(SK, \psi, \tau) \rightarrow dk \text{ or } \perp$
+\end{itemize}
+
+\item Constructing Secure Hybrid Encryption from Key Encapsulation Mechanism with Authenticity (AKEM) (SS, Cryptography and Coding 2011)
+\begin{itemize}
+\item $KeyGen(\lambda) \$\rightarrow (PK, SK)$
+\item $Key(PK) \$\rightarrow (K, e)$
+\item $Enc(e, ad) \$\rightarrow (\phi)$
+\item $Dec(SK, \phi) \rightarrow (K, vr) \text{ or }\perp$
+\item $Vrfy(vr, ad) \rightarrow \{0,1\}$
+\end{itemize}
+
+\item On the Connection Between Signcryption and One-pass Key (signcryption-KEM) (GBN, CCaC 2007)
+\begin{itemize}
+\item $CommonKeyGen(\lambda) \$\rightarrow params$
+\item $KeyGen(params) \$\rightarrow (PK, SK)$
+\item $Enc(params, SK_s, PK_r) \$\rightarrow (K, C)$
+\item $Dec(params, SK_r, PK_s, C) \rightarrow K \text{ or }\perp$
+\end{itemize}
+
+\item Building Better Signcryption Schemes with Tag-KEMs (BD, PKC 2006)
+\begin{itemize}
+\item $Com(\lambda) \$\rightarrow I$
+\item $Key_s(I) \$\rightarrow (PK_s, SK_s)$
+\item $Key_r(I) \$\rightarrow (PK_r, SK_r)$
+\item $Sym(PK_r, SK_s) \$\rightarrow (\omega, K)$
+\item $Encap(\omega, \tau) \$\rightarrow E$
+\item $Decap(SK_r, PK_s, E, \tau) \rightarrow K \text{ or }\perp$
+\end{itemize}
+
+\item On the Security of Tag-KEM for Signcryption (YF, ENTCS 2007)
+\begin{itemize}
+\item $KeyGen(\lambda) \$\rightarrow (PK, SK)$
+\item $Sym(PK_r, SK_s) \$\rightarrow (\omega, K)$
+\item $SEncap(\omega, \tau) \$\rightarrow E$
+\item $VDecap(SK_r, PK_s, E, \tau) \rightarrow K \text{ or }\perp$
+\item \url{www.signcryption.org}
+\end{itemize}
+
+\item Hybrid Signcryption Schemes with Insider Security (signature KEM) (Dent, ISC 2005)
+\begin{itemize}
+\item $Gen(\lambda) \$\rightarrow (PK, SK)$
+\item $Encap(SK, m) \$\rightarrow (K, C_1)$
+\item $Decap(PK, m, C_1) \rightarrow K \text{ or }\perp$
+\item In this scheme, $K$ is a MAC key, so the ultimate goal is to provide a hybrid signature scheme
+combining public and symmetric key constructions for integrity and authentication.
+\end{itemize}
+
+\end{enumerate}
+
+
+
+\section{Questions}
+\begin{enumerate}
+\item
+\end{enumerate}
+
+\end{document}
