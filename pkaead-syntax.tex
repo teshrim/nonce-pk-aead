@@ -21,12 +21,12 @@ Input  & Privacy & Authenticity & Recoverability \\
 \hline
 &&&\\[-1.5ex]
 %$\pubiv$   & No    & No         &  No \\
-$\vad$      & No    & Yes        &  No \\
-$\vmsg$   & Yes   & Yes         & Yes \\ 
-$\umd$    & Yes    & Potentially  &  No \\ [0.5ex]
+$\vad$      & never    & always     &  never \\
+$\vmsg$   & always  & always    & always \\ 
+$\umd$    & sometimes    & sometimes  &  never \\ [0.5ex]
 \hline
 \end{tabular}
-\caption{Requirements of encryption inputs}
+\caption{Requirements of encryption inputs. ``Recoverability'' means that the indicated quantity is returned by decryption.  An entry of ``sometimes'' means that the indicated property may or may not be required by~$\umd$, depending on the context of its use.}
 \end{table}
 
 \paragraph{Deterministic Public-key Encryption with AD and auxiliary input. }
@@ -52,7 +52,7 @@ We have formalized encryption to be deterministic, and a line of results \cite{x
 So as our third example, $\umd$~can be used to inject entropy.  
 Perhaps the application that produces~$\vmsg$ wants to protect itself against bad randomness at the point in the communication stack where encryption of~$\vmsg$ is actually performed.  In this case no authentication (based on~$\umd$) is demanded, and the set $\mathcal{Z}_T=\bits^*$ suffices.
 
-We note two other departures from more standard syntax for deterministic PKE.  First, we provide encryption with a vector of associated data.  This allows for ``stealing'' a component to use as a random IV, or as a nonce that, in conjunction with a secret~$\umd$, can be leveraged to provide per-encryption randomness.  We stress that the associated data~$\vad$ and the auxiliary input~$\umd$ do have different semantics.  The former must be provided by both the encrypting and decrypting parties, and our security notions will demand that if these parties provide different~$\vad$ then decryption will fail.  But considering the examples just given, it is not the case that~$\umd$ will be known to both parties; hence it cannot simply be considered as part of the associated data.
+We note two other departures from more standard syntax for deterministic PKE.  First, we provide encryption with a vector of associated data.  This allows for ``stealing'' a component to use as a nonce that, in conjunction with a secret~$\umd$, can be leveraged by constructions to provide per-encryption randomness.  We stress that the associated data~$\vad$ and the auxiliary input~$\umd$ do have different semantics.  The former must be provided by both the encrypting and decrypting parties, and our security notions will demand that if these parties provide different~$\vad$ then decryption will fail.  But considering the examples just given, it is not the case that~$\umd$ will be known to both parties; hence it cannot simply be considered as part of the associated data.
 
 Finally, our syntax also allows for vector-valued messages.  Among other things, this supports the bundling together of data that is related but not necessarily processed in the same way.  For example, traditional private data (i.e., plaintext) and private metadata.  
 
