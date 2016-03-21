@@ -196,6 +196,18 @@ $Dec'(SK_r, C):$
 \item If $PK' = PK_s$ return $M$ else return $\perp$
 \end{itemize}
 
+\subsection{Questions and differences}
+\begin{enumerate}
+\item I assume $PK_s$ isn't included in the $Dec$ syntax because it's built into the ciphertext.  Should this be the case?  This could allow for
+some sort of pinning if there is always a comparison step between the previously held public key and the attached public key.
+\item Some differences between $SK_s$ and our private metadata $T$:
+\begin{itemize}
+\item $T$ may depend on the message, where $sk_s$ does not
+\item $T$ or $Z$ may be shared, where $sk_s$ is never shared, and must be built on a scheme with a public verifying key
+\item Because authentication is dependent on a potentially shared value $T$, we cannot achieve insider unforgeability
+\end{itemize}
+\end{enumerate}
+
 
 \section{Questions}
 \begin{enumerate}
