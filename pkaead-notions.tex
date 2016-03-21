@@ -2,9 +2,16 @@
 
 \section{Security notions for PK-AEAD} 
 \tsnote{Needs to be reworked.}
+Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ with auxilary data space~$\umetadata$.  Our strongest security notions will give the adversary the ability to specify both the assoicated data and the message inputs.  Since the overall scheme is deterministic, achieving our privacy notion will require (min-)entropy to be provided by the auxilary input.  Likewise, to achieve our authenticity notion the auxiliarly input will need to be unpredictable.
 
-%\subsection{Current notions}
-Here we consider candidate security notions for an IV-based PK-AEAD scheme.  Fix a scheme $\pkaead=(\Kgen,\Enc,\Dec)$ with secret-AD space~$\umetadata \times \rmetadata$, and a secret-AD generation algorithm $\mdalg$.  Let~$\advA$ be an adversary.  
+To capture this, we introduce the concept of a stateful \emph{auxillary-data} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$\vmsg$, this algorithm returns auxiliary data~$\umd$ along with an updated state.  We write $(\st,\umd) \getsr \mdalg(\st,\vmsg)$. For notational convenience, we assume that on input $\mdalg(\emptystring,\bot)$ the algorithm simply initializes its state. 
+
+To prevent the auxiliary input from leaking information about the plaintext, we insist that for any fixed state~$\st$ and any two plaintexts~$\vmsg,\vmsg'$ such that $|\vmsg|=|\vmsg|$, when $\umd$ and $\umd'$ are output by $\mdalg(\st,\vmsg)$ and $\mdalg(\st,\vmsg')$ respectively, we have $|\umd|=|\umd'|$. 
+
+We note that $\mdalg$ is not necessarily something that a pkAEAD-scheme designer would actually specify and implement.  We use $\mdalg$ to abstract away the process by which secret-AD is produced by the environment (e.g. application, operating system, device) that also produces the plaintext~$M$. \task{Give a couple of examples.}
+
+Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as entropic strings produced by applications or operating systems(?) and associated to the plaintext.\task{Real examples?}  It also allows for sampling of things like passwords or other user input, this sampling possibly controlled by the current state.  (For example, sampling a password only on the first encryption call.)
+
 
 \paragraph{Privacy. }
 On the left side of Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\header,\pubiv,M_0,M_1)$, returns the encrpytion of $(\umd,\rmd,M_b)$ where~$(\umd,\rmd)$ is produced by executing $\mdalg(\st,M_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $|M_0|=|M_1|$ in every query.  (Combined with our conventions on the secret-AD output by $\mdalg$, this implies that $|\umd,\rmd,M_b|$ does not depend on~$b$.) \task{Give advantage measures $\AdvINDCDA{\kreg,\mdalg,\pkaead}{A}$.}

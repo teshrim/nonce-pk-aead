@@ -1,9 +1,13 @@
+\newcommand{\dimension}[1]{|| #1 ||}
 \section{Encryption Schemes}
 \label{sec:prelims}
 \label{sec:encryption}
 We begin by ... [blah blah]
 
 \paragraph{Notational conventions. }When $X,Y$ are bitstrings, we write $X \concat Y$ for their concatenation, $|X|$ for the bitlength, and $X\xor Y$ for their bitwise exclusive-or.  When~$X,Y$ are arbitrary quantities, we write $\langle X,Y \rangle$ for some implict, invertible encoding of~$X,Y$ as a bitstring, and define $|X,Y|=|\langle X,Y\rangle|$.
+
+When $\vec{X}=(X_1,X_2,\ldots,X_m)$ is a  vector, we write $\dimension{\vec{X}}$ for the number of components~$m$, and $|\vec{X}|=|X_1,X_2,\ldots,X_m|$.  We say that $\vec{X},\vec{Y}$ are \emph{length-equivalent} if $\dimension{\vec{X}}=\dimension{\vec{Y}}=m$ and, for all $i\in[m]$, $|X_i|=|Y_i|$.
+
 When $\calX$ is a set, we write $x \getsr \calX$ to mean that a value is sampled from $\calX$ and assigned to the variable~$x$.  Unless otherwise specified, sampling from sets is via the uniform distribution.  
 When~$F$ is an randomized algorithm, we write $x \getsr F(y_1,y_2,\cdots)$ to mean that~$F$ is run with the specified inputs and the result assigned to~$x$.  When~$F$ is determinsitic, we drop the $\$$-embellishment from the assignment arrow.  Algorithms may be provided access to one or more \emph{oracles}, and we write these as superscripts, e.g. $F^{\mathcal{O}}$; oracle access is black box and via an specified interface.  
 
@@ -41,19 +45,7 @@ To define correctness, we demand that for each~$\umd\in\umetadata$ there exists 
 \paragraph{Discussion. } We formalize encryption to be deterministic.  As such, our security notions will demand that a secure instantiation harvests sufficient randomness from it inputs.  A line of results \cite{xxx,yyy,zzz} results suggest that this requires a sufficient amount of min-entropy in $(\pk,\vad,\vmsg,\umd)$ in each call to encryption.  Providing encryption with a vector of associated data allows for ``stealing'' a component to use as an IV or nonce.  We also consider vector-valued messages.  Among other things, this supports the bundling together of data that is related but not necessarily processed in the same way.  For example, traditional private data (i.e., plaintext) and private metadata.  
 
 Perhaps the most significant syntactic addition to standard deterministic PKE is the auxilary data, $\umd$ for encryption and $\auxinput$ for decryption.  We envision multiple uses for~$\umd$, and give two examples here.  First, $\umd$~can be used to provide authenticity, say when~$\umd=\mathrm{pwd}$ is a user password, and $\mathcal{Z}_T$ consists of the single string $\auxinput=\langle \mathrm{salt},H(\mathrm{salt} \concat \mathrm{pwd} \rangle$.  Relatedly, $\umd$ may be a pre-shared secret\tsfnote{Here I'm thinking about PSK for session resumption, 0-RTT applications.}, in which case $\auxinput=\umd$.  Second, $\umd$~can be used to inject sender-side entropy.  For example, when the application that produces~$\vmsg$ wants to protect itself against bad randomness at the point in the stack where encryption is actually performed.  In this case the set $\mathcal{Z}_T=\bits^*$ suffices. 
-
-
-
-\paragraph{Secret-AD production. } \task{Reword to reflect current syntax.} To capture the notion that plaintexts may have secret-AD connected to them, we introduce the concept of a stateful \emph{secret-AD production} algorithm $\mdalg$.  On input state~$\st$ and plaintext~$M$, this algorithm returns secret-AD~$(\umd,\rmd)$ along with an updated state.  We write $(\st,\umd,\rmd) \getsr \mdalg(\st,M)$.  
-For notational convenience, we assume that on input $\mdalg(\emptystring,\bot)$ the algorithm simply initializes its state. 
-
-To prevent the secret-AD from leaking information about the plaintext, we insist that for any fixed state~$\st$ and any two plaintexts~$M,M'$ such that $|M|=|M'|$, when $(\umd,\rmd)$ and $(\umd',\rmd')$ are output by $\mdalg(\st,M)$ and $\mdalg(\st,M')$ respectively, we have $|\umd,\rmd|=|\umd',\rmd'|$. 
-
-We note that $\mdalg$ is not necessarily something that a pkAEAD-scheme designer would actually specify and implement.  We use $\mdalg$ to abstract away the process by which secret-AD is produced by the environment (e.g. application, operating system, device) that also produces the plaintext~$M$. \task{Give a couple of examples.}
-
-Allowing $\mdalg$ to pass state to itself admits things like secret counters.  Additionally allowing $\mdalg$ to be randomized captures things such as entropic strings produced by applications or operating systems(?) and associated to the plaintext.\task{Real examples?}  It also allows for sampling of things like passwords or other user input, this sampling possibly controlled by the current state.  (For example, sampling a password only on the first encryption call.)
-
-
+ 
 \paragraph{Key-registration data. } \task{This needs thought.  I like the idea, but I don't know how ``real'' it is. Should this be part of this paper, or not? }Letting $\Kgen$ take registration data as input allows for binding of AD to a $(\pk,\sk)$ pair.  This may support interesting things, like asserting that this ciphertext is produced using the same AD that was used to create a given public key.  (Note that this seems related to so-called ``predicate encryption''.)
 
 
