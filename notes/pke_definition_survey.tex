@@ -147,6 +147,54 @@ authenticating value.
 \item Specifically motivated to solve randomness concerns.  Not designed to augment any specific applications.
 \end{enumerate}
 
+\section{Public Key Authenticated Encryption (PKAE)}
+
+\subsection{Syntax}
+PKAE, also called signcryption in related work, was first formalized by An in 2001.  She defines a PKAE scheme as five algorithms:
+\begin{itemize}
+\item $CommonKeyGen(\lambda) \$\rightarrow I$
+\item $SenderKeyGen(I) \$\rightarrow (PK_s, SK_s)$
+\item $ReceiverKeyGen(I) \$\rightarrow (PK_r, SK_r)$
+\item $Enc(SK_s, PK_s, PK_r, m) \$\rightarrow C$
+\item $Dec(SK_r, C) \rightarrow (pk_s, M) \text{ or } \perp$
+\end{itemize}
+
+\subsection{Security Definitions}
+An defines six notions of security for PKAE, two for confidentiality, four for unforgeability.
+\begin{itemize}
+\item{\bf Privacy:} The author uses the standard notions for confidentiality in the public key setting, IND-CPA and IND-CCA security.
+\item{\bf Third-person (outsider) unforgeability:} The authors uses definitions that parallel the symmetric setting for outsider unforgeability.
+Essentially, TUF-CTXT allows an adversary access to an encryption oracle, and the adversary must forge a valid ciphertext that has never
+been returned by the oracle.  TUF-PTXT, by contrast, allows an adversary access to an encryption oracle, but must return a ciphertext which
+decrypts to a message that was never sent to the oracle.
+\item{\bf Receiver (insider) unforgeability:} In this definition, the receiver is the adversary.  It consists of two stages: the first is given the global
+information $I$ and may choose the receiver keys.  The second phase is given access to an encryption oracle that encrypts messages to the
+public key produced in phase one.  It has access to all public information, and must create a forged, never-before-seen ciphertext (CTXT) or
+message (PTXT) as with the previous definition.  The second stage adversary also has the ability to \emph{change} the adversary key pair mid
+experiment, simulating a receiver who revokes and changes their keys and is trying to forge a message based on previously received ciphertexts.
+The author points out that this attack could be thwarted with timestamps, but still allows an adversary the ability to modify its keys.
+\end{itemize}
+
+\subsection{Example Construction}
+The author examines three generic combinations of an IND-CPA encryption scheme and an unforgeable (both strongly and weakly) signature scheme
+ (encrypt-and-sign, sign-then-encrypt, encrypt-then-sign) and shows that none of them
+meet all the proposed definitions of security.  She then presents the following generic construction that meets all definitions of security.
+
+$Enc'(PK_r, SK_s, PK_s, M):$
+\begin{itemize}
+\item $C' \leftarrow Enc_{PK_r}(M||PK_s)$
+\item $\sigma \leftarrow Sign_{SK_s}(C'||PK_r)$
+\item $C \leftarrow PK_s||C'||\sigma$\\
+\end{itemize}
+
+$Dec'(SK_r, C):$
+\begin{itemize}
+\item parse $C \leftarrow PK_s||C'||\sigma$
+\item produce $PK_r$ based on $SK_r$
+\item If $Verify_{PK_s}(C'||PK_r) = 0$ return $\perp$
+\item $M||PK' \leftarrow Dec_{SK_r}(C')$
+\item If $PK' = PK_s$ return $M$ else return $\perp$
+\end{itemize}
 
 
 \section{Questions}
