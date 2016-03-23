@@ -1,5 +1,5 @@
 \paragraph{Comparison with BT.}
-\tsnote{This should be revisited once we get a full and current version from Mihir.}
+\tsnote{fold in with above}
 
 \emph{Why does decryption take $\pubiv,\header$ as input?} For applications like public-key-based keywrapping (and key transport?) the public-AD~$\header$ provides context to the receiver about the decrypted data. (See comments above)  Providing $\pubiv$ enables mechanisms for preventing replay.  \task{Example, other things?}  The downside is that, in some settings, exisiting decryption APIs may need to be updated.  BT explicitly did not require decryption to take $\pubiv,\header$ for just this reason.
 
