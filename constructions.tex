@@ -1,52 +1,101 @@
 \section{Constructions}
 \label{sec:constructions}
-\paragraph{IV-based PK-AEAD in the ROM. }
-In Figure~\ref{fig:ro-kem-dem-construction} we give a simple construction of an IV-based PK-AEAD scheme that is secure  in the random-oracle model. \task{Prove! Actually, you can't until you specify what $\mdalg$ is, or at least some security-relevant assumptions on it.  Also going to need to sort out what security notion(s) the KEM scheme needs to meet.}  
 
-%Operationally, it works for any randomized encapsulation algorithm $\OLencapprim{\pk}{}$, replacing its internally generated randomness with the output of the random oracle.  For example, the standard El Gamal KEM where $K=g^{\overline{S}x}$ and $X=g^{\overline{S}}$, for a generator~$g$ and $(\pk,\sk)=(g^x,x)$.
+\paragraph{Hash-then-key. } \tsnote{We're basically using one-time signature schemes.  I'll bet this composition has appeared before.  Check.} 
+\task{Prove security in the ROM.}
+\begin{figure}[tbhp]
+\begin{center}
+\fpage{.5}{
+\hpagess{.45}{.55}{
+ \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
+ $R \gets H(\langle \pk, \vad, \vmsg, \umd \rangle)$\\ 
+ $(\pk',\sk') \gets \Kgen(R)$\\
+ $C \gets \encprim{\pk}{}{\langle \vmsg, \umd,\pk' \rangle}$\\
+ $\sigma \gets \signprim{\sk'}{}{C}$\\
+ Return $C,\sigma$
+ }
+ {
+ \underline{$\Decprim{\sk}{\vad}{(C,\sigma),\auxinput}$}:\\[2pt]
+ $\langle \vmsg, \umd, \pk' \rangle \gets \decprim{\sk}{}{C} $\\
+ $ v \gets \verifyprim{\pk'}{}{C,\sigma}$\\
+ if $v=1$ and $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+ }
+}
+\caption{Hash-then-key construction.  The underlying public-key encryption $\enc$ is deterministic. }
+\label{fig:HtK}
+\end{center}
+\end{figure}
 
-\task{Formalize IV-based KEMs that take associated data. (See also labeled KEMs in the literature.)  They are called for in the following scheme, even though it isn't clear exactly what role $\header,\pubiv$ play in encapsulation, beyond what they already contribute by being part of the ``randomness'' creation.  Binding the ciphertext component~$\wrap$ to~$\header,\pubiv$? }
+
+\paragraph{Hash-then-encrypt.} \tsnote{This is the most obvious construction, and (I think) given in [BT].} \task{Prove security in the ROM.}
+\begin{figure}[tbhp]
+\begin{center}
+\fpage{.5}{
+\hpagess{.45}{.55}{
+ \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
+ $R \gets H(\langle \pk, \vad, \vmsg, \umd \rangle)$\\ 
+ $C \gets \encprim{\pk}{}{\langle \vmsg, \umd, R\rangle}$\\
+ Return $C$
+ }
+ {
+ \underline{$\Decprim{\sk}{\vad}{C,\auxinput}$}:\\[2pt]
+ $\langle \vmsg, \umd \rangle \gets \decprim{\sk}{}{C} $\\
+ if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+ }
+}
+\caption{Hash-then-encrypt construction.  The underlying public-key encryption $\enc$ is deterministic.   }
+\label{fig:HtE}
+\end{center}
+\end{figure}
+
+\paragraph{KEM-DEM instantiation of HtE.} 
+\task{Prove security in the ROM when the underlying symmetric encryption is an AEAD scheme.}
+\task{Does it add anything if we formalize KEMs to take AD?  }
 
 \begin{figure}[tbhp]
 \begin{center}
-\fpage{.6}{
+\fpage{.5}{
  \hpagess{.45}{.55}{
- \underline{$\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$}:\\[2pt]
- $R \gets H(\pk \concat \header \concat \pubiv \concat \umd \concat \rmd )$\\ 
- $(K,\wrap) \gets \encapprim{\pk}{\header,\pubiv}{R}$\\
- $C \gets \encprim{K}{\header,\pubiv}{\langle \umd,\rmd,M\rangle}$\\
+ \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
+ $R \gets H(\langle \pk,\vad,\vmsg,\umd \rangle)$\\ 
+ $(K,\wrap) \gets \encapprim{\pk}{}{R}$\\
+ $\vad' \gets (\vad,\wrap)$\\
+ $C \gets \encprim{K}{\vad'}{\langle \vmsg, \umd \rangle}$\\
  Return $(\wrap,C)$
  }
  {
- \underline{$\Decprim{\sk}{\header,\pubiv}{\wrap,C,\auxinput}$}:\\[2pt]
-$K \gets \decapprim{\sk}{\header,\pubiv}{\wrap}$\\[3pt]
-if $K = \bot$ then Return $\bot$\\
-$P \gets \decprim{K}{\header,\pubiv}{C}$\\ 
-if $ P = \bot$ then Return $\bot$\\
-$\umd,\rmd,M \gets P$\\
-if $\auxinput \in \mathcal{Z}_\umd$ then Return $(\rmd, M)$\\
- Return $\bot$
- }
-}
-
-\medskip
-\hspace*{.5ex}\fpage{.6}{
- \hpagess{.45}{.55}{
- \underline{$\encapprim{\pk}{\header,\pubiv}{R}$}:\\[2pt]
- $(K,X) \gets \OLencapprim{\pk}{}{\langle \header,\pubiv,R}\rangle$\\
- Return $(K,X)$
- }
- {
- \underline{$\decapprim{\sk}{\header,\pubiv}{X}$}:\\[2pt]
- $\langle K,\header',\pubiv'\rangle \gets \OLdecapprim{\sk}{}{X}$\\
- if $(\header',\pubiv')=(\header,\pubiv)$ then \\
-\nudge Return $K$ \\
+ \underline{$\Decprim{\sk}{\vad}{(\wrap,C),\auxinput}$}:\\[2pt]
+$K \gets \decapprim{\sk}{}{\wrap}$\\[3pt]
+$\vad' \gets (\vad,\wrap)$\\
+$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad'}{C}$\\ 
+if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
 Return $\bot$
- } 
-} 
-\caption{An IV-based PK-AEAD scheme, built in the KEM-DEM style,  that is secure in the random-oracle model for hash function~$H$. (To be proved.)  The unspecified encapsulation algorithm $\overline{\encap}$ can be any randomized algorithm with its internal randomness replaced by~$\overline{\seciv}$.  We assume there is an efficient test for membership in the set $\mathcal{Z}_\umd$.
+ }
 }
-\label{fig:ro-kem-dem-construction}
+%
+%\medskip
+%\hspace*{.5ex}\fpage{.5}{
+% \hpagess{.45}{.55}{
+% \underline{$\encapprim{\pk}{\vad}{R}$}:\\[2pt]
+%$(K,X) \gets \OLencapprim{\pk}{}{\langle \vad,R}\rangle$\\
+% Return $(K,X)$
+% }
+% {
+% \underline{$\decapprim{\sk}{\vad}{X}$}:\\[2pt]
+% $\langle K,\vad'\rangle \gets \OLdecapprim{\sk}{}{X}$\\
+% if $(\vad')=(\vad)$ then \\
+%\nudge Return $K$ \\
+%Return $\bot$
+% } 
+%} 
+\caption{KEM-DEM instantiation of HtE.  The underlying symmetric encryption $\enc$ is deterministic and supports associated data. The unspecified encapsulation algorithm $\encap$ can be any randomized algorithm with its internal randomness replaced by~$R$.  
+}
+\label{fig:kem-dem-HtE}
 \end{center}
 \end{figure}
 

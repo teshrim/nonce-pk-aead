@@ -13,14 +13,13 @@ Allowing $\mdalg$ to pass state to itself admits things like secret counters.  A
 
 
 \paragraph{Privacy. }
-On the left side of Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\vad,\vmsg_0,\vmsg_1)$, returns the encrpytion of $(\vmsg_b,\umd)$ where~$\umd$ is produced by executing $\mdalg(\st,\vmsg_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $\vmsg_0$ and $\vmsg_1$ are length-equivalent in every query. (Combined with our conventions on $\mdalg$, this implies that $|\umd,\rmd,M_b|$ does not depend on~$b$.) \task{Give advantage measures $\AdvINDCDA{\kreg,\mdalg,\pkaead}{A}$.}
+On the left side of Figure~\ref{fig:pkaead-notions} we give a notion of privacy.  The adversary queries an oracle that, on input $(\vad,\vmsg_0,\vmsg_1)$, returns the encrpytion of $(\vmsg_b,\umd)$ where~$\umd$ is produced by executing $\mdalg(\st,\vmsg_b)$ with the its current state~$\st$, and~$b$ is the random challenge-bit.  In this notion, we assume that $\vmsg_0$ and $\vmsg_1$ are length-equivalent in every query. (Combined with our conventions on $\mdalg$, this implies that $|\umd,\rmd,M_b|$ does not depend on~$b$.) \task{Give advantage measures $\AdvINDCDA{\kreg,\mdalg,\pkaead}{A}$ and assumptions on the adversary.}
 
 
-\tsnote{Note that our privacy definition is different than Mihir's.  He has (potential) per-message nonce-generation, and a one-time secret nonce (``seed'').  The adversary does not get to see the nonce, but does got to influence it's choice though the ``nonce selector'', whatever that is.  Our definition givse control of the nonce to the adversary, and has (potential) per-message secret nonce (i.e. secret-AD).  I'm not sure how his and our definitions relate, formally.}
+\tsnote{Note that our privacy definition is different than Mihir's.  He has (potential) per-message nonce-generation, and a one-time secret nonce (``seed'').  The adversary does not get to see the nonce, but does got to influence it's choice though the ``nonce selector'', whatever that is.  Our definition gives control of the nonce to the adversary, and has (potential) per-message secret nonce (i.e. secret-AD).  I'm not sure how his and our definitions relate, formally.}
 
 \paragraph{Authenticity. }  \tsnote{Needs to be reworked.}
-The right side of Figure~\ref{fig:pkaead-notions} describes a notion of authenticity.  Adversary~$A$ is provided with two oracles.  Its leftmost oracle~$\encOracle$ on input $(\header,\pubiv,M)$ simply returns the ciphertext $\Encprim{\pk}{\header,\pubiv}{\umd,\rmd,M}$ where the secret-AD $(\umd,\rmd)$ is produced by running $\mdalg(\st,M)$ with its current state.  The rightmost oracle $\decOracle$ on input $(\header,\pubiv,C,\auxinput)$ either returns $\Decprim{\sk}{\header,\pubiv}{C,Z}$ or $\bot$, depending on the value of the challenge bit~$b$.  The adversary must guess the value of~$b$.  Intuitively, this is possible (with probability significantly better than 1/2) only if the adversary manages to forge a $(\header,\pubiv,C,\auxinput)$ query such that $\Decprim{\sk}{\header,\pubiv}{C,Z} \neq \bot$.
-\task{Give advantage measure $\AdvAuth{\kreg,\mdalg,\pkaead}{A}$ and assumptions on the adversary.}
+The right side of Figure~\ref{fig:pkaead-notions} describes a notion of authenticity.  Adversary~$A$ is provided with two oracles.  Its leftmost oracle~$\encOracle$ on input $(\vad,\vmsg)$ simply returns the ciphertext $\Encprim{\pk}{\vad}{\vmsg,\umd}$ where $\umd$ is produced by running $\mdalg(\st,M)$ with its current state.  The rightmost oracle $\decOracle$ on input $(\vad,C,\auxinput)$ either returns $\Decprim{\sk}{\vad}{C,\auxinput}$ or $\bot$, depending on the value of the challenge bit~$b$.  The adversary must guess the value of~$b$.  Intuitively, this is possible (with probability significantly better than 1/2) only if the adversary manages to forge a $(\vad,C,\auxinput)$ query such that $\Decprim{\sk}{\vad}{C,\auxinput} \neq \bot$.  \task{Give advantage measure $\AdvAuth{\kreg,\mdalg,\pkaead}{A}$ and assumptions on the adversary.}
 
 %As previously noted, if the adversary controls~$\header, \pubiv$ and the plaintext messages, and encryption is deterministic, then the notion in Figure~\ref{fig:pkaead-notions} is unachievable if the secret-AD~$(\umd,\rmd)$ is predictable. Thus we introduce an auxillary notion, that of \textit{predictability of the secret-AD}.  The right side of Figure~\ref{fig:pkaead-notions} gives the notion.\task{Think about how this notion can be made useful}\tsfnote{Our PRED notion is essentially the same as Mihir's PRED notion. He uses it in the ROM to show how to build a hedged extractor with RoR-security.  This allows the PRED adversary in the RoR-reduction to simply return random strings and to ``guess'' which of the RO-queries is the one containing the output needed to win the PRED game. }
 
@@ -66,7 +65,7 @@ $(\st,\umd) \getsr \mdalg(\st,\vmsg_b)$\\
  \nudge Return $\Decprim{\sk}{\vad}{C,\auxinput}$\\
 Return $\bot$
 }
-\caption{Privacy (left) and authenticy (right) notions for a scheme $\pkaead$.}
+\caption{Privacy (left) and authenticy (right) notions for a scheme $\pkaead$ when the sender-side auxiliary data is produced by $\mdalg$.}
 \label{fig:pkaead-notions}
 \end{center}
 \end{figure}
