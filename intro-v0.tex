@@ -1,4 +1,4 @@
-\section{Old Introduction}
+\section{Introduction (version 0)}
 \label{sec:intro}
 \fixme{Old internal motivation. Read accordingly.}
 We introduce a new primitive, that of public-key, IV-based authenticated-encryption with associated data. The genesis of this primitive came from considering the construction of a public-key encryption scheme via the KEM-DEM paradigm, using an off-the-shelf symmetric-key, IV-based AEAD scheme for the DEM.  The latter turns a plaintext message~$M$ into a ciphertext~$C$ under control of a key~$K$, associated data~$\header$ and initial value (IV)~$\pubiv$, written $C \gets \enc_{K}^{\header,\pubiv}(M)$.  In a KEM-DEM construction, the key~$K$ is produced by a (randomized) key-encapsulation algorithm~$(K,X)\getsr\encap_\pk$, where the encapsulation~$X$ is used by the receiver to recover~$K$.  
