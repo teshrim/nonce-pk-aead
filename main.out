@@ -2,11 +2,8 @@
 \BOOKMARK [1][-]{section.2}{Encryption Schemes}{}% 2
 \BOOKMARK [1][-]{section.3}{Security notions for PK-AEAD}{}% 3
 \BOOKMARK [1][-]{section.4}{Generic Constructions}{}% 4
-\BOOKMARK [1][-]{section.5}{Password-authenticated PKE}{}% 5
-\BOOKMARK [1][-]{section.6}{Preshared-secret applications}{}% 6
-\BOOKMARK [1][-]{section.7}{Enabling protected metadata}{}% 7
-\BOOKMARK [1][-]{section.8}{Other potential applications}{}% 8
-\BOOKMARK [1][-]{section.9}{Related Work}{}% 9
-\BOOKMARK [1][-]{appendix.A}{Introduction \(version 0\)}{}% 10
-\BOOKMARK [1][-]{appendix.B}{Introduction \(version 1\)}{}% 11
-\BOOKMARK [1][-]{appendix.C}{Encapsulation Schemes}{}% 12
+\BOOKMARK [1][-]{section.5}{Applications}{}% 5
+\BOOKMARK [1][-]{section.6}{Related Work}{}% 6
+\BOOKMARK [1][-]{appendix.A}{Introduction \(version 0\)}{}% 7
+\BOOKMARK [1][-]{appendix.B}{Introduction \(version 1\)}{}% 8
+\BOOKMARK [1][-]{appendix.C}{Encapsulation Schemes}{}% 9

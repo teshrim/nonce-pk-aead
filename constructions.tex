@@ -2,7 +2,7 @@
 \label{sec:constructions}
 
 \paragraph{Hash-then-(ephemeral)key. } \tsnote{We're basically using one-time signature schemes.  I'll bet this composition has appeared before.  Check.} 
-\task{Prove security in the ROM.}
+\task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$.  What assumptions needed on encryption and the signature scheme (the signature scheme key generator, in particular)?}
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
@@ -29,7 +29,7 @@ Return $\bot$
 \end{figure}
 
 
-\paragraph{Hash-then-encrypt.} \tsnote{This is the most obvious construction, and (I think) given in [BT].} \task{Prove security in the ROM.}
+\paragraph{Hash-then-encrypt.} \tsnote{This is the most obvious construction, and (I think) given in [BT], more or less.} \task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$.}
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
@@ -52,8 +52,8 @@ Return $\bot$
 \end{center}
 \end{figure}
 
-\paragraph{KEM-DEM instantiation of HtE.} 
-\task{Prove security in the ROM when the underlying symmetric encryption is an AEAD scheme.}
+\paragraph{Hash-then-KEM-DEM.} 
+\task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$, when the underlying symmetric encryption is an AEAD scheme.}
 \task{Does it add anything if we formalize KEMs to take AD?  }
 
 \begin{figure}[tbhp]
