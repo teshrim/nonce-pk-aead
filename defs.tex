@@ -178,6 +178,25 @@ full version\fi}
         \framebox{\begin{minipage}[t]{#4\textwidth}\setstretch{1.1}\gamesfontsize #8 \end{minipage}}
         \end{tabular}
     }
+    
+    
+\newcommand{\procfont}[1]{\textbf{#1}}
+\newcommand{\nfont}[1]{{\footnotesize #1}}
+
+\newcommand{\query}[1]{\procfont{query} {#1}:}
+\newcommand{\queryl}[1]{\underline{\procfont{query} {#1}:}}
+\newcommand{\oracle}[1]{\underline{\procfont{oracle} {#1}:}}
+\newcommand{\oraclev}[1]{\underline{\procfont{oracle} {#1}:}\smallskip}
+\newcommand{\procedure}[1]{\underline{\procfont{procedure} {#1}:}}
+\newcommand{\procedurev}[1]{\underline{\procfont{procedure} {#1}:}\smallskip}
+\newcommand{\subroutine}[1]{\underline{\procfont{subroutine} {#1}:}}
+\newcommand{\subroutinev}[1]{\underline{\procfont{subroutine} {#1}:}\smallskip}
+\newcommand{\subroutinenl}[1]{{\procfont{subroutine} {#1}:}}
+\newcommand{\subroutinenlv}[1]{{\procfont{subroutine} {#1}:}\smallskip}
+\newcommand{\adversary}[1]{\underline{\procfont{adversary} {#1}:}}
+\newcommand{\adversaryv}[1]{\underline{\procfont{adversary} {#1}:}\smallskip}
+\newcommand{\experiment}[1]{\underline{{#1}}}
+\newcommand{\experimentv}[1]{\underline{{#1}}\smallskip}
 
 \newcommand{\vecw}{\mathbf{w}}
 \newcommand{\R}{\mathbb{R}}

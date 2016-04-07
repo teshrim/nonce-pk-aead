@@ -1,0 +1,117 @@
+\section{Proofs}
+\label{sec:proofs}
+
+\begin{figure}[tbhp]
+\begin{center}
+\fpage{.5}{
+\hpagess{.45}{.55}{
+ \experimentv{$\Exp^{\mathrm{IND-CPA}}_{\Pi,m}{(\advB)}$:}\\
+ $\pk = \pk_{chal}$\\
+ $st_0 \getsr XD(\epsilon,\bot)$\\
+ $st_1 = st_0$\\
+ $T = \emptyset$\\
+ $b' \getsr \advA^{Enc,H}(\pk)$\\
+Return $b'$\\ 
+ }
+ {
+  \queryl{$H(x)$}\\
+  $Z \getsr Coins$\\
+  if $T[x] \neq \bot:$\\
+  \nudge BAD $= \true$\\
+  \nudge $Z = T[x]$\\
+  $T[x] = Z$\\
+  Return $Z$\\
+ }
+ \hpagess{.55}{.45}{
+\queryl{$Enc(A,m_0,m_1)$}\\
+$(st_0, T_0) \getsr XD(st_0,m_0)$\\
+$(st_1, T_1) \getsr XD(st_1,m_1)$\\
+$R_0 \getsr H(\langle pk,A,M_0,T_0\rangle)$\\
+$R_1 \getsr H(\langle pk,A,M_1,T_1\rangle)$\\
+Return $\enc_{pk}(\langle M_0,T_0\rangle, \langle M_1,T_1\rangle)$\\
+ }
+ {
+
+ }
+}
+\caption{Adversary running against the IND-CPA experiment }
+\label{fig:CPA}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbhp]
+\begin{center}
+\fpage{.5}{
+\hpagess{.45}{.55}{
+ \experimentv{$\Exp^{\mathrm{Pred}}_{XD}{(\advP)}$:}\\
+ $(\pk,\sk) \getsr \kspace$\\
+ $b \getsr \bits$\\
+ $\cal X = \emptyset$\\
+  $\cal Q = \emptyset$\\
+ $b' \getsr \advA^{Enc,H}(\pk)$\\
+ $t^* \getsr \cal X \cap \cal Q$\\
+Return $t^*$\\ 
+ }
+ {
+  \queryl{$H(x)$}\\
+  $Z \getsr Coins$\\
+  $\cal X = \cal X \cup x$ \\
+  Return $Z$\\
+ }
+ \hpagess{.55}{.45}{
+\queryl{$Enc(A,m_0,m_1)$}\\
+$XD(m_b)$\\
+$T \gets ???$\\
+$q = \langle pk,A,m_b,T\rangle$\\
+$\cal Q = \cal Q \cup q$\\
+$R \getsr H(q)$\\
+Return $\enc_{pk}(\langle m_b,T\rangle;R)$\\
+ }
+ {
+
+ }
+}
+\caption{Adversary running against the Pred experiment}
+\label{fig:PRED}
+\end{center}
+\end{figure}
+
+\bea
+Pr[\Exp^{Priv}(\advA) = 1]  \leq &Pr[\Exp^{IND-CPA}(\advB) = 1] + Pr[BAD]\\
+\leq  &Pr[\Exp^{IND-CPA}(\advB) = 1] + q_h\Adv^{Pred}_{XD}(\advP)\\
+\Adv^{Priv}(\advA) \leq &\Adv^{IND-CPA}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
+\eea
+
+
+%Sample code---------------
+%\begin{figure}[t]
+%\noindent{$\mathcal{B}(PK)$}
+%\begin{algorithmic}[1]
+%\STATE $St = \emptyset$ 
+%\STATE $PK = c \leftarrow e(X,Y)$
+%\STATE $C = \emptyset$
+%\STATE $V = \emptyset$
+%\STATE $\text{run }\mathcal{A}(PK)$
+%\end{algorithmic}
+%
+%\noindent{\bf On query} $Enc(A,M_0,M_1)$
+%\begin{algorithmic}[1]
+%\STATE $St', T_0 \leftarrow XD(St, M_0)$
+%\STATE $St, T_1 \leftarrow XD(St, M_1)$
+%\STATE $M'_0 = M_0||T_0$
+%\STATE $M'_1 = M_1||T_1$
+%%\IF {$M'_0||M'_1 \notin C$}
+%\STATE{$C_b \leftarrow LR(M_0,T_0;M_1,T_1)$}
+%\STATE $C = C \cup (M'_0,M'_1,C_b)$
+%%\ELSE
+%\STATE $C(M'_0||M'_1)$
+%\RETURN $C_b$
+%\end{algorithmic}
+%
+%\noindent{\bf On query} $H(x)$
+%\begin{algorithmic}[1]
+%\RETURN $H(x)$
+%\end{algorithmic}
+%\caption{Adversary}
+%\label{fig:}
+%\end{figure}
