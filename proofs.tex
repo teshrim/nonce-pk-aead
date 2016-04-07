@@ -1,6 +1,18 @@
 \section{Proofs}
 \label{sec:proofs}
 
+\begin{theorem}
+Let $pke$ be a (possibly) randomized public-key encryption scheme, $pkAEAD$ be the hash-then-encrypt 
+$pkAEAD$ scheme, and $XD$ be a secret nonce generator.  Then, for any adversary $\advA$, the advantage of $\advA$ is bounded
+by an adversary $\advB$ breaking the semantic security of $pke$ and a predictor $\advP$ breaking the predictability of $XD$ as:
+\bne
+\Adv^{Priv}_{U,XD,pkAEAD}(\advA) \leq \Adv^{IND-CPA}_{pke}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
+\ene
+When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB$ makes $q_e$ queries to its
+encryption oracle and $q_e + q_h$ queries to its random oracle, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$
+ queries to the random oracle. 
+\end{theorem}
+
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
@@ -76,11 +88,35 @@ Return $\enc_{pk}(\langle m_b,T\rangle;R)$\\
 \end{center}
 \end{figure}
 
+\begin{proof}
+Given adversary $\advA$ playing $\Exp^{Priv}_{U,XD,pkAEAD}$, $\advB$ runs as in Figure~\ref{fig:CPA}.  Here, the set $Coins$ is defined
+by the set of all possible random coins used in the $pke$ encryption scheme.  Note also that we prevent $\advA$ from sending the same
+query to $Enc(\cdot,\cdot,\cdot)$ twice by assuming that one component of $A$ is used as a nonce that does not repeat.  Given this
+restriction, the $BAD$ flag will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
+oracle, which requires $\advA$ to guess the $T$ value associated with one of the messages it queried.  As long as
+$BAD$ remains false, each query to $Enc$ is correctly simulated with fresh randomness drawn from the $IND-CPA$ encryption oracle,
+and each query to $H$ is correctly simulated with fresh randomness drawn from the random oracle.  Thus, if $BAD = \false$, then
+$\advB$ has the same advantage in the $IND-CPA$ experiment as $\advA$ has in the $Priv$ experiment.
+
+If $BAD = \true$, then $\advA$ may distinguish between the fresh randomness used by the $IND-CPA$ oracle and the simulated
+random oracle maintained by $\advB$.  So, to bound the probability of $\advA$ guessing any $T$ value, we design a prediction adversary $\advP$ that runs as shown in Figure~\ref{fig:PRED} in the prediction game $\Exp^{pred}_XD$ as defined in~\cite{BellareTackmann}.  If the intersection between queried messages and hash queries from $\advA$ is non-empty, it
+implies that $\advA$ has guessed one of the $T$ values stored in the $pred$ oracle.  Since $\advP$ possesses the set of queried $T$ values 
+in $\cal X$ but cannot determine which to return, it has a $\frac{1}{q_h}$ probability of guessing and returning the predicted $T$ value and winning
+the prediction game.  Thus, we arrive at the following bound:
+
 \bea
-Pr[\Exp^{Priv}(\advA) = 1]  \leq &Pr[\Exp^{IND-CPA}(\advB) = 1] + Pr[BAD]\\
-\leq  &Pr[\Exp^{IND-CPA}(\advB) = 1] + q_h\Adv^{Pred}_{XD}(\advP)\\
-\Adv^{Priv}(\advA) \leq &\Adv^{IND-CPA}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
+Pr[\Exp^{Priv}_{U,XD,pkAEAD}(\advA) = 1]  = &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 | !BAD]Pr[!BAD]\\
+ + &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 | BAD]Pr[BAD]\\
+\leq &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1|!BAD] + Pr[BAD]\\
+\leq  &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1] + q_h\Adv^{Pred}_{XD}(\advP)\\
+\Adv^{Priv}_{U,XD,pkAEAD}(\advA) \leq &\Adv^{IND-CPA}_{pke}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
 \eea
+
+Where the first inequality is a result of the universal theorem of game playing, the second is the worst-case bound on the ability of $\advA$ to
+guess a secret metadata value $T$, and the final is from multiplying both sides by $2$ and subtracting $1$.  
+Note that this proof assumes the worst-case that an adversary controls messages and associated data, so
+the only unknown input to the random oracle is the value $T$.  Any added entropy in the joint distribution of these values tightens this bound.
+\end{proof}
 
 
 %Sample code---------------
