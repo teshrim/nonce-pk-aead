@@ -60,6 +60,92 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 {
 $\gamev{G3}{\advA}$\\
  $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad\gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b,0^{|\umd|}\rangle; R}$\\
+}
+\caption{Games}
+\label{fig:CPA}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagesss{.3}{.3}{.3}
+{
+ {$\adversaryv{\;\advB1^{\mathcal{O}}(\pk)}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $[d=d']'$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(\st_0, \umd_0) \getsr \mdalg(st_0,\vmsg_0)$\\
+$(\st_1, \umd_1) \getsr \mdalg(st_1,\vmsg_1)$\\
+Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
+}
+{
+{$\adversaryv{\;\advB2^{\mathcal{O}}(\pk)}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$d \getsr \bits$\\ 
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $\bad$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(\st, \umd) \getsr \mdalg(st,\vmsg)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+Return $\mathcal{O}(\langle \vmsg_d,\umd\rangle, \langle \vmsg_d,0^{|\umd|}\rangle)$\\
+}
+{
+$\gamev{G4}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+$ b \getsr \bits$\\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad\gets\true$
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b, 0^{|\umd|}\rangle; R}$\\
+}
+\if{0}
+{
+$\gamev{G4}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
 $ b \getsr \bits$\\
  $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
@@ -78,32 +164,17 @@ $ b \getsr \bits$\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr \mathrm{Coins}$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b, 0^{|\umd|}\rangle; R}$\\
 }
-\caption{Games}
+\fi
+\caption{Adversary running against the IND-CPA experiment }
 \label{fig:CPA}
 \end{center}
 \end{figure}
 
-\begin{figure}[tbhp]
+\begin{figure}
 \begin{center}
-\hfpagess{.3}{.3}{
- {$\adversaryv{\;\advB^{\mathcal{O}}(\pk)}$}\\
- $st_0 \getsr XD(\epsilon,\bot)$\\
- $st_1 = st_0$\\
- $b' \getsr \advA(\pk)$\\
-Return $b'$\\ 
-
-\queryl{$H(x)$}\\
-  $Z \getsr \mathrm{Coins}$\\
-  Return $Z$\\
-
-\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
-$(st_0, T_0) \getsr \mdalg(st_0,\vmsg_0)$\\
-$(st_1, T_1) \getsr \mdalg(st_1,\vmsg_1)$\\
-Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
-}
-{
+\fpage{.3}{
  $\adversaryv{\advP^{\mathcal{O}}}$\\
  $(\pk,\sk) \getsr \Kgen$\\
  $b \getsr \bits$\\
@@ -118,14 +189,11 @@ Return $T$\\
 
 \queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $R \getsr \mathrm{Coins}$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,T\rangle;R}$\\
-
+Return $\encprim{\pk}{}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
 }
-\caption{Adversary running against the IND-CPA experiment }
-\label{fig:CPA}
+\caption{Need that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
 \end{center}
 \end{figure}
-
 \begin{proof}
 Given adversary $\advA$ playing $\Exp^{Priv}_{U,XD,pkAEAD}$, $\advB$ runs as in Figure~\ref{fig:CPA}.  Here, the set $Coins$ is defined
 by the set of all possible random coins used in the $pke$ encryption scheme.  Note also that we prevent $\advA$ from sending the same
