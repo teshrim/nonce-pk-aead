@@ -68,6 +68,8 @@
 %\newcommand{\AdvDTE}[1]{\Adv^\mathrm{dte}_{#1}}
 
 \newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\AdvINDCPA}[2]{\Adv^{\mathrm{ind\mbox{-}cpa}}_{#1}{(#2)}}
+\newcommand{\ExpINDCPA}[2]{\Exp^{\mathrm{ind\mbox{-}cpa}}_{#1}{(#2)}}
 \newcommand{\AdvINDCDA}[2]{\Adv^{\mathrm{priv}}_{#1}{(#2)}}
 \newcommand{\ExpINDCDA}[2]{\Exp^{\mathrm{priv}}_{#1}{(#2)}}
 \newcommand{\AdvPred}[2]{\Adv^{\mathrm{pred}}_{#1}{(#2)}}
@@ -184,9 +186,11 @@ full version\fi}
 \newcommand{\nfont}[1]{{\footnotesize #1}}
 
 \newcommand{\query}[1]{\procfont{query} {#1}:}
-\newcommand{\queryl}[1]{\underline{\procfont{query} {#1}:}}
+\newcommand{\queryl}[1]{\underline{\procfont{On query} {#1}:}}
 \newcommand{\oracle}[1]{\underline{\procfont{oracle} {#1}:}}
 \newcommand{\oraclev}[1]{\underline{\procfont{oracle} {#1}:}\smallskip}
+\newcommand{\game}[2]{\underline{\procfont{Game} {\; #1}(#2):}}
+\newcommand{\gamev}[2]{\underline{\procfont{Game} {\; #1}(#2):}\smallskip}
 \newcommand{\procedure}[1]{\underline{\procfont{procedure} {#1}:}}
 \newcommand{\procedurev}[1]{\underline{\procfont{procedure} {#1}:}\smallskip}
 \newcommand{\subroutine}[1]{\underline{\procfont{subroutine} {#1}:}}
@@ -520,6 +524,7 @@ full version\fi}
 
 \newcommand{\calX}{\mathcal{X}}
 \newcommand{\calY}{\mathcal{Y}}
+\newcommand{\calT}{\mathcal{T}}
 
 %Parameter names:
 
@@ -612,3 +617,5 @@ full version\fi}
 
 \newcommand{\emptystring}{\varepsilon}
 \newcommand{\auxinput}{Z}
+
+\newcommand{\bad}{\mathrm{BAD}}

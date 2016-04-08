@@ -2,45 +2,90 @@
 \label{sec:proofs}
 
 \begin{theorem}
-Let $pke$ be a (possibly) randomized public-key encryption scheme, $pkAEAD$ be the hash-then-encrypt 
-$pkAEAD$ scheme, and $XD$ be a secret nonce generator.  Then, for any adversary $\advA$, the advantage of $\advA$ is bounded
-by an adversary $\advB$ breaking the semantic security of $pke$ and a predictor $\advP$ breaking the predictability of $XD$ as:
+Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a (possibly) randomized public-key encryption scheme, $\pkaead$ be the hash-then-encrypt scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB,\advP$ (explicitly constructed in the proof of this theorem) such that
 \bne
-\Adv^{Priv}_{U,XD,pkAEAD}(\advA) \leq \Adv^{IND-CPA}_{pke}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq \AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
 \ene
-When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB$ makes $q_e$ queries to its
-encryption oracle and $q_e + q_h$ queries to its random oracle, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$
- queries to the random oracle. 
+When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB$ makes $q_e$ queries to its encryption oracle and $q_e + q_h$ queries to its random oracle, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$ queries to the random oracle. 
 \end{theorem}
+
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagess{.3}{.3}{
+ {$\gamev{G1,\fbox{G0}}{\advA}$}\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr XD(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $b'$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  if $T[x] \neq \bot:$\\
+  \nudge BAD $= \true$\\
+  \nudge \fbox{$Z = T[x]$}\\
+  $T[x] = Z$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr XD(st,\vmsg_b)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+}
+{
+$\gamev{G2}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr XD(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calT \neq \emptyset$ then \\
+\nudge $\bad\gets\true$\\
+Return $b'$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr XD(st,\vmsg_b)$\\
+$\calT \gets \calT \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+}
+\caption{Games}
+\label{fig:CPA}
+\end{center}
+\end{figure}
 
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
 \hpagess{.45}{.55}{
- \experimentv{$\Exp^{\mathrm{IND-CPA}}_{\Pi,m}{(\advB)}$:}\\
- $\pk = \pk_{chal}$\\
+ {$\adversaryv{\;\advB^{\mathcal{O}}(\pk)}$}\\
  $st_0 \getsr XD(\epsilon,\bot)$\\
  $st_1 = st_0$\\
- $T = \emptyset$\\
- $b' \getsr \advA^{Enc,H}(\pk)$\\
+ $b' \getsr \advA(\pk)$\\
 Return $b'$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st_0, T_0) \getsr XD(st_0,\vmsg_0)$\\
+$(st_1, T_1) \getsr XD(st_1,\vmsg_1)$\\
+$R_0 \getsr H(\langle \pk,\vad,\vmsg_0,\umd_0\rangle)$\\
+$R_1 \getsr H(\langle \pk,\vad,\vmsg_1,\umd_1\rangle)$\\
+Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
  }
  {
-  \queryl{$H(x)$}\\
-  $Z \getsr Coins$\\
-  if $T[x] \neq \bot:$\\
-  \nudge BAD $= \true$\\
-  \nudge $Z = T[x]$\\
-  $T[x] = Z$\\
-  Return $Z$\\
  }
  \hpagess{.55}{.45}{
-\queryl{$Enc(A,m_0,m_1)$}\\
-$(st_0, T_0) \getsr XD(st_0,m_0)$\\
-$(st_1, T_1) \getsr XD(st_1,m_1)$\\
-$R_0 \getsr H(\langle pk,A,M_0,T_0\rangle)$\\
-$R_1 \getsr H(\langle pk,A,M_1,T_1\rangle)$\\
-Return $\enc_{pk}(\langle M_0,T_0\rangle, \langle M_1,T_1\rangle)$\\
  }
  {
 
