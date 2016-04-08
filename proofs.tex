@@ -30,7 +30,7 @@ Return $[b=b']$\\
 
 \medskip
 \procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
-$(st, T) \getsr XD(st,\vmsg_b)$\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
@@ -52,7 +52,7 @@ Return $[b=b']$\\
 
 \medskip
 \procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
-$(st, T) \getsr XD(st,\vmsg_b)$\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
@@ -76,10 +76,8 @@ Return $b'$\\
   Return $Z$\\
 
 \queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
-$(st_0, T_0) \getsr XD(st_0,\vmsg_0)$\\
-$(st_1, T_1) \getsr XD(st_1,\vmsg_1)$\\
-$R_0 \getsr H(\langle \pk,\vad,\vmsg_0,\umd_0\rangle)$\\
-$R_1 \getsr H(\langle \pk,\vad,\vmsg_1,\umd_1\rangle)$\\
+$(st_0, T_0) \getsr \mdalg(st_0,\vmsg_0)$\\
+$(st_1, T_1) \getsr \mdalg(st_1,\vmsg_1)$\\
 Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
 }
 {
@@ -87,7 +85,7 @@ Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle
  $(\pk,\sk) \getsr \Kgen$\\
  $b \getsr \bits$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
- $\langle \pk,\vad,\vmsg,T \rangle \getsr \cal X \cap \cal Q$\\
+ $\langle \pk,\vad,\vmsg,T \rangle \getsr \cal X$\\
 Return $T$\\ 
 
 \queryl{$H(x)$}\\
@@ -95,13 +93,9 @@ Return $T$\\
   $\calX = \calX \cup \{x\}$ \\
   Return $Z$\\
 
-\queryl{$Enc(A,m_0,m_1)$}\\
-$T XD(m_b)$\\
-$T \gets ???$\\
-$q = \langle pk,A,m_b,T\rangle$\\
-$\calQ = \calQ \cup \{q\}$\\
-$R \getsr H(q)$\\
-Return $\enc_{pk}(\langle m_b,T\rangle;R)$\\
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$R \getsr \mathrm{Coins}$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b,T\rangle;R}$\\
 
 }
 \caption{Adversary running against the IND-CPA experiment }
