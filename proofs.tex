@@ -15,7 +15,7 @@ When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to i
  {$\gamev{G1,\fbox{G0}}{\advA}$}\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
- $st \getsr XD(\epsilon,\bot)$\\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
 Return $[b=b']$\\ 
 
@@ -61,7 +61,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 $\gamev{G3}{\advA}$\\
  $(\pk,\sk)\getsr\Kgen$\\
 $ b \getsr \bits$\\
- $st \getsr XD(\epsilon,\bot)$\\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
  If $\calX \cap \calQ \neq \emptyset$ then \\
 \nudge $ x \getsr \calX$\\
