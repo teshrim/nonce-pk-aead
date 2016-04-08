@@ -54,7 +54,7 @@ Return $[b=b']$\\
 \procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
-$R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
+$R \getsr \mathrm{Coins}$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
 {
