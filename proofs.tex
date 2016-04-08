@@ -11,7 +11,7 @@ When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to i
 
 \begin{figure}[tbhp]
 \begin{center}
-\hfpagess{.3}{.3}{
+\hfpagesss{.3}{.3}{.3}{
  {$\gamev{G1,\fbox{G0}}{\advA}$}\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
@@ -55,6 +55,28 @@ Return $[b=b']$\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
+Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+}
+{
+$\gamev{G3}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $st \getsr XD(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $ x \getsr \calX$\\
+\nudge if $x \in \calQ$ then $\bad\gets\true$
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
 \caption{Games}
