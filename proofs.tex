@@ -17,7 +17,7 @@ When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to i
  $b \getsr \bits$ \\
  $st \getsr XD(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
-Return $b'$\\ 
+Return $[b=b']$\\ 
 
 \medskip
 \procedurev{$H(x)$}\\
@@ -40,9 +40,9 @@ $\gamev{G2}{\advA}$\\
  $b \getsr \bits$ \\
  $st \getsr XD(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
- If $\calX \cap \calT \neq \emptyset$ then \\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
 \nudge $\bad\gets\true$\\
-Return $b'$\\ 
+Return $[b=b']$\\ 
 
 \medskip
 \procedurev{$H(x)$}\\
@@ -53,7 +53,7 @@ Return $b'$\\
 \medskip
 \procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $(st, T) \getsr XD(st,\vmsg_b)$\\
-$\calT \gets \calT \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
@@ -64,8 +64,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 
 \begin{figure}[tbhp]
 \begin{center}
-\fpage{.5}{
-\hpagess{.45}{.55}{
+\hfpagess{.3}{.3}{
  {$\adversaryv{\;\advB^{\mathcal{O}}(\pk)}$}\\
  $st_0 \getsr XD(\epsilon,\bot)$\\
  $st_1 = st_0$\\
@@ -82,54 +81,31 @@ $(st_1, T_1) \getsr XD(st_1,\vmsg_1)$\\
 $R_0 \getsr H(\langle \pk,\vad,\vmsg_0,\umd_0\rangle)$\\
 $R_1 \getsr H(\langle \pk,\vad,\vmsg_1,\umd_1\rangle)$\\
 Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
- }
- {
- }
- \hpagess{.55}{.45}{
- }
- {
+}
+{
+ $\adversaryv{\advP^{\mathcal{O}}}$\\
+ $(\pk,\sk) \getsr \Kgen$\\
+ $b \getsr \bits$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ $\langle \pk,\vad,\vmsg,T \rangle \getsr \cal X \cap \cal Q$\\
+Return $T$\\ 
 
- }
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX = \calX \cup \{x\}$ \\
+  Return $Z$\\
+
+\queryl{$Enc(A,m_0,m_1)$}\\
+$T XD(m_b)$\\
+$T \gets ???$\\
+$q = \langle pk,A,m_b,T\rangle$\\
+$\calQ = \calQ \cup \{q\}$\\
+$R \getsr H(q)$\\
+Return $\enc_{pk}(\langle m_b,T\rangle;R)$\\
+
 }
 \caption{Adversary running against the IND-CPA experiment }
 \label{fig:CPA}
-\end{center}
-\end{figure}
-
-\begin{figure}[tbhp]
-\begin{center}
-\fpage{.5}{
-\hpagess{.45}{.55}{
- \experimentv{$\Exp^{\mathrm{Pred}}_{XD}{(\advP)}$:}\\
- $(\pk,\sk) \getsr \kspace$\\
- $b \getsr \bits$\\
- $\cal X = \emptyset$\\
-  $\cal Q = \emptyset$\\
- $b' \getsr \advA^{Enc,H}(\pk)$\\
- $t^* \getsr \cal X \cap \cal Q$\\
-Return $t^*$\\ 
- }
- {
-  \queryl{$H(x)$}\\
-  $Z \getsr Coins$\\
-  $\cal X = \cal X \cup x$ \\
-  Return $Z$\\
- }
- \hpagess{.55}{.45}{
-\queryl{$Enc(A,m_0,m_1)$}\\
-$XD(m_b)$\\
-$T \gets ???$\\
-$q = \langle pk,A,m_b,T\rangle$\\
-$\cal Q = \cal Q \cup q$\\
-$R \getsr H(q)$\\
-Return $\enc_{pk}(\langle m_b,T\rangle;R)$\\
- }
- {
-
- }
-}
-\caption{Adversary running against the Pred experiment}
-\label{fig:PRED}
 \end{center}
 \end{figure}
 
