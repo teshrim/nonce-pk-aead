@@ -215,10 +215,10 @@ Pr[\Exp^{Priv}_{U,XD,pkAEAD}(\advA) = 1]  = &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 
  + &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 | BAD]Pr[BAD]\\
 \leq &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1|!BAD] + Pr[BAD]\\
 \leq  &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1] + q_h\Adv^{Pred}_{XD}(\advP)\\
-\Adv^{Priv}_{U,XD,pkAEAD}(\advA) \leq &\Adv^{IND-CPA}_{pke}(\advB) + 2q_h\Adv^{Pred}_{XD}(\advP)
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
 \eea
 
-Where the first inequality is a result of the universal theorem of game playing, the second is the worst-case bound on the ability of $\advA$ to
+Where the first inequality is a result of the fundamental theorem of game playing, the second is the worst-case bound on the ability of $\advA$ to
 guess a secret metadata value $T$, and the final is from multiplying both sides by $2$ and subtracting $1$.  
 Note that this proof assumes the worst-case that an adversary controls messages and associated data, so
 the only unknown input to the random oracle is the value $T$.  Any added entropy in the joint distribution of these values tightens this bound.
