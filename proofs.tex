@@ -1,6 +1,8 @@
 \section{Proofs}
 \label{sec:proofs}
 
+\subsection{Hash-then-encrypt}
+
 \begin{theorem}
 Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a (possibly) randomized public-key encryption scheme, $\pkaead$ be the hash-then-encrypt scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB,\advP$ (explicitly constructed in the proof of this theorem) such that
 \bne
@@ -168,7 +170,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b, 0^{|\umd|}\rangle; R}$\\
 }
 \fi
 \caption{Adversary running against the IND-CPA experiment }
-\label{fig:CPA}
+\label{fig:CPA-adv}
 \end{center}
 \end{figure}
 
@@ -224,6 +226,187 @@ Note that this proof assumes the worst-case that an adversary controls messages 
 the only unknown input to the random oracle is the value $T$.  Any added entropy in the joint distribution of these values tightens this bound.
 \end{proof}
 
+\subsection{Hash-then-KEM-DEM}
+
+%GAMES
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagesss{.3}{.3}{.3}{
+ {$\gamev{G1,\fbox{G0}}{\advA}$}\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  if $T[x] \neq \bot:$\\
+  \nudge BAD $= \true$\\
+  \nudge \fbox{$Z = T[x]$}\\
+  $T[x] = Z$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
+$(K,X) \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X)$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg, T\rangle}$\\
+Return $(X,C)$\\
+}
+{
+$\gamev{G2}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr XD(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad\gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
+$(K,X) \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X)$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg, T\rangle}$\\
+Return $(X,C)$\\
+}
+{
+$\gamev{G3}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad\gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg_b)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
+$(K,X) \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X)$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg, 0^{|\umd|}\rangle}$\\
+Return $(X,C)$\\
+}
+\caption{KEM-DEM Games}
+\label{fig:CPA-KEMDEM}
+\end{center}
+\end{figure}
+
+%ADVERSARIES
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagesss{.3}{.3}{.3}
+{
+ {$\adversaryv{\;\advB1^{\mathcal{O}_\encap}(\pk)}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$d \getsr \bits$\\
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $[d=d']$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(\st, \umd) \getsr \mdalg(st,\vmsg_d)$\\
+$(K,X) \gets \mathcal{O}_\encap()$\\
+$\vad' \gets (\vad, X)$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg, T\rangle}$\\
+Return $(X,C)$\\
+}
+{
+{$\adversaryv{\;\advB1^{\mathcal{O}_\enc}()}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$(\pk,\sk)\getsr\Kgen$\\
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $d'$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(\st_0, \umd_0) \getsr \mdalg(st_0,\vmsg_0)$\\
+$(\st_1, \umd_1) \getsr \mdalg(st_1,\vmsg_1)$\\
+$R \getsr \mathrm{Coins}$\\
+$(K',X') \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X')$\\
+$C \gets \mathcal{O}_\enc(\vad',\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle)$\\
+Return $(X',C)$\\
+}
+{
+{$\adversaryv{\;\advB2^{\mathcal{O}}(\pk)}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$d \getsr \bits$\\ 
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $\bad$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$(\st, \umd) \getsr \mdalg(st,\vmsg)$\\
+$\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_d,\umd\rangle\}$\\
+$R \getsr \mathrm{Coins}$\\
+$(K',X') \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X')$\\
+$C \gets \mathcal{O}_\enc(\vad',\langle \vmsg_d,\umd\rangle, \langle \vmsg_d,0^{|\umd|}\rangle)$\\
+Return $(X',C)$\\
+}
+\caption{Adversary running against the IND-CPA experiment.}
+\label{fig:CPA-KDadv}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\fpage{.3}{
+ $\adversaryv{\advP^{\mathcal{O}}}$\\
+ $(\pk,\sk) \getsr \Kgen$\\
+ $b \getsr \bits$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ $\langle \pk,\vad,\vmsg,T \rangle \getsr \cal X$\\
+Return $T$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX = \calX \cup \{x\}$ \\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
+$R \getsr \mathrm{Coins}$\\
+$(K,X) \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X)$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg_b, 0^{\ell}\rangle}$\\
+Return $(X,C)$\\
+}
+\caption{Need that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
+\end{center}
+\end{figure}
 
 %Sample code---------------
 %\begin{figure}[t]
