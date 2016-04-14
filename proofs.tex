@@ -1,14 +1,33 @@
 \section{Proofs}
 \label{sec:proofs}
 
+\begin{figure}
+\begin{center}
+\fpage{.3}{
+$\gamev{G^{\mathrm{pred}}_{XD}}{\advP}$\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$n \getsr \advP^{\mathcal{O}}$\\
+Return $[n \in N]$\\
+
+\medskip
+\procedurev{$\mathcal{O}(x)$}\\
+$(n, st) \getsr \mdalg(st, x)$\\
+$N \gets N \cup \{n\}$\\
+}
+\caption{Unpredictability security game.}
+\label{fig:preddef}
+\end{center}
+\end{figure}
+
 \subsection{Hash-then-encrypt}
 
 \begin{theorem}
-Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a (possibly) randomized public-key encryption scheme, $\pkaead$ be the hash-then-encrypt scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB,\advP$ (explicitly constructed in the proof of this theorem) such that
+Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a (possibly) randomized public-key encryption scheme, $\pkaead$ be the hash-then-encrypt scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB1,\advB2,\advP$ (explicitly constructed in the proof of this theorem) such that
 \bne
-\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq \AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq 3\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
 \ene
-When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB$ makes $q_e$ queries to its encryption oracle and $q_e + q_h$ queries to its random oracle, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$ queries to the random oracle. 
+When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB1$ and $\advB2$ make $q_e$ queries each to their 
+encryption oracles and $q_e + q_h$ queries to their random oracles, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$ queries to the random oracle. 
 \end{theorem}
 
 \begin{figure}[tbhp]
@@ -83,7 +102,7 @@ $R \getsr \mathrm{Coins}$\\
 Return $\encprim{\pk}{}{\langle \vmsg_b,0^{|\umd|}\rangle; R}$\\
 }
 \caption{Games}
-\label{fig:CPA}
+\label{fig:HtEgames}
 \end{center}
 \end{figure}
 
@@ -197,33 +216,33 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
 \end{center}
 \end{figure}
 \begin{proof}
-Given adversary $\advA$ playing $\Exp^{Priv}_{U,XD,pkAEAD}$, $\advB$ runs as in Figure~\ref{fig:CPA}.  Here, the set $Coins$ is defined
-by the set of all possible random coins used in the $pke$ encryption scheme.  Note also that we prevent $\advA$ from sending the same
-query to $Enc(\cdot,\cdot,\cdot)$ twice by assuming that one component of $A$ is used as a nonce that does not repeat.  Given this
-restriction, the $BAD$ flag will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
-oracle, which requires $\advA$ to guess the $T$ value associated with one of the messages it queried.  As long as
-$BAD$ remains false, each query to $Enc$ is correctly simulated with fresh randomness drawn from the $IND-CPA$ encryption oracle,
-and each query to $H$ is correctly simulated with fresh randomness drawn from the random oracle.  Thus, if $BAD = \false$, then
-$\advB$ has the same advantage in the $IND-CPA$ experiment as $\advA$ has in the $Priv$ experiment.
-
-If $BAD = \true$, then $\advA$ may distinguish between the fresh randomness used by the $IND-CPA$ oracle and the simulated
-random oracle maintained by $\advB$.  So, to bound the probability of $\advA$ guessing any $T$ value, we design a prediction adversary $\advP$ that runs as shown in Figure~\ref{fig:PRED} in the prediction game $\Exp^{pred}_XD$ as defined in~\cite{BellareTackmann}.  If the intersection between queried messages and hash queries from $\advA$ is non-empty, it
-implies that $\advA$ has guessed one of the $T$ values stored in the $pred$ oracle.  Since $\advP$ possesses the set of queried $T$ values 
-in $\cal X$ but cannot determine which to return, it has a $\frac{1}{q_h}$ probability of guessing and returning the predicted $T$ value and winning
-the prediction game.  Thus, we arrive at the following bound:
+We show a series of games to simulate $\ExpINDCDA{U,XD,pkAEAD}{\advA}$ in Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{U,XD,pkAEAD}{\advA}$,
+the set $Coins$ is defined by the set of all possible random coins used in $\Pi$.  We prevent $\advA$ from sending the same
+query to $Enc(\cdot,\cdot,\cdot)$ twice by assuming that one component of $\vad$ is used as a nonce that does not repeat.  Given this
+restriction, $BAD$ will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
+oracle.  $G1$ is identical to $G0$ except calls to $H(x)$ always return fresh randomness.
+As long as $BAD$ remains false, the randomness in $G0$ and $G1$ is identical, and $G1$ can be simulated by an adversary $\advB1$ 
+as shown in Figure~\ref{fig:CPA-adv}.  $G2$ is identical to $G1$ except that instead of maintaining the dictionary $T[x]$, the game maintains
+a set containing queries to $H(x)$ by $\advA$ and a set containing queries to $H(x)$ by $\encOracle(\vad,\vmsg_0,\vmsg_1)$.  Note the probability
+of $BAD$ is the same in $G1$ and $G2$.  Finally, $G3$ is identical to $G2$ except that the encrypted $T$ is substituted for the zero string $0^{|\umd|}$.
+Note that any adversary $\advA$ distinguishing between these two experiments implies and adversary $\advB2$ constructed as in Figure~\ref{fig:CPA-adv}
+that can win $\ExpINDCPA{\Pi}{\advB2}$ with the same advantage.  Given $G3$, we construct a prediction adversary $\advP$ in Figure~\ref{fig:CPA-adv}
+running in the prediction game $\ExpPred{XD}{\advP}$ as defined in Figure~\ref{fig:preddef} that has a $\frac{1}{q_h}$ probability of guessing which query
+from $\advA$ caused $BAD$ to be set.  Thus, we arrive at the following bound:
 
 \bea
-Pr[\Exp^{Priv}_{U,XD,pkAEAD}(\advA) = 1]  = &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 | !BAD]Pr[!BAD]\\
- + &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1 | BAD]Pr[BAD]\\
-\leq &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1|!BAD] + Pr[BAD]\\
-\leq  &Pr[\Exp^{IND-CPA}_{pke}(\advB) = 1] + q_h\Adv^{Pred}_{XD}(\advP)\\
-\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
+Pr[\ExpINDCDA{U,XD,pkAEAD}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
+\leq &Pr[G1(\advA) \wedge \neg BAD] + Pr[G1(\advA) : BAD]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : BAD]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : BAD]\\
+   &-Pr[G2(\advA) : BAD] +  Pr[G2(\advA) : BAD]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G2(\advA) : BAD]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{XD}{\advP}\\
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{XD}{\advP}
 \eea
 
-Where the first inequality is a result of the fundamental theorem of game playing, the second is the worst-case bound on the ability of $\advA$ to
-guess a secret metadata value $T$, and the final is from multiplying both sides by $2$ and subtracting $1$.  
-Note that this proof assumes the worst-case that an adversary controls messages and associated data, so
-the only unknown input to the random oracle is the value $T$.  Any added entropy in the joint distribution of these values tightens this bound.
+Where the first inequality is due to the fundamental theorem of games, the second to the existence of $\advB1$, the third and fourth to the existence of $\advB2$,
+and the last to the existence of $\advP$.
 \end{proof}
 
 \subsection{Hash-then-KEM-DEM}
