@@ -129,6 +129,8 @@ Return $\mathcal{O}(\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\umd_1\rangle
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $d \getsr \bits$\\ 
 $d' \getsr \advA^{\encOracle,H}(\pk)$\\
+if $\calX \cap \calQ \neq \emptyset$ then\\
+\nudge $\bad\gets\true$\\
 Return $\bad$\\ 
 
 \queryl{$H(x)$}\\
@@ -139,7 +141,7 @@ Return $\bad$\\
 \queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $(\st, \umd) \getsr \mdalg(st,\vmsg)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
-Return $\mathcal{O}(\langle \vmsg_d,\umd\rangle, \langle \vmsg_d,0^{|\umd|}\rangle)$\\
+Return $\mathcal{O}(\langle \vmsg_d,0^{|\umd|}\rangle, \langle \vmsg_d,\umd\rangle)$\\
 }
 {
 $\gamev{G4}{\advA}$\\
@@ -235,8 +237,8 @@ Pr[\ExpINDCDA{U,XD,pkAEAD}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
 \leq &Pr[G1(\advA) \wedge \neg BAD] + Pr[G1(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : BAD]\\
-   &-Pr[G2(\advA) : BAD] +  Pr[G2(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G2(\advA) : BAD]\\
+   &-Pr[G3(\advA) : BAD] +  Pr[G3(\advA) : BAD]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G3(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{XD}{\advP}\\
 \AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{XD}{\advP}
 \eea
@@ -380,7 +382,7 @@ Return $(X',C)$\\
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $d \getsr \bits$\\ 
 $d' \getsr \advA^{\encOracle,H}(\pk)$\\
-Return $\bad$\\ 
+Return $\neg\bad$\\ 
 
 \queryl{$H(x)$}\\
   $Z \getsr \mathrm{Coins}$\\
