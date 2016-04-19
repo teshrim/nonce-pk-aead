@@ -4,7 +4,7 @@
 \begin{figure}
 \begin{center}
 \fpage{.3}{
-$\gamev{G^{\mathrm{pred}}_{XD}}{\advP}$\\
+$\gamev{G^{\mathrm{pred}}_{\mdalg}}{\advP}$\\
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $n \getsr \advP^{\mathcal{O}}$\\
 Return $[n \in N]$\\
@@ -24,7 +24,7 @@ $N \gets N \cup \{n\}$\\
 \begin{theorem}
 Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a (possibly) randomized public-key encryption scheme, $\pkaead$ be the hash-then-encrypt scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB1,\advB2,\advP$ (explicitly constructed in the proof of this theorem) such that
 \bne
-\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq 3\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{XD}{\advP}
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq 3\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{\mdalg}{\advP}
 \ene
 When $\advA$ makes $q_e$ queries to its encryption oracle and $q_h$ queries to its random oracle, $\advB1$ and $\advB2$ make $q_e$ queries each to their 
 encryption oracles and $q_e + q_h$ queries to their random oracles, and $\advP$ makes $q_e$ queries to the prediction oracle and $q_e + q_h$ queries to the random oracle. 
@@ -59,7 +59,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
 $\gamev{G2}{\advA}$\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
- $st \getsr XD(\epsilon,\bot)$\\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
  If $\calX \cap \calQ \neq \emptyset$ then \\
 \nudge $\bad\gets\true$\\
@@ -219,7 +219,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
 \end{center}
 \end{figure}
 \begin{proof}
-We show a series of games to simulate $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$ in Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{U,XD,pkAEAD}{\advA}$,
+We show a series of games to simulate $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$ in Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$,
 the set $Coins$ is defined by the set of all possible random coins used in $\Pi$.  We prevent $\advA$ from sending the same
 query to $Enc(\cdot,\cdot,\cdot)$ twice by assuming that one component of $\vad$ is used as a nonce that does not repeat.  Given this
 restriction, $BAD$ will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
@@ -230,18 +230,18 @@ a set containing queries to $H(x)$ by $\advA$ and a set containing queries to $H
 of $BAD$ is the same in $G1$ and $G2$.  Finally, $G3$ is identical to $G2$ except that the encrypted $T$ is substituted for the zero string $0^{|\umd|}$.
 Note that any adversary $\advA$ distinguishing between these two experiments implies and adversary $\advB2$ constructed as in Figure~\ref{fig:CPA-adv}
 that can win $\ExpINDCPA{\Pi}{\advB2}$ with the same advantage.  Given $G3$, we construct a prediction adversary $\advP$ in Figure~\ref{fig:CPA-adv}
-running in the prediction game $\ExpPred{XD}{\advP}$ as defined in Figure~\ref{fig:preddef} that has a $\frac{1}{q_h}$ probability of guessing which query
+running in the prediction game $\ExpPred{\mdalg}{\advP}$ as defined in Figure~\ref{fig:preddef} that has a $\frac{1}{q_h}$ probability of guessing which query
 from $\advA$ caused $BAD$ to be set.  Thus, we arrive at the following bound:
 
 \bea
-Pr[\ExpINDCDA{U,XD,pkAEAD}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
+Pr[\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
 \leq &Pr[G1(\advA) \wedge \neg BAD] + Pr[G1(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : BAD]\\
    &-Pr[G3(\advA) : BAD] +  Pr[G3(\advA) : BAD]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G3(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{XD}{\advP}\\
-\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{XD}{\advP}
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{\mdalg}{\advP}\\
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{\mdalg}{\advP}
 \eea
 
 Where the first inequality is due to the fundamental theorem of games, the second to the existence of $\advB1$, the third and fourth to the existence of $\advB2$,
@@ -283,7 +283,7 @@ Return $(X,C)$\\
 $\gamev{G2}{\advA}$\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
- $st \getsr XD(\epsilon,\bot)$\\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
  If $\calX \cap \calQ \neq \emptyset$ then \\
 \nudge $\bad\gets\true$\\
