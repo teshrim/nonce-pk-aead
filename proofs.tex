@@ -219,7 +219,7 @@ Return $\encprim{\pk}{}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
 \end{center}
 \end{figure}
 \begin{proof}
-We show a series of games to simulate $\ExpINDCDA{U,XD,pkAEAD}{\advA}$ in Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{U,XD,pkAEAD}{\advA}$,
+We show a series of games to simulate $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$ in Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{U,XD,pkAEAD}{\advA}$,
 the set $Coins$ is defined by the set of all possible random coins used in $\Pi$.  We prevent $\advA$ from sending the same
 query to $Enc(\cdot,\cdot,\cdot)$ twice by assuming that one component of $\vad$ is used as a nonce that does not repeat.  Given this
 restriction, $BAD$ will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
