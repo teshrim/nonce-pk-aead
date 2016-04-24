@@ -46,7 +46,7 @@ Return $[b=b']$\\
 \procedurev{$H(x)$}\\
   $Z \getsr \mathrm{Coins}$\\
   if $T[x] \neq \bot:$\\
-  \nudge BAD $= \true$\\
+  \nudge $\bad = \true$\\
   \nudge \fbox{$Z = T[x]$}\\
   $T[x] = Z$\\
   Return $Z$\\
@@ -87,7 +87,7 @@ $\gamev{G3}{\advA}$\\
  $st \getsr \mdalg(\epsilon,\bot)$\\
  $b' \getsr \advA^{\encOracle,H}(\pk)$\\
  If $\calX \cap \calQ \neq \emptyset$ then \\
-\nudge $\bad\gets\true$\\
+\nudge $\bad \gets\true$\\
 Return $[b=b']$\\ 
 
 \medskip
@@ -175,28 +175,28 @@ We show a series of games to simulate $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$ 
 Figure~\ref{fig:HtEgames}.  In $G0$, matching $\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA}$,
 the set $Coins$ is defined by the set of all possible random coins used in $\Pi$.  We assume $\advA$ will never send the same
 query to $Enc(\cdot,\cdot,\cdot)$ twice.  This can be enforced in practice by assuming one component of $\vad$ is used as a nonce that does not repeat.  Given this
-restriction, $BAD$ will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
-oracle.  We consider separately the case where $BAD$ is set and where $BAD$ remains $\false$.
+restriction, $\bad$ will only be set if $\advA$ queries the random oracle on a value that was previously submitted to the encryption
+oracle.  We consider separately the case where $\bad$ is set and where $\bad$ remains $\false$.
 
 The next game $G1$ is identical to $G0$ except calls to $H(x)$ always return fresh randomness.
-As long as $BAD$ remains false, the randomness in $G0$ and $G1$ is identical, and $G1$ can be simulated by an adversary $\advB1$ 
+As long as $\bad$ remains false, the randomness in $G0$ and $G1$ is identical, and $G1$ can be simulated by an adversary $\advB1$ 
 as shown in Figure~\ref{fig:CPA-adv}.  $G2$ is identical to $G1$ except that instead of maintaining the dictionary $T[x]$, the game maintains
 a set containing queries to $H(x)$ by $\advA$ and a set containing queries to $H(x)$ by $\encOracle(\vad,\vmsg_0,\vmsg_1)$.  Note the probability
-of $BAD$ is the same in $G1$ and $G2$.  Finally, $G3$ is identical to $G2$ except that the encrypted $T$ is substituted for the zero string $0^{|\umd|}$.
+of $\bad$ is the same in $G1$ and $G2$.  Finally, $G3$ is identical to $G2$ except that the encrypted $T$ is substituted for the zero string $0^{|\umd|}$.
 Note that any adversary $\advA$ distinguishing between these two experiments implies and adversary $\advB2$ constructed as in Figure~\ref{fig:CPA-adv}
 that can win $\ExpINDCPA{\Pi}{\advB2}$ with the same advantage.  Given $G3$, we construct a prediction adversary $\advP$ in Figure~\ref{fig:CPA-adv}
 running in the prediction game $\ExpPred{\mdalg}{\advP}$ as defined in Figure~\ref{fig:preddef} that has a $\frac{1}{q_h}$ probability of guessing which query
-from $\advA$ caused $BAD$ to be set.  Thus, we arrive at the following bound:
+from $\advA$ caused $\bad$ to be set.  Thus, we arrive at the following bound:
 
 \bea
 Pr[\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
-\leq &Pr[G1(\advA) \wedge \neg BAD] + Pr[G1(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : BAD]\\
-   &-Pr[G3(\advA) : BAD] +  Pr[G3(\advA) : BAD]\\
+\leq &Pr[G1(\advA) \wedge \neg \bad] + Pr[G1(\advA) : \bad]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : \bad]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : \bad]\\
+   &-Pr[G3(\advA) : \bad] +  Pr[G3(\advA) : \bad]\\
    \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[\ExpINDCPA{\Pi}{\advB2} = 1 | b = 0]\\
-   &-Pr[\ExpINDCPA{\Pi}{\advB2} = 1 | b = 1] +  Pr[G3(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G3(\advA) : BAD]\\
+   &-Pr[\ExpINDCPA{\Pi}{\advB2} = 1 | b = 1] +  Pr[G3(\advA) : \bad]\\
+\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G3(\advA) : \bad]\\
 \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{\mdalg}{\advP}\\
 \AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{\mdalg}{\advP}
 \eea
@@ -207,17 +207,31 @@ and the last to the existence of $\advP$.
 
 \subsection{Hash-then-KEM-DEM}
 
+\begin{theorem}
+Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a randomized symmetric-key encryption scheme, $\Phi=(\Kgen,\encap,\decap)$ be a key encapsulation mechanism, $\pkaead$ be the KEM-DEM scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB3^{\mathcal{O}_\encap},\advB3^{\mathcal{O}_\enc},\advB3^{\mathcal{O}},\advP$ (explicitly constructed in the proof of this theorem) such that
+\bne
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq 4\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + 3\AdvINDCPA{\Pi}{\advB} + 2q_h\AdvPred{\mdalg}{\advP}
+\ene
+\end{theorem}
+
 \bea
 Pr[\ExpINDCDA{\kreg,\mdalg,\pkaead}{\advA} = 1]  = &Pr[G0(\advA) = 1]\\
-\leq &Pr[G1(\advA) \wedge \neg BAD] + Pr[G1(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G1(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[G2(\advA) : BAD]\\
-   &-Pr[G3(\advA) : BAD] +  Pr[G3(\advA) : BAD]\\
-   \leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + Pr[\ExpINDCPA{\Pi}{\advB2} = 1 | b = 0]\\
-   &-Pr[\ExpINDCPA{\Pi}{\advB2} = 1 | b = 1] +  Pr[G3(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  Pr[G3(\advA) : BAD]\\
-\leq &Pr[\ExpINDCPA{\Pi}{\advB1} = 1] + \AdvINDCPA{\Pi}{\advB2} +  q_h\AdvPred{\mdalg}{\advP}\\
-\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &\AdvINDCPA{\Pi}{\advB1} + 2\AdvINDCPA{\Pi}{\advB2} +  2q_h\AdvPred{\mdalg}{\advP}
+\leq &Pr[G1(\advA) \wedge \neg\bad] + Pr[G1(\advA) : \bad]\\
+\leq &Pr[G2(\advA) \wedge \neg\bad] + Pr[G2(\advA) : \bad]\\
+\leq &Pr[G2(\advA) \wedge \neg\bad] - Pr[G3(\advA) \wedge \neg\bad] + Pr[G3(\advA) \wedge \neg\bad]\\
+	&+ Pr[G2(\advA) : \bad] - Pr[G3(\advA) : \bad] + Pr[G3(\advA) : \bad]\\
+\leq &\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + Pr[G3(\advA) \wedge \neg\bad]\\
+	&+ \AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + Pr[G3(\advA) : \bad]\\
+\leq &\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + Pr[\ExpINDCPA{\Pi}{\advB3^{\mathcal{O}_\enc}} = 1]\\
+	&+ \AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + Pr[G3(\advA) : \bad]\\
+\leq &\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + Pr[\ExpINDCPA{\Pi}{\advB3^{\mathcal{O}_\enc}} = 1]\\
+	&+ \AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + Pr[G3(\advA) : \bad] - Pr[G4(\advA) : \bad] + Pr[G4(\advA) : \bad]\\
+\leq &\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + Pr[\ExpINDCPA{\Pi}{\advB3^{\mathcal{O}_\enc}} = 1]\\
+	&+ \AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + \AdvINDCPA{\Pi}{\advB3^{\mathcal{O}}} + Pr[G4(\advA) : \bad]\\
+\leq &\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + Pr[\ExpINDCPA{\Pi}{\advB3^{\mathcal{O}_\enc}} = 1]\\
+	&+ \AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + \AdvINDCPA{\Pi}{\advB3^{\mathcal{O}}} + q_h\AdvPred{\mdalg}{\advP}\\
+\AdvINDCDA{\kreg,\mdalg,\pkaead}{\advA} \leq &2\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}} + \AdvINDCPA{\Pi}{\advB3^{\mathcal{O}_\enc}}\\
+	&+ 2\AdvKEM{\Phi}{\advB3^{\mathcal{O}_\encap}}  + 2\AdvINDCPA{\Pi}{\advB3^{\mathcal{O}}} + 2q_h\AdvPred{\mdalg}{\advP}\\
 \eea
 
 %----------------------------------KEM-DEM Games----------------------------------
@@ -235,7 +249,7 @@ Return $[b=b']$\\
 \procedurev{$H(x)$}\\
   $Z \getsr \mathrm{Coins}$\\
   if $T[x] \neq \bot:$\\
-  \nudge BAD $= \true$\\
+  \nudge $\bad = \true$\\
   \nudge \fbox{$Z = T[x]$}\\
   $T[x] = Z$\\
   Return $Z$\\
@@ -333,7 +347,7 @@ $R \getsr \mathrm{Coins}$\\
 $K \getsr \kspace$\\
 $(K',X') \gets \encapprim{\pk}{}{R}$\\
 $\vad' \gets (\vad, X')$\\
-$C \gets \encprim{K}{\vad'}{\langle \vmsg, T\rangle}$\\
+$C \gets \encprim{K}{\vad'}{\langle \vmsg, 0^{|\umd|}\rangle}$\\
 Return $(X',C)$\\
 
 }
@@ -346,7 +360,7 @@ Return $(X',C)$\\
 \begin{center}
 \hfpagesss{.3}{.3}{.3}
 {
- {$\adversaryv{\;\advB1^{\mathcal{O}_\encap}(\pk)}$}\\
+ {$\adversaryv{\;\advB3^{\mathcal{O}_\encap}(\pk)}$}\\
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $d \getsr \bits$\\
 $d' \getsr \advA^{\encOracle,H}(\pk)$\\
@@ -364,7 +378,7 @@ $C \gets \encprim{K}{\vad'}{\langle \vmsg, T\rangle}$\\
 Return $(X,C)$\\
 }
 {
-{$\adversaryv{\;\advB1^{\mathcal{O}_\enc}()}$}\\
+{$\adversaryv{\;\advB3^{\mathcal{O}_\enc}()}$}\\
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $(\pk,\sk)\getsr\Kgen$\\
 $d' \getsr \advA^{\encOracle,H}(\pk)$\\
@@ -384,7 +398,7 @@ $C \gets \mathcal{O}_\enc(\vad',\langle \vmsg_0,\umd_0\rangle, \langle \vmsg_1,\
 Return $(X',C)$\\
 }
 {
-{$\adversaryv{\;\advB2^{\mathcal{O}}(\pk)}$}\\
+{$\adversaryv{\;\advB3^{\mathcal{O}}(\pk)}$}\\
 $st \getsr \mdalg(\epsilon,\bot)$\\
 $d \getsr \bits$\\ 
 $d' \getsr \advA^{\encOracle,H}(\pk)$\\
@@ -426,10 +440,11 @@ Return $T$\\
 
 \queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $R \getsr \mathrm{Coins}$\\
-$(K,X) \gets \encapprim{\pk}{}{R}$\\
-$\vad' \gets (\vad, X)$\\
+$K \getsr \kspace$\\
+$(K',X') \gets \encapprim{\pk}{}{R}$\\
+$\vad' \gets (\vad, X')$\\
 $C \gets \encprim{K}{\vad'}{\langle \vmsg_b, 0^{\ell}\rangle}$\\
-Return $(X,C)$\\
+Return $(X',C)$\\
 }
 \caption{Need that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
 \end{center}
