@@ -19,7 +19,7 @@ $N \gets N \cup \{n\}$\\
 \end{center}
 \end{figure}
 
-\subsection{Hash-then-encrypt}
+\subsection{Hash-then-encrypt}%--------------------------------------------------------------------
 
 %----------------------------------Hash-then-encrypt theorem----------------------------------
 \begin{theorem}
@@ -205,7 +205,47 @@ Where the first inequality is due to the fundamental theorem of games, the secon
 and the last to the existence of $\advP$.
 \end{proof}
 
-\subsection{Hash-then-KEM-DEM}
+%----------------------------------Hash-then-encrypt authentication games----------------------------------
+
+\begin{figure}[tbhp]
+\begin{center}
+\fpage{.3}{
+ {$\gamev{G1,\fbox{G0}}{\advA}$}\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,\decOracle,H}(\pk)$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  if $T[x] \neq \bot:$\\
+  \nudge $\bad = \true$\\
+  \nudge \fbox{$Z = T[x]$}\\
+  $T[x] = Z$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
+Return $\encprim{\pk}{}{\langle \vmsg,\umd\rangle; R}$\\
+
+\medskip
+\procedurev{$\decOracle(\vad,C,\auxinput)$}\\
+$(\vmsg,\umd) \gets \decprim{\sk}{C}$\\
+if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+}
+\caption{Auth games}
+\end{center}
+\end{figure}
+
+
+
+\subsection{Hash-then-KEM-DEM}%--------------------------------------------------------------------
 
 \begin{theorem}
 Let $\Pi=(\Kgen,\mathsf{enc},\mathsf{dec})$ be a randomized symmetric-key encryption scheme, $\Phi=(\Kgen,\encap,\decap)$ be a key encapsulation mechanism, $\pkaead$ be the KEM-DEM scheme, and $\mdalg$ be a secret nonce generator.  Then, for any adversary $\advA$, there exist adversaries $\advB3^{\mathcal{O}_\encap},\advB3^{\mathcal{O}_\enc},\advB3^{\mathcal{O}},\advP$ (explicitly constructed in the proof of this theorem) such that
