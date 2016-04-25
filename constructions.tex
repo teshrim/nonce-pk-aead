@@ -36,12 +36,12 @@ Return $\bot$
 \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
  $R \gets H(\langle \pk, \vad, \vmsg, \umd \rangle)$\\ 
- $C \gets \encprim{\pk}{}{\langle \vmsg, \umd, R\rangle}$\\
+ $C \gets \encprim{\pk}{\vad}{\langle \vmsg, \umd, R\rangle}$\\
  Return $C$
  }
  {
  \underline{$\Decprim{\sk}{\vad}{C,\auxinput}$}:\\[2pt]
- $\langle \vmsg, \umd \rangle \gets \decprim{\sk}{}{C} $\\
+ $\langle \vmsg, \umd \rangle \gets \decprim{\sk}{\vad}{C} $\\
  if $\auxinput \in \Witness_\umd$ then\\
 \nudge Return $\vmsg$\\
 Return $\bot$
@@ -52,16 +52,15 @@ Return $\bot$
 \end{center}
 \end{figure}
 
-\paragraph{Hash-then-KEM-DEM.} 
-\task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$, when the underlying symmetric encryption is an AEAD scheme.}
-\task{Does it add anything if we formalize KEMs to take AD?  }
+\paragraph{Hash-then-Encrypt via KEM-DEM} 
+\task{Prove privacy and authenticity of this, in the ROM, based on the \emph{CPA} security of the KEM and security of the AEAD scheme. }
 
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
  \hpagess{.45}{.55}{
- \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
- $R \gets H(\langle \pk,\vad,\vmsg,\umd \rangle)$\\ 
+ \underline{$\encprim{\pk}{\vad}{\vmsg,\umd,R}$}:\\[2pt]
+ %$R \gets H(\langle \pk,\vad,\vmsg,\umd \rangle)$\\ 
  $(K',\wrap) \gets \encapprim{\pk}{}{R}$\\
  $K \gets H(\langle K', \wrap\rangle )$\\
  %$\vad' \gets (\vad,\wrap)$\\
@@ -69,14 +68,15 @@ Return $\bot$
  Return $(\wrap,C)$
  }
  {
- \underline{$\Decprim{\sk}{\vad}{(\wrap,C),\auxinput}$}:\\[2pt]
+\underline{$\decprim{\sk}{\vad}{\wrap,C}$}:\\[2pt]
 $K' \gets \decapprim{\sk}{}{\wrap}$\\[3pt]
 %$\vad' \gets (\vad,\wrap)$\\
 $K \gets H(\langle K', \wrap\rangle)$\\
-$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad}{C}$\\ 
-if $\auxinput \in \Witness_\umd$ then\\
-\nudge Return $\vmsg$\\
-Return $\bot$
+Return $\decprim{K}{\vad}{C}$
+%$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad}{C}$\\ 
+%if $\auxinput \in \Witness_\umd$ then\\
+%\nudge Return $\vmsg$\\
+%Return $\bot$
  }
 }
 %
@@ -95,7 +95,7 @@ Return $\bot$
 %Return $\bot$
 % } 
 %} 
-\caption{KEM-DEM instantiation of HtE.  The underlying symmetric encryption $\enc$ is deterministic and supports associated data. The unspecified encapsulation algorithm $\encap$ can be any randomized algorithm with its internal randomness replaced by~$R$.  
+\caption{KEM-DEM instantiation of encryption for HtE.  The underlying symmetric encryption $\enc$ is deterministic and supports associated data. The unspecified encapsulation algorithm $\encap$ can be any randomized algorithm with its internal randomness replaced by~$R$.  
 }
 \label{fig:kem-dem-HtE}
 \end{center}
