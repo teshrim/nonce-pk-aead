@@ -62,16 +62,18 @@ Return $\bot$
  \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
  $R \gets H(\langle \pk,\vad,\vmsg,\umd \rangle)$\\ 
- $(K,\wrap) \gets \encapprim{\pk}{}{R}$\\
- $\vad' \gets (\vad,\wrap)$\\
- $C \gets \encprim{K}{\vad'}{\langle \vmsg, \umd \rangle}$\\
+ $(K',\wrap) \gets \encapprim{\pk}{}{R}$\\
+ $K \gets H(\langle K', \wrap\rangle )$\\
+ %$\vad' \gets (\vad,\wrap)$\\
+ $C \gets \encprim{K}{\vad}{\langle \vmsg, \umd \rangle}$\\
  Return $(\wrap,C)$
  }
  {
  \underline{$\Decprim{\sk}{\vad}{(\wrap,C),\auxinput}$}:\\[2pt]
-$K \gets \decapprim{\sk}{}{\wrap}$\\[3pt]
-$\vad' \gets (\vad,\wrap)$\\
-$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad'}{C}$\\ 
+$K' \gets \decapprim{\sk}{}{\wrap}$\\[3pt]
+%$\vad' \gets (\vad,\wrap)$\\
+$K \gets H(\langle K', \wrap\rangle)$\\
+$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad}{C}$\\ 
 if $\auxinput \in \Witness_\umd$ then\\
 \nudge Return $\vmsg$\\
 Return $\bot$
