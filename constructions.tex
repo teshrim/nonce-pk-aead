@@ -36,7 +36,7 @@ Return $\bot$
 \hpagess{.45}{.55}{
  \underline{$\Encprim{\pk}{\vad}{\vmsg,\umd}$}:\\[2pt]
  $R \gets H(\langle \pk, \vad, \vmsg, \umd \rangle)$\\ 
- $C \gets \encprim{\pk}{\vad}{\langle \vmsg, \umd, R\rangle}$\\
+ $C \gets \encprim{\pk}{\vad}{\langle \vmsg, \umd \rangle; R}$\\
  Return $C$
  }
  {
@@ -53,14 +53,15 @@ Return $\bot$
 \end{figure}
 
 \paragraph{Hash-then-Encrypt via KEM-DEM} 
-\task{Prove privacy and authenticity of this, in the ROM, based on the \emph{CPA} security of the KEM and security of the AEAD scheme.  These then plug into the generic result, above. }
+\task{Prove privacy and authenticity of this, in the ROM, based on the \emph{CPA} security of the KEM and security of the AEAD scheme. These then plug into the generic result, above. }
 
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
  \hpagess{.45}{.55}{
- \underline{$\encprim{\pk}{\vad}{\vmsg,\umd,R}$}:\\[2pt]
+ \underline{$\encprim{\pk}{\vad}{\langle\vmsg,\umd \rangle}$}:\\[2pt]
  %$R \gets H(\langle \pk,\vad,\vmsg,\umd \rangle)$\\ 
+ $R \getsr \mathrm{Coins}$\\
  $(K',\wrap) \gets \encapprim{\pk}{}{R}$\\
  $K \gets H(\langle K', \wrap\rangle )$\\
  %$\vad' \gets (\vad,\wrap)$\\
