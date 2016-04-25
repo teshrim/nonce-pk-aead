@@ -29,7 +29,7 @@ Return $\bot$
 \end{figure}
 
 
-\paragraph{Hash-then-encrypt.} \tsnote{This is the most obvious construction, and (I think) given in [BT], more or less.} \task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$.}
+\paragraph{Hash-then-encrypt.} \tsnote{This is the most obvious construction, and (I think) given in [BT], more or less.} \task{Prove privacy and authenticity in the ROM, under some assumptions on the min-entropy of $\langle \pk,\vad,\vmsg,\umd\rangle$.  The result will be ``generic'', reducing to the privacy and authenticity of the undelrying public-key scheme.  In some way, you want the authenticity bound to reflect the fact that you have to break the authenticity of the underlying public-key scheme \emph{and} guess a valid~$\auxinput$.  If the bound is strictly additive, then you're saying ``or'' rather than ``and''...}
 \begin{figure}[tbhp]
 \begin{center}
 \fpage{.5}{
@@ -53,7 +53,7 @@ Return $\bot$
 \end{figure}
 
 \paragraph{Hash-then-Encrypt via KEM-DEM} 
-\task{Prove privacy and authenticity of this, in the ROM, based on the \emph{CPA} security of the KEM and security of the AEAD scheme. }
+\task{Prove privacy and authenticity of this, in the ROM, based on the \emph{CPA} security of the KEM and security of the AEAD scheme.  These then plug into the generic result, above. }
 
 \begin{figure}[tbhp]
 \begin{center}
@@ -64,7 +64,7 @@ Return $\bot$
  $(K',\wrap) \gets \encapprim{\pk}{}{R}$\\
  $K \gets H(\langle K', \wrap\rangle )$\\
  %$\vad' \gets (\vad,\wrap)$\\
- $C \gets \encprim{K}{\vad}{\langle \vmsg, \umd \rangle}$\\
+ $C \gets \sencprim{K}{\vad}{\langle \vmsg, \umd \rangle}$\\
  Return $(\wrap,C)$
  }
  {
@@ -72,7 +72,7 @@ Return $\bot$
 $K' \gets \decapprim{\sk}{}{\wrap}$\\[3pt]
 %$\vad' \gets (\vad,\wrap)$\\
 $K \gets H(\langle K', \wrap\rangle)$\\
-Return $\decprim{K}{\vad}{C}$
+Return $\sdecprim{K}{\vad}{C}$
 %$\langle \vmsg,\umd \rangle \gets \decprim{K}{\vad}{C}$\\ 
 %if $\auxinput \in \Witness_\umd$ then\\
 %\nudge Return $\vmsg$\\
