@@ -55,7 +55,7 @@ Return $[b=b']$\\
 \procedurev{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $R \getsr H(\langle \pk,\vad,\vmsg_b,\umd\rangle)$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
 {
 $\gamev{G2}{\advA}$\\
@@ -78,7 +78,7 @@ Return $[b=b']$\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr \mathrm{Coins}$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,\umd\rangle; R}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg_b,\umd\rangle; R}$\\
 }
 {
 $\gamev{G3}{\advA}$\\
@@ -101,7 +101,7 @@ Return $[b=b']$\\
 $(st, T) \getsr \mdalg(st,\vmsg_b)$\\
 $\calQ \gets \calQ \cup \{\langle \pk,\vad,\vmsg_b,\umd\rangle\}$\\
 $R \getsr \mathrm{Coins}$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,0^{|\umd|}\rangle; R}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg_b,0^{|\umd|}\rangle; R}$\\
 }
 \caption{Games}
 \label{fig:HtEgames}
@@ -161,7 +161,7 @@ Return $T$\\
 
 \queryl{$\encOracle(\vad,\vmsg_0,\vmsg_1)$}\\
 $R \getsr \mathrm{Coins}$\\
-Return $\encprim{\pk}{}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
 }
 \caption{Adversary running against the IND-CPA experiment and PRED experiment.
 Note that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
@@ -209,7 +209,7 @@ and the last to the existence of $\advP$.
 
 \begin{figure}[tbhp]
 \begin{center}
-\fpage{.3}{
+\hfpagesss{.3}{.3}{.3}{
  {$\gamev{G1,\fbox{G0}}{\advA}$}\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
@@ -230,16 +230,154 @@ Return $[b=b']$\\
 \procedurev{$\encOracle(\vad,\vmsg)$}\\
 $(st, T) \getsr \mdalg(st,\vmsg)$\\
 $R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
-Return $\encprim{\pk}{}{\langle \vmsg,\umd\rangle; R}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg,\umd\rangle; R}$\\
 
 \medskip
 \procedurev{$\decOracle(\vad,C,\auxinput)$}\\
-$(\vmsg,\umd) \gets \decprim{\sk}{C}$\\
+$(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
+if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+}
+{
+$\gamev{G2}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad \gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+  
+  \medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg,\umd\rangle; R}$\\
+
+\medskip
+\procedurev{$\decOracle(\vad,C,\auxinput)$}\\
+$(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
+if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+}
+{
+$\gamev{G3}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad \gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+  
+  \medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg,0^{|\umd|}\rangle; R}$\\
+
+\medskip
+\procedurev{$\decOracle(\vad,C,\auxinput)$}\\
+$(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
 if $\auxinput \in \Witness_\umd$ then\\
 \nudge Return $\vmsg$\\
 Return $\bot$
 }
 \caption{Auth games}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\fpage{.3}{
+$\gamev{G4}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad \gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+  
+  \medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg,0^{|\umd|}\rangle; R}$\\
+
+\medskip
+\procedurev{$\decOracle(\vad,C,\auxinput)$}\\
+Return $\bot$
+}\caption{Additional Auth Game}
+\end{center}
+\end{figure}
+
+%----------------------------------Hash-then-encrypt Authentication Adversaries----------------------------------
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagess{.3}{.3}
+{
+ {$\adversaryv{\;\advB2^{\mathcal{O}_e,\mathcal{O}_d}(\pk)}$}\\
+$st \getsr \mdalg(\epsilon,\bot)$\\
+$C \gets \bot$\\
+$d' \getsr \advA^{\encOracle,H}(\pk)$\\
+Return $C$\\ 
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg)$}\\
+$(\st, \umd) \getsr \mdalg(st,\vmsg)$\\
+Return $\mathcal{O}_e(\vad, \langle \vmsg,\umd\rangle)$\\
+
+\queryl{$\decOracle(\vad,C,\auxinput)$}\\
+$C' \gets \mathcal{O}_d(\vad, C)$\\
+If $C' \neq \bot$ then:\\
+\nudge $C \gets C'$\\
+Return C'
+}
+{
+ $\adversaryv{\advP^{\mathcal{O}}}$\\
+ $(\pk,\sk) \getsr \Kgen$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ $\langle \pk,\vad,\vmsg,T \rangle \getsr \cal X$\\
+Return $T$\\
+
+\queryl{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX = \calX \cup \{x\}$ \\
+  Return $Z$\\
+
+\queryl{$\encOracle(\vad,\vmsg)$}\\
+$R \getsr \mathrm{Coins}$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg_b,0^{\ell}\rangle;R}$\\
+
+\queryl{$\decOracle(\vad,C,\auxinput)$}\\
+Return $\bot$
+}
+\caption{Auth adversaries for the set $\Witness_\umd = \umd$.
+Note that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
 \end{center}
 \end{figure}
 
@@ -487,5 +625,52 @@ $C \gets \encprim{K}{\vad'}{\langle \vmsg_b, 0^{\ell}\rangle}$\\
 Return $(X',C)$\\
 }
 \caption{Need that $|\umd|$ is a function of $||\vmsg||$ only so that $\ell$ is computable.}
+\end{center}
+\end{figure}
+
+%----------------------------------KEM-DEM authentication games----------------------------------
+
+\begin{figure}[tbhp]
+\begin{center}
+\hfpagesss{.3}{.3}{.3}{
+ {$\gamev{G1,\fbox{G0}}{\advA}$}\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,\decOracle,H}(\pk)$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  if $T[x] \neq \bot:$\\
+  \nudge $\bad = \true$\\
+  \nudge \fbox{$Z = T[x]$}\\
+  $T[x] = Z$\\
+  Return $Z$\\
+
+\medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr \mathrm{Coins}$\\
+$(K', X) \gets \encap(R)$\\
+$K \gets H(\langle K', X \rangle)$\\
+$C \gets \encprim{K}{\vad}{\langle \vmsg,\umd\rangle}$\\
+Return $(X, C)$
+
+\medskip
+\procedurev{$\decOracle(\vad,\langle X,C\rangle,\auxinput)$}\\
+$K' \gets \decapprim{\sk}{}{X}$\\
+$K \gets H(\langle K', X \rangle)$\\ 
+$\vmsg \gets \decprim{K}{\vad}{C}$\\
+ if $\auxinput \in \Witness_\umd$ then\\
+\nudge Return $\vmsg$\\
+Return $\bot$
+}
+{
+}
+{
+}
+\caption{Auth games}
 \end{center}
 \end{figure}
