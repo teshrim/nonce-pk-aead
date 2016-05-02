@@ -235,9 +235,9 @@ Return $\encprim{\pk}{\vad}{\langle \vmsg,\umd\rangle; R}$\\
 \medskip
 \procedurev{$\decOracle(\vad,C,\auxinput)$}\\
 $(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
-if $\auxinput \in \Witness_\umd$ then\\
-\nudge Return $\vmsg$\\
-Return $\bot$
+if $\auxinput \notin \Witness_\umd$ then\\
+\nudge $\vmsg \gets \bot$\\
+Return $\vmsg$
 }
 {
 $\gamev{G2}{\advA}$\\
@@ -264,9 +264,9 @@ Return $\encprim{\pk}{\vad}{\langle \vmsg,\umd\rangle; R}$\\
 \medskip
 \procedurev{$\decOracle(\vad,C,\auxinput)$}\\
 $(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
-if $\auxinput \in \Witness_\umd$ then\\
-\nudge Return $\vmsg$\\
-Return $\bot$
+if $\auxinput \notin \Witness_\umd$ then\\
+\nudge $\vmsg \gets \bot$\\
+Return $\vmsg$
 }
 {
 $\gamev{G3}{\advA}$\\
@@ -293,9 +293,9 @@ Return $\encprim{\pk}{\vad}{\langle \vmsg,0^{|\umd|}\rangle; R}$\\
 \medskip
 \procedurev{$\decOracle(\vad,C,\auxinput)$}\\
 $(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
-if $\auxinput \in \Witness_\umd$ then\\
-\nudge Return $\vmsg$\\
-Return $\bot$
+if $\auxinput \notin \Witness_\umd$ then\\
+\nudge $\vmsg \gets \bot$\\
+Return $\vmsg$
 }
 \caption{Auth games}
 \end{center}
@@ -303,8 +303,35 @@ Return $\bot$
 
 \begin{figure}
 \begin{center}
-\fpage{.3}{
+\hfpagess{.3}{.3}{
 $\gamev{G4}{\advA}$\\
+ $(\pk,\sk)\getsr\Kgen$\\
+ $b \getsr \bits$ \\
+ $st \getsr \mdalg(\epsilon,\bot)$\\
+ $b' \getsr \advA^{\encOracle,H}(\pk)$\\
+ If $\calX \cap \calQ \neq \emptyset$ then \\
+\nudge $\bad \gets\true$\\
+Return $[b=b']$\\ 
+
+\medskip
+\procedurev{$H(x)$}\\
+  $Z \getsr \mathrm{Coins}$\\
+  $\calX \gets \calX \cup \{x\}$\\
+  Return $Z$\\
+  
+  \medskip
+\procedurev{$\encOracle(\vad,\vmsg)$}\\
+$(st, T) \getsr \mdalg(st,\vmsg)$\\
+$R \getsr H(\langle \pk,\vad,\vmsg,\umd\rangle)$\\
+Return $\encprim{\pk}{\vad}{\langle \vmsg,0^{|\umd|}\rangle; R}$\\
+
+\medskip
+\procedurev{$\decOracle(\vad,C,\auxinput)$}\\
+$(\vmsg,\umd) \gets \decprim{\sk}{\vad}{C}$\\
+Return $\vmsg$
+}
+{
+$\gamev{G5}{\advA}$\\
  $(\pk,\sk)\getsr\Kgen$\\
  $b \getsr \bits$ \\
  $st \getsr \mdalg(\epsilon,\bot)$\\
